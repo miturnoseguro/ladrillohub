@@ -397,6 +397,19 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
       <h2>Desarrollos disponibles</h2>
       <p class="desc">Tocá un proyecto para ver el detalle, o tildá "Comparar" para ponerlos lado a lado.</p>
     </div>
+    <div class="filterbar" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+      <select id="filtro-amb" style="padding:9px 14px;border:1px solid var(--line);border-radius:var(--r-pill);font-size:.85rem;background:#fff;">
+        <option value="">Ambientes: todos</option>
+        <option value="2">2 ambientes</option>
+        <option value="3">3 ambientes</option>
+      </select>
+      <select id="filtro-precio" style="padding:9px 14px;border:1px solid var(--line);border-radius:var(--r-pill);font-size:.85rem;background:#fff;">
+        <option value="">Presupuesto: cualquiera</option>
+        <option value="0-3000">Hasta US$ 3.000/m²</option>
+        <option value="3000-3500">US$ 3.000 – 3.500/m²</option>
+        <option value="3500-999999">Más de US$ 3.500/m²</option>
+      </select>
+    </div>
     <p class="listing-count" id="listing-count">9 desarrollos encontrados</p>
     <div class="cards" id="cards"></div>
   </div>
@@ -892,8 +905,20 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
     });
   }
 
+  var currentAmbFilter = "";
+  var currentPrecioFilter = "";
+
   function applyFilters(){
-    var list = DEV.filter(function(d){ return !currentBarrioFilter || d.barrio===currentBarrioFilter; });
+    var list = DEV.filter(function(d){
+      if(currentBarrioFilter && d.barrio !== currentBarrioFilter) return false;
+      if(currentAmbFilter && d.amb.indexOf(Number(currentAmbFilter)) === -1) return false;
+      if(currentPrecioFilter){
+        var parts = currentPrecioFilter.split('-');
+        var min = Number(parts[0]), max = Number(parts[1]);
+        if(d.precioM2 < min || d.precioM2 > max) return false;
+      }
+      return true;
+    });
     render(list);
   }
 
@@ -909,6 +934,14 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
   document.getElementById('cat-verificado').addEventListener('click', function(){document.getElementById('verificado').scrollIntoView({behavior:'smooth'});});
   document.getElementById('cat-dev').addEventListener('click', function(){document.getElementById('desarrolladoras').scrollIntoView({behavior:'smooth'});});
   document.getElementById('search-pill-open').addEventListener('click', function(){document.getElementById('buscar').scrollIntoView({behavior:'smooth'});});
+  document.getElementById('filtro-amb').addEventListener('change', function(e){
+    currentAmbFilter = e.target.value;
+    applyFilters();
+  });
+  document.getElementById('filtro-precio').addEventListener('change', function(e){
+    currentPrecioFilter = e.target.value;
+    applyFilters();
+  });
   document.querySelectorAll('a[data-jump]').forEach(function(a){
     a.addEventListener('click', function(e){
       e.preventDefault();
