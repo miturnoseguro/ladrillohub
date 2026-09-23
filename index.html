@@ -1,1 +1,1150 @@
 
+
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ladrillo Hub — Comparamos precios, vos elegís</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rausch:#E7384F;
+  --rausch-dark:#C22740;
+  --rausch-tint:#FDE8EA;
+  --ink:#222222;
+  --grey:#717171;
+  --grey-light:#B0B0B0;
+  --line:#E4E4E4;
+  --bg:#FFFFFF;
+  --bg-soft:#F7F7F7;
+  --verify:#00895D;
+  --verify-tint:#E1F5EC;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.08);
+  --shadow-md: 0 6px 20px rgba(0,0,0,.13);
+  --shadow-lg: 0 12px 36px rgba(0,0,0,.20);
+  --r-card:16px;
+  --r-pill:999px;
+  --r-btn:10px;
+  color-scheme: light;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:150px;}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-0.01em;line-height:1.15;}
+p{margin:0;}
+a{color:inherit;text-decoration:none;}
+img{max-width:100%;display:block;}
+button{font-family:inherit;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 40px;}
+@media (max-width:900px){.wrap{padding:0 20px;}}
+
+/* ================= buttons ================= */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px 20px;border-radius:var(--r-btn);border:1px solid var(--ink);
+  font-size:.92rem;font-weight:600;cursor:pointer;background:none;color:var(--ink);white-space:nowrap;}
+.btn-primary{background:var(--rausch);border-color:var(--rausch);color:#fff;}
+.btn-primary:hover{background:var(--rausch-dark);border-color:var(--rausch-dark);}
+.btn-dark{background:var(--ink);border-color:var(--ink);color:#fff;}
+.btn-dark:hover{background:#000;}
+.btn-ghost{border-color:var(--line);color:var(--ink);}
+.btn-ghost:hover{background:var(--bg-soft);}
+.btn-sm{padding:9px 15px;font-size:.82rem;border-radius:8px;}
+.btn-full{width:100%;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-round{border-radius:var(--r-pill);}
+
+/* ================= header ================= */
+header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.nav{display:flex;align-items:center;justify-content:space-between;height:80px;gap:20px;}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.28rem;color:var(--rausch);flex:none;}
+.brand .mark{width:30px;height:30px;flex:none;}
+.searchpill{display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--r-pill);
+  box-shadow:var(--shadow-sm);padding:6px;gap:0;cursor:pointer;flex:1;max-width:560px;}
+.searchpill .seg{padding:9px 20px;font-size:.82rem;border-right:1px solid var(--line);}
+.searchpill .seg:last-of-type{border-right:none;}
+.searchpill .seg b{display:block;font-weight:600;}
+.searchpill .seg span{color:var(--grey);}
+.searchpill .go{width:38px;height:38px;border-radius:50%;background:var(--rausch);color:#fff;display:flex;
+  align-items:center;justify-content:center;margin-left:auto;flex:none;}
+@media (max-width:860px){.searchpill{display:none;}}
+.navcta{display:flex;align-items:center;gap:14px;flex:none;}
+.navcta .publish-link{font-size:.88rem;font-weight:600;padding:11px 14px;border-radius:var(--r-pill);}
+.navcta .publish-link:hover{background:var(--bg-soft);}
+@media (max-width:600px){.navcta .publish-link{display:none;}}
+.menu-btn{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:6px 6px 6px 14px;cursor:pointer;background:#fff;box-shadow:var(--shadow-sm);}
+.menu-btn .avatar{width:28px;height:28px;border-radius:50%;background:var(--ink);color:#fff;display:flex;
+  align-items:center;justify-content:center;font-size:.72rem;font-weight:700;}
+
+.catrow{border-bottom:1px solid var(--line);}
+.catrow .wrap{display:flex;gap:30px;padding:16px 40px;overflow-x:auto;}
+.catpill{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:.76rem;color:var(--grey);
+  cursor:pointer;flex:none;padding-bottom:12px;border-bottom:2px solid transparent;opacity:.85;}
+.catpill:hover{opacity:1;color:var(--ink);}
+.catpill.on{color:var(--ink);border-color:var(--ink);opacity:1;}
+.catpill .ic{width:24px;height:24px;}
+
+/* ================= hero ================= */
+.hero{padding:44px 0 40px;}
+.hero-inner{display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;}
+.hero h1{font-size:clamp(1.9rem,3.4vw,2.7rem);max-width:16ch;}
+.hero .sub{margin-top:10px;color:var(--grey);max-width:46ch;font-size:1rem;}
+.trustrow{display:flex;gap:26px;margin-top:20px;flex-wrap:wrap;}
+.trustrow .t{display:flex;flex-direction:column;}
+.trustrow .t b{font-size:1.3rem;font-weight:800;}
+.trustrow .t span{font-size:.76rem;color:var(--grey);}
+
+/* ================= section shell ================= */
+section{padding:46px 0;}
+.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:26px;flex-wrap:wrap;}
+.section-head h2{font-size:clamp(1.5rem,2.6vw,2rem);max-width:22ch;}
+.section-head .desc{max-width:38ch;color:var(--grey);font-size:.92rem;}
+.eyebrow{font-size:.76rem;font-weight:700;color:var(--rausch);}
+
+/* ================= listing cards ================= */
+.listing-count{font-size:.86rem;color:var(--grey);margin-bottom:16px;}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 24px;}
+@media (max-width:980px){.cards{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.cards{grid-template-columns:1fr;}}
+.card{cursor:pointer;}
+.card .photo{position:relative;aspect-ratio:1/0.92;border-radius:var(--r-card);overflow:hidden;margin-bottom:12px;}
+.card .photo .bg{position:absolute;inset:0;}
+.card .heart{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:50%;
+  background:rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;z-index:2;}
+.card .heart svg{width:17px;height:17px;fill:#fff;stroke:#fff;}
+.card .heart.on svg{fill:var(--rausch);stroke:var(--rausch);}
+.card .badge-top{position:absolute;top:12px;left:12px;background:#fff;padding:5px 11px;border-radius:var(--r-pill);
+  font-size:.72rem;font-weight:700;z-index:2;box-shadow:var(--shadow-sm);}
+.card .cmp-pill{position:absolute;bottom:12px;left:12px;z-index:2;}
+.card .cmp-pill label{display:flex;align-items:center;gap:6px;background:#fff;padding:6px 12px;border-radius:var(--r-pill);
+  font-size:.74rem;font-weight:600;box-shadow:var(--shadow-sm);cursor:pointer;}
+.card .cmp-pill input{accent-color:var(--rausch);}
+.card .row1{display:flex;justify-content:space-between;gap:8px;}
+.card h3{font-size:.98rem;font-weight:700;}
+.card .dev{font-size:.84rem;color:var(--grey);margin-top:2px;}
+.card .price{font-weight:700;font-size:.95rem;white-space:nowrap;}
+.card .price span{font-weight:400;color:var(--grey);}
+.card .metarow{display:flex;gap:12px;margin-top:6px;font-size:.82rem;color:var(--grey);flex-wrap:wrap;}
+.card .avance{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.card .avance .bar{flex:1;height:5px;border-radius:99px;background:var(--line);}
+.card .avance .bar i{display:block;height:100%;border-radius:99px;background:var(--verify);}
+.card .avance small{font-size:.74rem;color:var(--grey);}
+
+/* ================= compare bar ================= */
+.compare-bar{position:fixed;left:0;right:0;bottom:22px;z-index:70;display:flex;justify-content:center;
+  transform:translateY(140%);transition:transform .25s ease;padding:0 16px;}
+.compare-bar.show{transform:translateY(0);}
+.compare-bar .pillbar{background:var(--ink);color:#fff;border-radius:var(--r-pill);padding:10px 10px 10px 22px;
+  display:flex;align-items:center;gap:16px;box-shadow:var(--shadow-lg);}
+.compare-bar .txt{font-size:.86rem;}
+.compare-bar .txt b{font-weight:800;}
+
+/* ================= modal ================= */
+.modal-veil{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:80;display:none;
+  align-items:center;justify-content:center;padding:24px;overflow:auto;}
+.modal-veil.show{display:flex;}
+.modal{background:#fff;max-width:760px;width:100%;border-radius:20px;box-shadow:var(--shadow-lg);
+  max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal.modal-wide{max-width:980px;}
+.modal-head{display:flex;align-items:center;justify-content:center;position:relative;padding:18px 20px;border-bottom:1px solid var(--line);flex:none;}
+.modal-head h3{font-size:1.05rem;}
+.modal-close{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;
+  border:none;background:var(--bg-soft);cursor:pointer;font-size:1rem;color:var(--ink);}
+.modal-body{padding:24px;overflow:auto;}
+table.compare-table{width:100%;border-collapse:collapse;font-size:.86rem;}
+table.compare-table th,table.compare-table td{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;vertical-align:top;}
+table.compare-table th{color:var(--grey);font-weight:600;font-size:.76rem;width:130px;}
+table.compare-table td strong{font-weight:700;}
+
+/* ================= listing detail ================= */
+.detail-gallery{display:grid;grid-template-columns:1.6fr 1fr;gap:8px;border-radius:16px;overflow:hidden;margin-bottom:22px;}
+.detail-gallery > div:first-child{grid-row:1/3;}
+.detail-gallery .ph{min-height:120px;}
+@media (max-width:640px){.detail-gallery{grid-template-columns:1fr;}.detail-gallery > div:first-child{grid-row:auto;}.detail-gallery > div:nth-child(n+3){display:none;}}
+.detail-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:36px;}
+@media (max-width:760px){.detail-grid{grid-template-columns:1fr;}}
+.detail-amenities{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-top:16px;}
+.detail-amenities div{font-size:.88rem;padding:10px 0;border-bottom:1px solid var(--line);}
+.booking-box{border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-md);padding:22px;height:fit-content;position:sticky;top:100px;}
+.booking-box .price{font-size:1.25rem;font-weight:800;}
+.booking-box .price span{font-weight:400;color:var(--grey);font-size:.86rem;}
+.booking-box .subrow{font-size:.8rem;color:var(--grey);margin-top:4px;}
+.booking-box .divider{height:1px;background:var(--line);margin:16px 0;}
+.booking-box .line{display:flex;justify-content:space-between;font-size:.86rem;padding:6px 0;color:var(--grey);}
+.booking-box .line.total{color:var(--ink);font-weight:700;border-top:1px solid var(--line);padding-top:12px;margin-top:4px;}
+
+/* ================= steps ================= */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+@media (max-width:900px){.steps{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.steps{grid-template-columns:1fr;}}
+.step{padding:6px;}
+.step .circ{width:46px;height:46px;border-radius:50%;background:var(--rausch-tint);color:var(--rausch);
+  display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:14px;}
+.step h4{font-size:1rem;margin-bottom:6px;}
+.step p{font-size:.86rem;color:var(--grey);}
+
+/* ================= pricing ================= */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+@media (max-width:760px){.plans{grid-template-columns:1fr;}}
+.plan{border:1px solid var(--line);border-radius:20px;padding:30px;box-shadow:var(--shadow-sm);}
+.plan.highlight{border:2px solid var(--rausch);box-shadow:var(--shadow-md);position:relative;}
+.plan .tag{font-size:.74rem;font-weight:700;color:var(--rausch);margin-bottom:10px;display:inline-block;
+  background:var(--rausch-tint);padding:4px 10px;border-radius:var(--r-pill);}
+.plan h3{font-size:1.3rem;margin-bottom:6px;}
+.plan .price{font-size:2rem;font-weight:800;margin:14px 0 4px;}
+.plan .price small{font-size:.86rem;color:var(--grey);font-weight:400;}
+.plan ul{list-style:none;margin:20px 0 24px;padding:0;display:flex;flex-direction:column;gap:11px;font-size:.88rem;}
+.plan ul li{padding-left:26px;position:relative;}
+.plan ul li::before{content:"✓";position:absolute;left:0;color:var(--verify);font-weight:700;}
+
+/* ================= anon card ================= */
+.anon-section .wrap{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;}
+@media (max-width:900px){.anon-section .wrap{grid-template-columns:1fr;}}
+.anon-copy p{color:var(--grey);margin-top:14px;font-size:.98rem;max-width:44ch;}
+.anon-copy .compare-note{margin-top:22px;background:var(--bg-soft);border-radius:14px;padding:16px 18px;}
+.anon-copy .compare-note .label{font-size:.76rem;color:var(--rausch);font-weight:700;}
+.anon-copy .compare-note p{margin-top:6px;color:var(--ink);}
+.buyer-card{border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-md);overflow:hidden;}
+.buyer-card .bc-head{padding:20px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:var(--bg-soft);}
+.buyer-card .bc-id{font-size:.8rem;color:var(--grey);font-weight:600;}
+.buyer-card .bc-body{padding:22px;display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;}
+.buyer-card .bc-body .full{grid-column:1/-1;}
+.buyer-card .bc-body div span.l{display:block;font-size:.72rem;color:var(--grey);margin-bottom:3px;}
+.buyer-card .bc-body div span.v{font-size:.96rem;font-weight:600;}
+.buyer-card .badges{display:flex;gap:8px;flex-wrap:wrap;padding:0 22px 22px;}
+.buyer-card .badge{font-size:.74rem;font-weight:600;padding:6px 11px;border-radius:var(--r-pill);
+  background:var(--verify-tint);color:var(--verify);display:flex;align-items:center;gap:6px;}
+.buyer-card .bc-foot{padding:18px 22px;border-top:1px solid var(--line);}
+
+/* ================= developer dashboard ================= */
+.dev-section{background:var(--bg-soft);}
+.dev-panel{background:#fff;border-radius:20px;box-shadow:var(--shadow-md);padding:28px;}
+.dev-panel .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.dev-panel .ph .name{font-size:1.15rem;font-weight:800;}
+.dev-panel .ph .status{font-size:.8rem;color:var(--grey);}
+.dev-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-bottom:24px;}
+@media (max-width:900px){.dev-metrics{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:560px){.dev-metrics{grid-template-columns:repeat(2,1fr);}}
+.dev-metrics .m{border:1px solid var(--line);border-radius:14px;padding:16px;}
+.dev-metrics .m .n{font-size:1.6rem;font-weight:800;}
+.dev-metrics .m .l{font-size:.74rem;color:var(--grey);margin-top:4px;}
+.chartbox{border:1px solid var(--line);border-radius:14px;padding:20px;}
+.chartbox .lbl{font-size:.8rem;color:var(--grey);margin-bottom:14px;font-weight:600;}
+.bars{display:flex;align-items:flex-end;gap:10px;height:120px;}
+.bars .bcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;}
+.bars .bcol .b{width:100%;background:var(--rausch);border-radius:6px 6px 0 0;}
+.bars .bcol .d{font-size:.68rem;color:var(--grey);}
+.dev-note{margin-top:18px;font-size:.84rem;color:var(--grey);max-width:60ch;}
+.dev-tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:22px;}
+.dev-tab{background:none;border:none;padding:10px 4px 14px;margin-right:22px;font-size:.9rem;font-weight:600;
+  color:var(--grey);cursor:pointer;border-bottom:2px solid transparent;display:flex;align-items:center;gap:8px;}
+.dev-tab.on{color:var(--ink);border-color:var(--ink);}
+.dev-tab-count{background:var(--rausch);color:#fff;font-size:.68rem;font-weight:700;border-radius:99px;padding:2px 7px;}
+.dev-tabpanel{display:none;}
+.dev-tabpanel.on{display:block;}
+.lead-card{border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px;}
+.lead-card .lc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.lead-card .lc-id{font-size:.8rem;font-weight:700;color:var(--grey);}
+.lead-card .lc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 18px;margin-top:14px;}
+@media (max-width:760px){.lead-card .lc-grid{grid-template-columns:1fr 1fr;}}
+.lead-card .lc-grid div span.l{display:block;font-size:.7rem;color:var(--grey);}
+.lead-card .lc-grid div span.v{font-size:.9rem;font-weight:600;}
+.lead-card .lc-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.lead-card .lc-badges span{font-size:.7rem;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--verify-tint);color:var(--verify);}
+.lead-card .lc-actions{display:flex;gap:10px;margin-top:16px;}
+.lead-card.rejected{opacity:.5;}
+.lead-card.rejected .lc-actions{display:none;}
+.lead-card.unlocked .lc-actions{display:none;}
+.lead-card .lc-contact{margin-top:14px;background:var(--verify-tint);border-radius:10px;padding:12px 14px;font-size:.86rem;color:var(--verify);font-weight:600;}
+.status-pill{font-size:.72rem;font-weight:700;padding:5px 10px;border-radius:99px;}
+.status-pill.rejected-tag{background:#F1E4E4;color:#9C4141;}
+.pay-modal-summary{background:var(--bg-soft);border-radius:12px;padding:14px 16px;font-size:.86rem;margin-bottom:18px;}
+.finance-toggle{display:flex;gap:8px;margin:14px 0;}
+.finance-toggle button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--grey);}
+.finance-toggle button.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.finance-calc{margin-top:6px;}
+.finance-calc .fc-row{display:flex;gap:10px;margin-bottom:10px;}
+.finance-calc .fc-row .field-block{flex:1;}
+.finance-calc .fc-row .field-block input,.finance-calc .fc-row .field-block select{padding:9px 10px;font-size:.84rem;}
+
+.b2b-table{width:100%;border-collapse:separate;border-spacing:0;margin-top:34px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.b2b-table th,.b2b-table td{padding:16px 18px;text-align:left;vertical-align:top;font-size:.88rem;border-bottom:1px solid var(--line);}
+.b2b-table th{background:var(--bg-soft);color:var(--grey);font-weight:700;font-size:.78rem;}
+.b2b-table td strong{font-size:1.05rem;font-weight:800;display:block;margin-bottom:6px;}
+.b2b-table .price-cell{font-weight:700;color:var(--rausch);}
+.b2b-table tr:last-child td{border-bottom:none;}
+
+/* ================= flow diagram ================= */
+.flow{border:1px solid var(--line);border-radius:20px;background:#fff;padding:36px 24px;overflow-x:auto;box-shadow:var(--shadow-sm);}
+.flow svg{display:block;margin:0 auto;min-width:640px;}
+
+/* ================= lead form ================= */
+.form-section{background:var(--bg-soft);}
+.form-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;}
+@media (max-width:900px){.form-grid{grid-template-columns:1fr;gap:30px;}}
+.toggle-pair{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:var(--r-pill);padding:4px;margin-bottom:24px;}
+.toggle-pair button{padding:9px 18px;background:none;border:none;border-radius:var(--r-pill);font-size:.86rem;cursor:pointer;color:var(--grey);font-weight:600;}
+.toggle-pair button.active{background:var(--ink);color:#fff;}
+form.lead{display:flex;flex-direction:column;gap:16px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:560px){.form-row{grid-template-columns:1fr;}}
+.field-block label{display:block;font-size:.78rem;color:var(--grey);margin-bottom:6px;font-weight:600;}
+.field-block input,.field-block select{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;
+  background:#fff;font-family:inherit;font-size:.92rem;}
+.field-block input:focus,.field-block select:focus{outline:2px solid var(--ink);outline-offset:1px;}
+.chosen-list{display:flex;flex-wrap:wrap;gap:8px;margin:2px 0 4px;}
+.chosen-list span{font-size:.76rem;background:#fff;border:1px solid var(--line);padding:6px 11px;border-radius:var(--r-pill);}
+.chosen-list.empty{color:var(--grey);font-size:.86rem;font-style:italic;}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:.82rem;color:var(--grey);}
+.consent input{margin-top:3px;accent-color:var(--rausch);}
+.confirm-msg{display:none;border-radius:12px;background:var(--verify-tint);color:var(--verify);padding:14px 16px;font-size:.88rem;font-weight:600;}
+.confirm-msg.show{display:block;}
+.disclaimer{font-size:.76rem;color:var(--grey);margin-top:14px;}
+
+/* ================= checkout wizard ================= */
+.wizard-steps{display:flex;gap:8px;margin-bottom:22px;}
+.wizard-steps span{flex:1;height:4px;border-radius:99px;background:var(--line);}
+.wizard-steps span.done{background:var(--rausch);}
+.wiz-panel{display:none;}
+.wiz-panel.active{display:block;}
+.wiz-devlist{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.wiz-devlist label{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;font-size:.9rem;}
+.wiz-devlist label b{font-weight:700;}
+.wiz-devlist label small{display:block;color:var(--grey);font-weight:400;}
+.wiz-devlist input{accent-color:var(--rausch);width:18px;height:18px;}
+.wiz-nav{display:flex;justify-content:space-between;margin-top:22px;gap:12px;}
+.card-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.paylock{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--grey);margin-top:14px;}
+.result-card{text-align:center;padding:10px 0 4px;}
+.result-check{width:56px;height:56px;border-radius:50%;background:var(--verify-tint);color:var(--verify);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.6rem;}
+
+/* ================= footer ================= */
+footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0 30px;}
+.footer-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+@media (max-width:760px){.footer-cols{grid-template-columns:1fr 1fr;}}
+@media (max-width:480px){.footer-cols{grid-template-columns:1fr;}}
+.footer-cols h5{font-size:.82rem;margin-bottom:14px;}
+.footer-cols a{display:block;font-size:.84rem;color:var(--grey);padding:6px 0;}
+.footer-bottom{margin-top:30px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;font-size:.8rem;color:var(--grey);}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="#E7384F"/><rect x="9" y="9" width="6" height="6" fill="#fff"/><rect x="17" y="9" width="6" height="6" fill="#fff" opacity=".7"/><rect x="9" y="17" width="6" height="6" fill="#fff" opacity=".7"/><rect x="17" y="17" width="6" height="6" fill="#fff"/></svg>
+      Ladrillo Hub
+    </div>
+    <div class="searchpill" id="search-pill-open">
+      <div class="seg"><b>Zona</b><span>Explorá barrios</span></div>
+      <div class="seg"><b>Ambientes</b><span>2 o 3</span></div>
+      <div class="seg"><b>Presupuesto</b><span>Cualquiera</span></div>
+      <div class="go">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+      </div>
+    </div>
+    <div class="navcta">
+      <a href="#desarrolladoras" class="publish-link">Publicá tu proyecto</a>
+      <div class="menu-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+        <span class="avatar">LH</span>
+      </div>
+    </div>
+  </div>
+  <div class="catrow">
+    <div class="wrap">
+      <div class="catpill on" data-barrio=""><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="10" width="18" height="10" rx="1"/><path d="M3 10 12 3l9 7"/></svg>Todos</div>
+      <div class="catpill" data-barrio="Belgrano"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="10" y1="10" x2="10" y2="20"/></svg>Belgrano</div>
+      <div class="catpill" data-barrio="Núñez"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20V10l8-6 8 6v10"/><path d="M9 20v-6h6v6"/></svg>Núñez</div>
+      <div class="catpill" data-barrio="Olivos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18"/></svg>Olivos</div>
+      <div class="catpill" id="cat-verificado"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>Verificado</div>
+      <div class="catpill" id="cat-dev"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1"/><line x1="8" y1="8" x2="8" y2="8.01"/><line x1="12" y1="8" x2="12" y2="8.01"/><line x1="16" y1="8" x2="16" y2="8.01"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Desarrolladoras</div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="eyebrow">Belgrano · Núñez · Olivos</span>
+      <h1 style="margin-top:6px;">Comparamos precios, vos elegís.</h1>
+      <p class="sub">Desarrollos en pozo y en construcción, lado a lado: precio por m², avance de obra, anticipo y entrega — sin dejar tus datos hasta que vos decidís avanzar.</p>
+      <div class="trustrow">
+        <div class="t"><b id="stat-proj">9</b><span>proyectos activos</span></div>
+        <div class="t"><b>37</b><span>compradores verificados este mes</span></div>
+        <div class="t"><b>12</b><span>desarrolladoras publicando</span></div>
+      </div>
+    </div>
+    <a href="#buscar" class="btn btn-dark btn-round">Ver desarrollos</a>
+  </div>
+</section>
+
+<section id="buscar">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Desarrollos disponibles</h2>
+      <p class="desc">Tocá un proyecto para ver el detalle, o tildá "Comparar" para ponerlos lado a lado.</p>
+    </div>
+    <p class="listing-count" id="listing-count">9 desarrollos encontrados</p>
+    <div class="cards" id="cards"></div>
+  </div>
+</section>
+
+<section id="como-funciona">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>De explorar a comprar, sin apurarte</h2>
+      <p class="desc">Todo empieza gratis. Vos decidís en qué momento pasar al siguiente paso.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="circ">1</div><h4>Explorá</h4><p>Mirá todos los proyectos de la zona sin registrarte ni dejar ningún dato.</p></div>
+      <div class="step"><div class="circ">2</div><h4>Comparé</h4><p>Poné lado a lado hasta 5 desarrollos: precio por m², avance, anticipo, entrega.</p></div>
+      <div class="step"><div class="circ">3</div><h4>Guardá favoritos</h4><p>Marcá lo que te interesa con el corazón y volvé cuando quieras.</p></div>
+      <div class="step"><div class="circ">4</div><h4>Armá tu perfil</h4><p>Presupuesto, anticipo disponible, zona y cuándo pensás comprar. Sigue siendo gratis.</p></div>
+      <div class="step"><div class="circ">5</div><h4>Elegí hasta 3</h4><p>Seleccioná los proyectos con los que realmente querés avanzar.</p></div>
+      <div class="step"><div class="circ">6</div><h4>Activá tu búsqueda</h4><p>Con Comprador Verificado, esas desarrolladoras reciben tu ficha y te contactan a vos.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="verificado">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Explorar es gratis. Avanzar, vos decidís cuándo.</h2>
+      <p class="desc">No vendemos tus datos a nadie. Solo pasan a una desarrolladora cuando vos autorizás la presentación.</p>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <span class="tag">Sin costo</span>
+        <h3>Gratis</h3>
+        <div class="price">$0</div>
+        <ul>
+          <li>Explorar todos los desarrollos</li>
+          <li>Comparar hasta 5 proyectos</li>
+          <li>Guardar favoritos</li>
+          <li>Crear tu perfil de comprador</li>
+          <li>Descubrir oportunidades nuevas</li>
+        </ul>
+        <a href="#buscar" class="btn btn-ghost btn-full btn-round">Empezar a explorar</a>
+      </div>
+      <div class="plan highlight">
+        <span class="tag">Para cuando estás listo para avanzar</span>
+        <h3>Comprador Verificado</h3>
+        <div class="price">US$ 5.000 <small>/ 7 días</small></div>
+        <ul>
+          <li>Verificación de identidad y presupuesto</li>
+          <li>Búsqueda prioritaria durante 7 días</li>
+          <li>Selección de hasta 3 proyectos</li>
+          <li>Presentación a las desarrolladoras elegidas</li>
+          <li>Condición visible de "Comprador Verificado"</li>
+        </ul>
+        <button class="btn btn-primary btn-full btn-round" id="open-checkout">Activar búsqueda prioritaria</button>
+      </div>
+    </div>
+    <p class="disclaimer" style="margin-top:18px;">Precio de referencia sujeto a validación legal y comercial. Todavía no se procesan pagos reales en este prototipo.</p>
+  </div>
+</section>
+
+<section class="anon-section">
+  <div class="wrap">
+    <div class="anon-copy">
+      <span class="eyebrow">Cómo protegemos tu identidad</span>
+      <h2 style="margin-top:10px;">La desarrolladora no recibe tu teléfono. Recibe esto.</h2>
+      <p>Hasta que vos autorizás el contacto, tu nombre, teléfono, email y DNI quedan afuera. La desarrolladora ve una ficha con señales objetivas de intención de compra, sin poder identificarte.</p>
+      <div class="compare-note">
+        <span class="label">La diferencia con un lead tradicional</span>
+        <p>Un lead común es "alguien dejó sus datos porque vio un aviso". Un Comprador Verificado ya comparó varios proyectos, definió presupuesto y anticipo, y pagó para activar una búsqueda prioritaria.</p>
+      </div>
+    </div>
+    <div class="buyer-card" id="anon-card">
+      <div class="bc-head"><span class="bc-id">Ladrillo Hub — Comprador #LH-01872</span></div>
+      <div class="bc-body">
+        <div><span class="l">Zona</span><span class="v">Villa Urquiza</span></div>
+        <div><span class="l">Ambientes</span><span class="v">2/3 ambientes</span></div>
+        <div><span class="l">Presupuesto</span><span class="v">US$ 120.000–140.000</span></div>
+        <div><span class="l">Anticipo disponible</span><span class="v">US$ 45.000</span></div>
+        <div><span class="l">Ventana de compra</span><span class="v">Próximos 30 días</span></div>
+        <div><span class="l">Financiación</span><span class="v">Sí</span></div>
+        <div class="full"><span class="l">Proyectos comparados</span><span class="v">7 — proyecto seleccionado: Proyecto X</span></div>
+      </div>
+      <div class="badges">
+        <span class="badge">Comprador verificado</span>
+        <span class="badge">Búsqueda prioritaria activa</span>
+        <span class="badge">Solicitó avanzar</span>
+      </div>
+      <div class="bc-foot"><a href="#desarrolladoras" class="btn btn-primary btn-sm btn-round">Solicitar presentación</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="dev-section" id="desarrolladoras">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>No vendemos contactos. Presentamos compradores que ya compararon el mercado.</h2>
+      <p class="desc">Publicá tu proyecto gratis y vas a ver, en tiempo real, cuánta demanda compatible existe — antes de pagar por nada.</p>
+    </div>
+
+    <div class="dev-panel">
+      <div class="ph">
+        <div><div class="name">Panel de desarrollador — Vitrum Belgrano</div><div class="status">Publicado hace 34 días · Belgrano</div></div>
+        <button class="btn btn-ghost btn-sm btn-round" id="open-publish">Publicar mi proyecto</button>
+      </div>
+      <div class="dev-tabs">
+        <button class="dev-tab on" data-tab="metrics">Métricas</button>
+        <button class="dev-tab" data-tab="leads">Compradores verificados <span class="dev-tab-count" id="leads-pending-count">3</span></button>
+      </div>
+
+      <div class="dev-tabpanel on" id="tab-metrics">
+        <div class="dev-metrics">
+          <div class="m"><div class="n">427</div><div class="l">usuarios vieron el proyecto</div></div>
+          <div class="m"><div class="n">83</div><div class="l">lo agregaron a favoritos</div></div>
+          <div class="m"><div class="n">31</div><div class="l">lo compararon con otros</div></div>
+          <div class="m"><div class="n">12</div><div class="l">presupuesto compatible</div></div>
+          <div class="m"><div class="n">4</div><div class="l">activaron búsqueda prioritaria</div></div>
+        </div>
+        <div class="chartbox">
+          <div class="lbl">Vistas de los últimos 7 días</div>
+          <div class="bars" id="bars"></div>
+        </div>
+        <p class="dev-note">Este panel es un ejemplo con datos simulados de cómo se va a ver una vez que tengamos desarrolladoras reales publicando proyectos.</p>
+      </div>
+
+      <div class="dev-tabpanel" id="tab-leads">
+        <p class="dev-note" style="margin-top:0;margin-bottom:16px;">Estos compradores activaron su búsqueda prioritaria y eligieron este proyecto. Podés rechazar sin costo, o aceptar y pagar para desbloquear los datos de contacto.</p>
+        <div id="leads-list"></div>
+      </div>
+    </div>
+
+    <table class="b2b-table">
+      <thead><tr><th>Producto</th><th>Qué recibe la desarrolladora</th><th>Precio de referencia</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Lead</strong>Contacto básico</td><td>Datos básicos del interesado y el proyecto que miró.</td><td class="price-cell">A definir</td></tr>
+        <tr><td><strong>Comprador Verificado</strong>Perfil con intención</td><td>Perfil económico, proyecto de interés y ventana de compra declarada.</td><td class="price-cell">A definir</td></tr>
+        <tr><td><strong>Comprador Verificado Premium</strong>Presentación directa</td><td>Perfil completo, comparación de proyectos, intención activa y presentación autorizada.</td><td class="price-cell">A definir</td></tr>
+      </tbody>
+    </table>
+    <p class="disclaimer">Los tres productos y sus precios están en diseño — se van a validar comercial y legalmente antes de cobrarse.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Cómo se mueve la información</h2>
+      <p class="desc">Compradores y desarrolladoras se encuentran del lado a lado del mismo embudo — el match queda anónimo hasta que alguien autoriza el siguiente paso.</p>
+    </div>
+    <div class="flow">
+      <svg viewBox="0 0 900 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama del flujo entre compradores y desarrolladoras">
+        <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#717171"/></marker></defs>
+        <g font-family="Plus Jakarta Sans" font-size="13" fill="#222">
+          <rect x="20" y="20" width="190" height="52" rx="12" fill="#F7F7F7" stroke="#E4E4E4"/>
+          <text x="115" y="42" text-anchor="middle" font-weight="700">Compradores</text>
+          <text x="115" y="60" text-anchor="middle" fill="#717171" font-size="11">buscan y comparan</text>
+          <rect x="690" y="20" width="190" height="52" rx="12" fill="#F7F7F7" stroke="#E4E4E4"/>
+          <text x="785" y="42" text-anchor="middle" font-weight="700">Desarrolladoras</text>
+          <text x="785" y="60" text-anchor="middle" fill="#717171" font-size="11">publican proyectos</text>
+          <rect x="355" y="115" width="190" height="52" rx="12" fill="#E7384F"/>
+          <text x="450" y="137" text-anchor="middle" fill="#fff" font-weight="700">Match anónimo</text>
+          <text x="450" y="155" text-anchor="middle" fill="#FDE8EA" font-size="11">ficha comercial</text>
+          <rect x="355" y="200" width="190" height="45" rx="12" fill="#00895D"/>
+          <text x="450" y="228" text-anchor="middle" fill="#fff" font-weight="700" font-size="12">Presentación autorizada</text>
+          <path d="M115,72 L115,141 L353,141" fill="none" stroke="#717171" marker-end="url(#arrow)"/>
+          <path d="M785,72 L785,141 L547,141" fill="none" stroke="#717171" marker-end="url(#arrow)"/>
+          <path d="M450,167 L450,198" fill="none" stroke="#717171" marker-end="url(#arrow)"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="form-section" id="lead">
+  <div class="wrap" style="padding:56px 0;">
+    <div class="form-grid">
+      <div>
+        <h2 style="font-size:1.7rem;">Recibí información de tus favoritos</h2>
+        <p style="color:var(--grey);margin-top:14px;">Contanos qué buscás. Si activás Comprador Verificado, esto es lo que va a ver la desarrolladora — sin tus datos de contacto hasta que vos autorices.</p>
+        <div style="margin-top:26px;">
+          <span class="eyebrow">Elegiste para comparar</span>
+          <div class="chosen-list empty" id="chosen-list">Todavía no elegiste ningún desarrollo. Volvé a "Desarrollos" y tildá "Comparar".</div>
+        </div>
+      </div>
+      <form class="lead" id="lead-form">
+        <div class="toggle-pair" id="toggle-goal">
+          <button type="button" class="active" data-v="comprar">Quiero comprar</button>
+          <button type="button" data-v="invertir">Quiero invertir</button>
+        </div>
+        <div class="form-row">
+          <div class="field-block"><label>Presupuesto total (US$)</label><input type="number" placeholder="Ej. 130.000"></div>
+          <div class="field-block"><label>Anticipo disponible (US$)</label><input type="number" placeholder="Ej. 45.000"></div>
+        </div>
+        <div class="form-row">
+          <div class="field-block"><label>Barrio</label><select><option>Belgrano</option><option>Núñez</option><option>Olivos</option></select></div>
+          <div class="field-block"><label>Ambientes</label><select><option>2</option><option>3</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="field-block"><label>Cuándo pensás comprar</label><select><option>Ya</option><option>En 3 meses</option><option>En 6 meses</option><option>En más de 1 año</option></select></div>
+          <div class="field-block"><label>Forma de pago</label><select><option>Financiar el saldo</option><option>Contado</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="field-block"><label>Nombre</label><input type="text" placeholder="Tu nombre"></div>
+          <div class="field-block"><label>WhatsApp</label><input type="tel" placeholder="+54 9 11..."></div>
+        </div>
+        <div class="field-block"><label>Email</label><input type="email" placeholder="tu@email.com"></div>
+        <label class="consent"><input type="checkbox" id="consent-check">Acepto que mis datos se compartan con las desarrolladoras elegidas para que me contacten.</label>
+        <button type="submit" class="btn btn-primary btn-full btn-round">Solicitar información</button>
+        <div class="confirm-msg" id="confirm-msg">Listo — en un sitio real esto activaría tu búsqueda. Acá es un prototipo con datos de ejemplo: no se envía ninguna información.</div>
+        <p class="disclaimer">Prototipo con datos de ejemplo. Los desarrollos, precios y desarrolladoras son ficticios y no se envía ninguna información real.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-cols">
+      <div>
+        <h5>Comprador</h5>
+        <a href="#buscar">Buscar desarrollos</a>
+        <a href="#verificado">Comprador Verificado</a>
+        <a href="#como-funciona">Cómo funciona</a>
+      </div>
+      <div>
+        <h5>Desarrolladora</h5>
+        <a href="#desarrolladoras">Publicar proyecto</a>
+        <a href="#desarrolladoras">Productos B2B</a>
+      </div>
+      <div>
+        <h5>Zonas</h5>
+        <a href="#buscar" data-jump="Belgrano">Belgrano</a>
+        <a href="#buscar" data-jump="Núñez">Núñez</a>
+        <a href="#buscar" data-jump="Olivos">Olivos</a>
+      </div>
+      <div>
+        <h5>Ladrillo Hub</h5>
+        <p style="font-size:.84rem;color:var(--grey);padding:6px 0;max-width:26ch;">Todos los proyectos. Una sola búsqueda. Compradores verificados.</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© Ladrillo Hub — prototipo con datos de ejemplo</span>
+      <span>Los desarrollos, precios y métricas de este sitio son ficticios. No se procesa ni se envía información real.</span>
+    </div>
+  </div>
+</footer>
+
+<div class="compare-bar" id="compare-bar">
+  <div class="pillbar">
+    <div class="txt"><b id="compare-count">0</b> seleccionados</div>
+    <button class="btn btn-ghost btn-sm btn-round" id="compare-clear" style="border-color:#4a4a4a;color:#fff;">Vaciar</button>
+    <button class="btn btn-primary btn-sm btn-round" id="compare-open" disabled>Comparar</button>
+  </div>
+</div>
+
+<div class="modal-veil" id="modal-veil">
+  <div class="modal modal-wide">
+    <div class="modal-head"><button class="modal-close" id="modal-close">✕</button><h3>Comparación de desarrollos</h3></div>
+    <div class="modal-body"><table class="compare-table" id="compare-table"></table></div>
+  </div>
+</div>
+
+<div class="modal-veil" id="detail-veil">
+  <div class="modal modal-wide">
+    <div class="modal-head"><button class="modal-close" id="detail-close">✕</button><h3 id="detail-title">Desarrollo</h3></div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<div class="modal-veil" id="checkout-veil">
+  <div class="modal">
+    <div class="modal-head"><button class="modal-close" id="checkout-close">✕</button><h3>Activar Comprador Verificado</h3></div>
+    <div class="modal-body">
+      <div class="wizard-steps"><span id="wstep1"></span><span id="wstep2"></span><span id="wstep3"></span><span id="wstep4"></span></div>
+
+      <div class="wiz-panel active" id="panel1">
+        <p style="font-weight:700;margin-bottom:4px;">Elegí hasta 3 proyectos</p>
+        <p style="color:var(--grey);font-size:.86rem;margin-bottom:16px;">Estas van a ser las desarrolladoras que reciban tu ficha comercial.</p>
+        <div class="wiz-devlist" id="wiz-devlist"></div>
+        <div class="wiz-nav"><span></span><button class="btn btn-primary btn-round" id="w1-next" disabled>Continuar</button></div>
+      </div>
+
+      <div class="wiz-panel" id="panel2">
+        <p style="font-weight:700;margin-bottom:16px;">Tu perfil de comprador</p>
+        <div class="form-row" style="margin-bottom:14px;">
+          <div class="field-block"><label>Presupuesto total (US$)</label><input type="number" id="w-presupuesto" placeholder="Ej. 130.000"></div>
+          <div class="field-block"><label>Anticipo disponible (US$)</label><input type="number" id="w-anticipo" placeholder="Ej. 45.000"></div>
+        </div>
+        <div class="form-row" style="margin-bottom:14px;">
+          <div class="field-block"><label>Cuándo pensás comprar</label><select id="w-plazo"><option>Ya</option><option>En 3 meses</option><option>En 6 meses</option><option>En más de 1 año</option></select></div>
+          <div class="field-block"><label>Financiación</label><select id="w-financia"><option>Sí</option><option>No</option></select></div>
+        </div>
+        <div class="form-row"><div class="field-block"><label>Nombre</label><input type="text" id="w-nombre" placeholder="Tu nombre"></div><div class="field-block"><label>WhatsApp</label><input type="tel" id="w-whatsapp" placeholder="+54 9 11..."></div></div>
+        <div class="wiz-nav"><button class="btn btn-ghost btn-round" data-back="1">Atrás</button><button class="btn btn-primary btn-round" id="w2-next">Continuar</button></div>
+      </div>
+
+      <div class="wiz-panel" id="panel3">
+        <p style="font-weight:700;margin-bottom:16px;">Pago de la búsqueda prioritaria</p>
+        <div class="card-fields">
+          <div class="field-block" style="grid-column:1/-1;"><label>Número de tarjeta</label><input type="text" placeholder="4242 4242 4242 4242" maxlength="19"></div>
+          <div class="field-block"><label>Vencimiento</label><input type="text" placeholder="MM/AA"></div>
+          <div class="field-block"><label>CVV</label><input type="text" placeholder="123" maxlength="4"></div>
+        </div>
+        <div class="paylock">🔒 Pago simulado — no se procesa ningún cobro real en este prototipo.</div>
+        <div class="wiz-nav"><button class="btn btn-ghost btn-round" data-back="2">Atrás</button><button class="btn btn-primary btn-round" id="w3-pay">Pagar US$ 5.000</button></div>
+      </div>
+
+      <div class="wiz-panel" id="panel4">
+        <div class="result-card">
+          <div class="result-check">✓</div>
+          <h3 style="font-size:1.2rem;">Búsqueda prioritaria activada</h3>
+          <p style="color:var(--grey);font-size:.9rem;margin-top:8px;">Esta es tu ficha comercial anonimizada — así te van a ver las desarrolladoras que elegiste.</p>
+        </div>
+        <div class="buyer-card" style="margin-top:18px;" id="result-card"></div>
+        <div class="wiz-nav" style="justify-content:center;"><button class="btn btn-dark btn-round" id="w4-close">Listo</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-veil" id="publish-veil">
+  <div class="modal">
+    <div class="modal-head"><button class="modal-close" id="publish-close">✕</button><h3>Publicá tu proyecto</h3></div>
+    <div class="modal-body">
+      <form class="lead" id="publish-form">
+        <div class="form-row">
+          <div class="field-block"><label>Nombre del proyecto</label><input type="text" placeholder="Ej. Vitrum Belgrano" required></div>
+          <div class="field-block"><label>Barrio</label><select><option>Belgrano</option><option>Núñez</option><option>Olivos</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="field-block"><label>Precio por m² (US$)</label><input type="number" placeholder="Ej. 3200"></div>
+          <div class="field-block"><label>Estado de obra (%)</label><input type="number" placeholder="Ej. 40" min="0" max="100"></div>
+        </div>
+        <div class="form-row">
+          <div class="field-block"><label>Fecha de entrega</label><input type="text" placeholder="Ej. 2027"></div>
+          <div class="field-block"><label>Anticipo</label><input type="text" placeholder="Ej. 30%"></div>
+        </div>
+        <div class="field-block"><label>Contacto comercial (email)</label><input type="email" placeholder="ventas@desarrolladora.com"></div>
+        <button type="submit" class="btn btn-primary btn-full btn-round">Publicar proyecto gratis</button>
+        <div class="confirm-msg" id="publish-confirm">Listo — tu proyecto quedaría publicado. En este prototipo no se guarda información real.</div>
+        <p class="disclaimer">Publicar es gratis. Vas a ver cuánta demanda compatible existe antes de pagar por cualquier producto B2B.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal-veil" id="unlock-veil">
+  <div class="modal">
+    <div class="modal-head"><button class="modal-close" id="unlock-close">✕</button><h3 id="unlock-title">Solicitar presentación</h3></div>
+    <div class="modal-body">
+      <div class="pay-modal-summary" id="unlock-summary"></div>
+      <p style="font-weight:700;margin-bottom:14px;">Pago del Comprador Verificado</p>
+      <div class="card-fields">
+        <div class="field-block" style="grid-column:1/-1;"><label>Número de tarjeta</label><input type="text" placeholder="4242 4242 4242 4242" maxlength="19"></div>
+        <div class="field-block"><label>Vencimiento</label><input type="text" placeholder="MM/AA"></div>
+        <div class="field-block"><label>CVV</label><input type="text" placeholder="123" maxlength="4"></div>
+      </div>
+      <div class="paylock">🔒 Pago simulado — no se procesa ningún cobro real en este prototipo.</div>
+      <div class="wiz-nav"><span></span><button class="btn btn-primary btn-round" id="unlock-pay">Pagar y ver contacto</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PALETTES = {
+    "Belgrano": ["#FCD9C8","#F7B48E"],
+    "Núñez": ["#CDE6E0","#8FC7BB"],
+    "Olivos": ["#E4DBF6","#B9A4E8"]
+  };
+  var DEV = [
+    {id:1,barrio:"Belgrano",nombre:"Vitrum Belgrano",desarrolladora:"Terravista Desarrollos",amb:[2,3],precioM2:3450,avance:62,entrega:"2027",anticipo:"30%",financia:true,desc:"Torre boutique a metros de Cabildo, con amenities completos y unidades a estrenar de 2 y 3 ambientes."},
+    {id:2,barrio:"Belgrano",nombre:"Cabildo 4200",desarrolladora:"Obring Norte",amb:[2],precioM2:2980,avance:18,entrega:"2028",anticipo:"25%",financia:true,desc:"Desarrollo en pozo sobre avenida Cabildo, ideal para quienes buscan anticipo bajo y financiación extendida."},
+    {id:3,barrio:"Belgrano",nombre:"Parque Sarmiento Residence",desarrolladora:"Coto Urbano",amb:[3],precioM2:3720,avance:84,entrega:"2026",anticipo:"40%",financia:false,desc:"Últimas unidades de 3 ambientes frente al parque, entrega próxima y terminaciones premium."},
+    {id:4,barrio:"Núñez",nombre:"River View Tower",desarrolladora:"Norte Capital",amb:[2,3],precioM2:3600,avance:45,entrega:"2027",anticipo:"35%",financia:true,desc:"Vista abierta hacia el río, unidades de 2 y 3 ambientes con balcón terraza."},
+    {id:5,barrio:"Núñez",nombre:"Libertador 7200",desarrolladora:"Grupo Amarilo",amb:[2],precioM2:3150,avance:9,entrega:"2028",anticipo:"20%",financia:true,desc:"Recién lanzado, precio de pozo y el anticipo más bajo de la zona."},
+    {id:6,barrio:"Núñez",nombre:"Núñez Central",desarrolladora:"Terravista Desarrollos",amb:[3],precioM2:3380,avance:71,entrega:"2026",anticipo:"30%",financia:false,desc:"A metros de Barrancas de Belgrano, con amenities completos y avance de obra avanzado."},
+    {id:7,barrio:"Olivos",nombre:"Maipú Green",desarrolladora:"Costa Norte SA",amb:[2,3],precioM2:2870,avance:33,entrega:"2027",anticipo:"25%",financia:true,desc:"Proyecto con parquización propia y unidades de 2 y 3 ambientes con patio."},
+    {id:8,barrio:"Olivos",nombre:"Corvalán 1500",desarrolladora:"Obring Norte",amb:[2],precioM2:2650,avance:12,entrega:"2028",anticipo:"20%",financia:true,desc:"El precio por m² más accesible de Olivos, en etapa temprana de construcción."},
+    {id:9,barrio:"Olivos",nombre:"Rambla Olivos",desarrolladora:"Grupo Amarilo",amb:[3],precioM2:3050,avance:95,entrega:"2026",anticipo:"40%",financia:false,desc:"A entregarse este año, muy cerca de la costanera. Últimas unidades de 3 ambientes."}
+  ];
+
+  var favorites = new Set();
+  var selected = new Set();
+  var wizChosen = new Set();
+  var currentBarrioFilter = "";
+  var cardsEl = document.getElementById('cards');
+  var countEl = document.getElementById('listing-count');
+
+  function money(n){return 'US$ '+n.toLocaleString('es-AR');}
+
+  function cardPhoto(d){
+    var pal = PALETTES[d.barrio];
+    return '<div class="photo"><div class="bg" style="background:linear-gradient(150deg,'+pal[0]+','+pal[1]+');width:100%;height:100%;"></div>'+
+      '<svg class="skyline" viewBox="0 0 300 140" preserveAspectRatio="none" style="position:absolute;bottom:0;left:0;right:0;height:46%;opacity:.9;"><g fill="rgba(255,255,255,.55)">'+
+      '<rect x="10" y="60" width="34" height="80"/><rect x="52" y="30" width="28" height="110"/><rect x="88" y="75" width="30" height="65"/>'+
+      '<rect x="126" y="45" width="26" height="95"/><rect x="160" y="65" width="34" height="75"/><rect x="202" y="20" width="26" height="120"/>'+
+      '<rect x="236" y="55" width="30" height="85"/><rect x="272" y="80" width="20" height="60"/></g></svg>'+
+      '<div class="heart" data-id="'+d.id+'"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.3C.4 7.7 2.4 4 6 4c2 0 3.6 1 4.9 2.7C12.4 5 14 4 16 4c3.6 0 5.6 3.7 4 7.7C19.5 16.3 12 21 12 21z"/></svg></div>'+
+      '<span class="badge-top">'+d.barrio+'</span>'+
+      '<div class="cmp-pill"><label onclick="event.stopPropagation()"><input type="checkbox" data-id="'+d.id+'" class="cmp-check"> Comparar</label></div>'+
+      '</div>';
+  }
+
+  function render(list){
+    cardsEl.innerHTML = "";
+    list.forEach(function(d){
+      var card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = cardPhoto(d) +
+        '<div class="row1"><div><h3>'+d.nombre+'</h3><div class="dev">'+d.desarrolladora+'</div></div>'+
+        '<div class="price">'+money(d.precioM2)+'<span> /m²</span></div></div>'+
+        '<div class="metarow"><span>'+d.amb.join(' y ')+' amb.</span><span>·</span><span>Entrega '+d.entrega+'</span><span>·</span><span>Anticipo '+d.anticipo+'</span></div>'+
+        '<div class="avance"><div class="bar"><i style="width:'+d.avance+'%"></i></div><small>'+d.avance+'%</small></div>';
+      card.addEventListener('click', function(e){
+        if(e.target.closest('.cmp-pill') || e.target.closest('.heart')) return;
+        openDetail(d);
+      });
+      cardsEl.appendChild(card);
+    });
+    countEl.textContent = list.length + (list.length===1 ? " desarrollo encontrado" : " desarrollos encontrados");
+
+    document.querySelectorAll('.cmp-check').forEach(function(cb){
+      cb.checked = selected.has(Number(cb.dataset.id));
+      cb.addEventListener('change', function(){
+        var id = Number(cb.dataset.id);
+        if(cb.checked){ if(selected.size>=5){cb.checked=false;return;} selected.add(id); } else { selected.delete(id); }
+        updateCompareBar(); updateChosenList();
+      });
+    });
+    document.querySelectorAll('.heart').forEach(function(h){
+      h.classList.toggle('on', favorites.has(Number(h.dataset.id)));
+      h.addEventListener('click', function(e){
+        e.stopPropagation();
+        var id = Number(h.dataset.id);
+        if(favorites.has(id)){favorites.delete(id);h.classList.remove('on');} else {favorites.add(id);h.classList.add('on');}
+      });
+    });
+  }
+
+  function applyFilters(){
+    var list = DEV.filter(function(d){ return !currentBarrioFilter || d.barrio===currentBarrioFilter; });
+    render(list);
+  }
+
+  document.querySelectorAll('.catpill[data-barrio]').forEach(function(el){
+    el.addEventListener('click', function(){
+      document.querySelectorAll('.catpill[data-barrio]').forEach(function(s){s.classList.remove('on');});
+      el.classList.add('on');
+      currentBarrioFilter = el.dataset.barrio;
+      applyFilters();
+      document.getElementById('buscar').scrollIntoView({behavior:'smooth'});
+    });
+  });
+  document.getElementById('cat-verificado').addEventListener('click', function(){document.getElementById('verificado').scrollIntoView({behavior:'smooth'});});
+  document.getElementById('cat-dev').addEventListener('click', function(){document.getElementById('desarrolladoras').scrollIntoView({behavior:'smooth'});});
+  document.getElementById('search-pill-open').addEventListener('click', function(){document.getElementById('buscar').scrollIntoView({behavior:'smooth'});});
+  document.querySelectorAll('a[data-jump]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      document.querySelectorAll('.catpill[data-barrio]').forEach(function(s){s.classList.remove('on');
+        if(s.dataset.barrio===a.dataset.jump) s.classList.add('on');});
+      currentBarrioFilter = a.dataset.jump;
+      applyFilters();
+      document.getElementById('buscar').scrollIntoView({behavior:'smooth'});
+    });
+  });
+
+  render(DEV);
+
+  var detailVeil = document.getElementById('detail-veil');
+  function openDetail(d){
+    document.getElementById('detail-title').textContent = d.nombre;
+    var pal = PALETTES[d.barrio];
+    var galleryTile = function(h){ return '<div class="ph" style="height:'+h+'px;background:linear-gradient(160deg,'+pal[0]+','+pal[1]+');border-radius:8px;"></div>'; };
+    document.getElementById('detail-body').innerHTML =
+      '<div class="detail-gallery">'+galleryTile(300)+galleryTile(146)+galleryTile(146)+'</div>'+
+      '<div class="detail-grid">'+
+        '<div>'+
+          '<span class="eyebrow">'+d.barrio+'</span>'+
+          '<h2 style="margin-top:6px;font-size:1.4rem;">'+d.nombre+'</h2>'+
+          '<p style="color:var(--grey);margin-top:6px;">'+d.desarrolladora+'</p>'+
+          '<p style="margin-top:16px;color:var(--ink);font-size:.94rem;">'+d.desc+'</p>'+
+          '<div class="detail-amenities">'+
+            '<div>Avance de obra: '+d.avance+'%</div>'+
+            '<div>Entrega: '+d.entrega+'</div>'+
+            '<div>Anticipo: '+d.anticipo+'</div>'+
+            '<div>Financiación: '+(d.financia?'Sí':'No')+'</div>'+
+            '<div>Ambientes: '+d.amb.join(' y ')+'</div>'+
+            '<div>Zona: '+d.barrio+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="booking-box">'+
+          '<div class="price">'+money(d.precioM2)+' <span>/ m²</span></div>'+
+          '<div class="subrow">Precio de referencia, sujeto a disponibilidad</div>'+
+          '<div class="divider"></div>'+
+          '<div class="line"><span>Ambientes</span><span>'+d.amb.join(' y ')+'</span></div>'+
+          '<div class="line"><span>Anticipo</span><span>'+d.anticipo+'</span></div>'+
+          '<div class="line"><span>Entrega</span><span>'+d.entrega+'</span></div>'+
+          '<div class="line total"><span>Avance de obra</span><span>'+d.avance+'%</span></div>'+
+          '<div class="divider"></div>'+
+          '<div class="finance-toggle" id="fin-toggle">'+
+            '<button type="button" class="active" data-v="contado">Contado</button>'+
+            '<button type="button" data-v="financiado" '+(d.financia?'':'disabled title="Este proyecto no ofrece financiación"')+'>Financiado</button>'+
+          '</div>'+
+          '<div class="finance-calc">'+
+            '<div class="fc-row"><div class="field-block"><label>m² del depto</label><input type="number" id="fin-m2" value="45" min="20" max="120"></div>'+
+            '<div class="field-block" id="fin-cuotas-wrap" style="display:none;"><label>Cuotas</label><select id="fin-cuotas"><option value="12">12</option><option value="24" selected>24</option><option value="36">36</option><option value="48">48</option></select></div></div>'+
+            '<div class="line"><span>Precio total estimado</span><span id="fin-total">—</span></div>'+
+            '<div class="line" id="fin-anticipo-row"><span>Anticipo ('+d.anticipo+')</span><span id="fin-anticipo">—</span></div>'+
+            '<div class="line total" id="fin-cuota-row" style="display:none;"><span>Cuota mensual</span><span id="fin-cuota">—</span></div>'+
+          '</div>'+
+          '<button class="btn btn-dark btn-full btn-round" style="margin-top:18px;" id="detail-cta">Solicitar información</button>'+
+          '<p class="disclaimer" style="text-align:center;">No se envía ninguna información real</p>'+
+        '</div>'+
+      '</div>';
+    detailVeil.classList.add('show');
+    document.getElementById('detail-cta').addEventListener('click', function(){
+      selected.add(d.id); updateCompareBar(); updateChosenList();
+      detailVeil.classList.remove('show');
+      document.getElementById('lead').scrollIntoView({behavior:'smooth'});
+    });
+
+    var finMode = 'contado';
+    function recalcFinance(){
+      var m2 = Number(document.getElementById('fin-m2').value) || 45;
+      var total = d.precioM2 * m2;
+      var anticipoPct = parseFloat(d.anticipo) / 100;
+      var anticipoMonto = total * anticipoPct;
+      document.getElementById('fin-total').textContent = money(Math.round(total));
+      document.getElementById('fin-anticipo').textContent = money(Math.round(anticipoMonto));
+      if(finMode==='financiado'){
+        var n = Number(document.getElementById('fin-cuotas').value);
+        var saldo = total - anticipoMonto;
+        var cuota = saldo / n;
+        document.getElementById('fin-cuota').textContent = money(Math.round(cuota))+' x '+n;
+        document.getElementById('fin-cuota-row').style.display = 'flex';
+      } else {
+        document.getElementById('fin-cuota-row').style.display = 'none';
+      }
+    }
+    document.getElementById('fin-m2').addEventListener('input', recalcFinance);
+    document.getElementById('fin-cuotas').addEventListener('change', recalcFinance);
+    document.querySelectorAll('#fin-toggle button').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(b.disabled) return;
+        document.querySelectorAll('#fin-toggle button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        finMode = b.dataset.v;
+        document.getElementById('fin-cuotas-wrap').style.display = finMode==='financiado' ? 'block' : 'none';
+        recalcFinance();
+      });
+    });
+    recalcFinance();
+  }
+  document.getElementById('detail-close').addEventListener('click', function(){detailVeil.classList.remove('show');});
+  detailVeil.addEventListener('click', function(e){if(e.target===detailVeil) detailVeil.classList.remove('show');});
+
+  var bar = document.getElementById('compare-bar');
+  var countBadge = document.getElementById('compare-count');
+  var openBtn = document.getElementById('compare-open');
+  function updateCompareBar(){
+    countBadge.textContent = selected.size;
+    bar.classList.toggle('show', selected.size>0);
+    openBtn.disabled = selected.size < 2;
+  }
+  document.getElementById('compare-clear').addEventListener('click', function(){
+    selected.clear();
+    document.querySelectorAll('.cmp-check').forEach(function(cb){cb.checked=false;});
+    updateCompareBar(); updateChosenList();
+  });
+  var veil = document.getElementById('modal-veil');
+  openBtn.addEventListener('click', function(){
+    var rows = [
+      ['Barrio', d=>d.barrio],['Precio /m²', d=>money(d.precioM2)],['Ambientes', d=>d.amb.join(' y ')],
+      ['Avance de obra', d=>d.avance+'%'],['Entrega', d=>d.entrega],['Anticipo', d=>d.anticipo],
+      ['Financiación', d=>d.financia?'Sí':'No'],['Desarrolladora', d=>d.desarrolladora]
+    ];
+    var chosen = DEV.filter(function(d){return selected.has(d.id);});
+    var html = '<thead><tr><th></th>'+chosen.map(function(d){return '<th><strong>'+d.nombre+'</strong></th>';}).join('')+'</tr></thead><tbody>';
+    rows.forEach(function(r){ html += '<tr><th>'+r[0]+'</th>'+chosen.map(function(d){return '<td>'+r[1](d)+'</td>';}).join('')+'</tr>'; });
+    document.getElementById('compare-table').innerHTML = html+'</tbody>';
+    veil.classList.add('show');
+  });
+  document.getElementById('modal-close').addEventListener('click', function(){veil.classList.remove('show');});
+  veil.addEventListener('click', function(e){if(e.target===veil) veil.classList.remove('show');});
+
+  function updateChosenList(){
+    var el = document.getElementById('chosen-list');
+    var chosen = DEV.filter(function(d){return selected.has(d.id);});
+    if(chosen.length===0){ el.className='chosen-list empty'; el.textContent='Todavía no elegiste ningún desarrollo. Volvé a "Desarrollos" y tildá "Comparar".'; }
+    else { el.className='chosen-list'; el.innerHTML = chosen.map(function(d){return '<span>'+d.nombre+'</span>';}).join(''); }
+  }
+
+  document.querySelectorAll('#toggle-goal button').forEach(function(b){
+    b.addEventListener('click', function(){ document.querySelectorAll('#toggle-goal button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
+  });
+  document.getElementById('lead-form').addEventListener('submit', function(e){ e.preventDefault(); document.getElementById('confirm-msg').classList.add('show'); });
+
+  var pubVeil = document.getElementById('publish-veil');
+  document.getElementById('open-publish').addEventListener('click', function(){pubVeil.classList.add('show');});
+  document.getElementById('publish-close').addEventListener('click', function(){pubVeil.classList.remove('show');});
+  pubVeil.addEventListener('click', function(e){if(e.target===pubVeil) pubVeil.classList.remove('show');});
+  document.getElementById('publish-form').addEventListener('submit', function(e){ e.preventDefault(); document.getElementById('publish-confirm').classList.add('show'); });
+
+  var barsData = [62,74,58,91,120,103,138];
+  var days = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var maxB = Math.max.apply(null, barsData);
+  document.getElementById('bars').innerHTML = barsData.map(function(v,i){
+    return '<div class="bcol"><div class="b" style="height:'+Math.round(v/maxB*100)+'px;" title="'+v+' vistas"></div><div class="d">'+days[i]+'</div></div>';
+  }).join('');
+
+  /* ---------- dev panel tabs ---------- */
+  document.querySelectorAll('.dev-tab').forEach(function(t){
+    t.addEventListener('click', function(){
+      document.querySelectorAll('.dev-tab').forEach(x=>x.classList.remove('on'));
+      document.querySelectorAll('.dev-tabpanel').forEach(x=>x.classList.remove('on'));
+      t.classList.add('on');
+      document.getElementById('tab-'+t.dataset.tab).classList.add('on');
+    });
+  });
+
+  /* ---------- leads inbox (developer side) ---------- */
+  var LEADS = [
+    {id:'LH-04213',zona:'Belgrano',amb:'2/3 ambientes',presupuesto:'US$ 140.000–160.000',anticipo:'US$ 48.000',plazo:'Próximos 30 días',financia:'Sí',comparados:5,contactoEmail:'comprador.04213@ladrillohub.com (simulado)',contactoTel:'+54 9 11 5555-0192 (simulado)'},
+    {id:'LH-04198',zona:'Belgrano',amb:'2 ambientes',presupuesto:'US$ 95.000–110.000',anticipo:'US$ 30.000',plazo:'En 3 meses',financia:'Sí',comparados:4,contactoEmail:'comprador.04198@ladrillohub.com (simulado)',contactoTel:'+54 9 11 5555-0177 (simulado)'},
+    {id:'LH-04156',zona:'Belgrano',amb:'3 ambientes',presupuesto:'US$ 180.000–200.000',anticipo:'US$ 72.000',plazo:'Ya',financia:'No',comparados:6,contactoEmail:'comprador.04156@ladrillohub.com (simulado)',contactoTel:'+54 9 11 5555-0143 (simulado)'}
+  ];
+  var leadStatus = {}; // id -> 'rejected' | 'unlocked'
+
+  function renderLeads(){
+    var el = document.getElementById('leads-list');
+    el.innerHTML = LEADS.map(function(l){
+      var st = leadStatus[l.id];
+      var cls = st==='rejected' ? 'rejected' : (st==='unlocked' ? 'unlocked' : '');
+      var statusTag = st==='rejected' ? '<span class="status-pill rejected-tag">Rechazado</span>' :
+                      (st==='unlocked' ? '<span class="status-pill" style="background:var(--verify-tint);color:var(--verify);">Contacto desbloqueado</span>' : '');
+      var contact = st==='unlocked' ? '<div class="lc-contact">'+l.contactoEmail+' · '+l.contactoTel+'</div>' : '';
+      var actions = (!st) ? '<div class="lc-actions">'+
+          '<button class="btn btn-ghost btn-sm btn-round lead-reject" data-id="'+l.id+'">Rechazar</button>'+
+          '<button class="btn btn-primary btn-sm btn-round lead-accept" data-id="'+l.id+'">Aceptar y solicitar presentación</button>'+
+        '</div>' : '';
+      return '<div class="lead-card '+cls+'">'+
+        '<div class="lc-top"><span class="lc-id">Comprador #'+l.id+'</span>'+statusTag+'</div>'+
+        '<div class="lc-grid">'+
+          '<div><span class="l">Zona</span><span class="v">'+l.zona+'</span></div>'+
+          '<div><span class="l">Ambientes</span><span class="v">'+l.amb+'</span></div>'+
+          '<div><span class="l">Presupuesto</span><span class="v">'+l.presupuesto+'</span></div>'+
+          '<div><span class="l">Anticipo</span><span class="v">'+l.anticipo+'</span></div>'+
+          '<div><span class="l">Ventana de compra</span><span class="v">'+l.plazo+'</span></div>'+
+          '<div><span class="l">Financiación</span><span class="v">'+l.financia+'</span></div>'+
+          '<div><span class="l">Proyectos comparados</span><span class="v">'+l.comparados+'</span></div>'+
+        '</div>'+
+        '<div class="lc-badges"><span>Comprador verificado</span><span>Búsqueda prioritaria activa</span></div>'+
+        contact+actions+
+      '</div>';
+    }).join('');
+    document.querySelectorAll('.lead-reject').forEach(function(b){
+      b.addEventListener('click', function(){ leadStatus[b.dataset.id]='rejected'; renderLeads(); updateLeadsPending(); });
+    });
+    document.querySelectorAll('.lead-accept').forEach(function(b){
+      b.addEventListener('click', function(){ openUnlock(b.dataset.id); });
+    });
+  }
+  function updateLeadsPending(){
+    var pending = LEADS.filter(function(l){return !leadStatus[l.id];}).length;
+    document.getElementById('leads-pending-count').textContent = pending;
+  }
+  renderLeads();
+  updateLeadsPending();
+
+  var unlockVeil = document.getElementById('unlock-veil');
+  var unlockingId = null;
+  function openUnlock(id){
+    unlockingId = id;
+    var l = LEADS.find(function(x){return x.id===id;});
+    document.getElementById('unlock-summary').innerHTML =
+      '<b>Comprador #'+l.id+'</b> · '+l.zona+' · '+l.amb+'<br>Vas a pagar por desbloquear sus datos de contacto y solicitar la presentación.';
+    unlockVeil.classList.add('show');
+  }
+  document.getElementById('unlock-close').addEventListener('click', function(){unlockVeil.classList.remove('show');});
+  unlockVeil.addEventListener('click', function(e){if(e.target===unlockVeil) unlockVeil.classList.remove('show');});
+  document.getElementById('unlock-pay').addEventListener('click', function(){
+    if(unlockingId){ leadStatus[unlockingId]='unlocked'; renderLeads(); updateLeadsPending(); }
+    unlockVeil.classList.remove('show');
+  });
+
+  var coVeil = document.getElementById('checkout-veil');
+  var panels = [1,2,3,4].map(function(n){return document.getElementById('panel'+n);});
+  var wsteps = [1,2,3,4].map(function(n){return document.getElementById('wstep'+n);});
+  function showPanel(n){
+    panels.forEach(function(p,i){p.classList.toggle('active', i===n-1);});
+    wsteps.forEach(function(s,i){s.classList.toggle('done', i<n);});
+  }
+  function openCheckout(){
+    wizChosen = new Set(Array.from(selected).slice(0,3));
+    document.getElementById('wiz-devlist').innerHTML = DEV.map(function(d){
+      return '<label><input type="checkbox" class="wiz-check" data-id="'+d.id+'" '+(wizChosen.has(d.id)?'checked':'')+'>'+
+        '<span><b>'+d.nombre+'</b><small>'+d.barrio+' · '+money(d.precioM2)+' /m²</small></span></label>';
+    }).join('');
+    document.querySelectorAll('.wiz-check').forEach(function(cb){
+      cb.addEventListener('change', function(){
+        var id = Number(cb.dataset.id);
+        if(cb.checked){ if(wizChosen.size>=3){cb.checked=false;return;} wizChosen.add(id); } else { wizChosen.delete(id); }
+        document.getElementById('w1-next').disabled = wizChosen.size===0;
+      });
+    });
+    document.getElementById('w1-next').disabled = wizChosen.size===0;
+    showPanel(1);
+    coVeil.classList.add('show');
+  }
+  document.getElementById('open-checkout').addEventListener('click', openCheckout);
+  document.getElementById('checkout-close').addEventListener('click', function(){coVeil.classList.remove('show');});
+  coVeil.addEventListener('click', function(e){if(e.target===coVeil) coVeil.classList.remove('show');});
+  document.getElementById('w1-next').addEventListener('click', function(){showPanel(2);});
+  document.getElementById('w2-next').addEventListener('click', function(){showPanel(3);});
+  document.querySelectorAll('[data-back]').forEach(function(b){
+    b.addEventListener('click', function(){showPanel(Number(b.dataset.back));});
+  });
+  document.getElementById('w3-pay').addEventListener('click', function(){
+    var chosenDevs = DEV.filter(function(d){return wizChosen.has(d.id);});
+    var presupuesto = document.getElementById('w-presupuesto').value || '120.000–140.000';
+    var anticipo = document.getElementById('w-anticipo').value || '45.000';
+    var plazo = document.getElementById('w-plazo').value;
+    var financia = document.getElementById('w-financia').value;
+    var barrios = Array.from(new Set(chosenDevs.map(function(d){return d.barrio;}))).join(' / ') || '—';
+    var ambientes = Array.from(new Set(chosenDevs.flatMap(function(d){return d.amb;}))).sort().join('/') || '—';
+    var idNum = 'LH-'+Math.floor(10000+Math.random()*89999);
+    document.getElementById('result-card').innerHTML =
+      '<div class="bc-head"><span class="bc-id">Ladrillo Hub — Comprador #'+idNum+'</span></div>'+
+      '<div class="bc-body">'+
+        '<div><span class="l">Zona</span><span class="v">'+barrios+'</span></div>'+
+        '<div><span class="l">Ambientes</span><span class="v">'+ambientes+' ambientes</span></div>'+
+        '<div><span class="l">Presupuesto</span><span class="v">US$ '+presupuesto+'</span></div>'+
+        '<div><span class="l">Anticipo disponible</span><span class="v">US$ '+anticipo+'</span></div>'+
+        '<div><span class="l">Ventana de compra</span><span class="v">'+plazo+'</span></div>'+
+        '<div><span class="l">Financiación</span><span class="v">'+financia+'</span></div>'+
+        '<div class="full"><span class="l">Proyectos comparados</span><span class="v">'+chosenDevs.length+' — '+(chosenDevs.map(function(d){return d.nombre;}).join(', ')||'—')+'</span></div>'+
+      '</div>'+
+      '<div class="badges"><span class="badge">Comprador verificado</span><span class="badge">Búsqueda prioritaria activa</span><span class="badge">Solicitó avanzar</span></div>';
+    showPanel(4);
+  });
+  document.getElementById('w4-close').addEventListener('click', function(){coVeil.classList.remove('show');});
+
+  updateCompareBar();
+  updateChosenList();
+})();
+</script>
+</body>
+</html>
