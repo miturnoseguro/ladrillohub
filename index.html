@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es-AR">
 <head>
@@ -768,13 +767,29 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
      sigue funcionando con los datos de ejemplo (DEV_DEMO) como fallback.
      ====================================================================== */
   var APP_URL = 'https://script.google.com/macros/s/AKfycbxDY93d6KAK1OOn3ozpH2bUQyUmOMm27BrtxEmE-AVxAGNlmi7eNjSKdFas6Ladmb_d/exec';    // URL del Web App público (API de lectura + leads)
-  var PORTAL_URL = ''; // URL del Web App del Portal de Desarrolladoras
+  var PORTAL_URL = 'https://script.google.com/macros/s/AKfycbxDY93d6KAK1OOn3ozpH2bUQyUmOMm27BrtxEmE-AVxAGNlmi7eNjSKdFas6Ladmb_d/exec?page=portal'; // URL del Web App del Portal de Desarrolladoras
 
   var PALETTES = {
     "Belgrano": ["#FCD9C8","#F7B48E"],
     "Núñez": ["#CDE6E0","#8FC7BB"],
     "Olivos": ["#E4DBF6","#B9A4E8"]
   };
+  // Paleta de repuesto para barrios que no están en la lista de arriba
+  // (por ejemplo, los que carguen las desarrolladoras desde el Portal).
+  // Se elige siempre la misma para el mismo nombre de barrio, sin
+  // importar mayúsculas/minúsculas, así queda estable entre recargas.
+  var FALLBACK_PALETTES = [
+    ["#D9E8FC","#8EB4F7"], ["#FCEBC8","#F7CE8E"], ["#D9FCE4","#8EF7B4"],
+    ["#F6DBF3","#E8A4DF"], ["#FCE0D9","#F7A08E"], ["#E0E0E0","#B0B0B0"]
+  ];
+  function paletteFor(barrio){
+    var clave = String(barrio || '').trim().toLowerCase();
+    var match = Object.keys(PALETTES).filter(function(k){ return k.toLowerCase() === clave; })[0];
+    if(match) return PALETTES[match];
+    var hash = 0;
+    for(var i=0;i<clave.length;i++){ hash = (hash * 31 + clave.charCodeAt(i)) >>> 0; }
+    return FALLBACK_PALETTES[hash % FALLBACK_PALETTES.length];
+  }
   // Datos de ejemplo — se usan solo si APP_URL está vacío o falla el fetch.
   var DEV_DEMO = [
     {id:1,barrio:"Belgrano",nombre:"Vitrum Belgrano",desarrolladora:"Terravista Desarrollos",amb:[2,3],precioM2:3450,avance:62,entrega:"2027",anticipo:"30%",financia:true,desc:"Torre boutique a metros de Cabildo, con amenities completos y unidades a estrenar de 2 y 3 ambientes."},
@@ -829,7 +844,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
   function money(n){return 'US$ '+n.toLocaleString('es-AR');}
 
   function cardPhoto(d){
-    var pal = PALETTES[d.barrio];
+    var pal = paletteFor(d.barrio);
     return '<div class="photo"><div class="bg" style="background:linear-gradient(150deg,'+pal[0]+','+pal[1]+');width:100%;height:100%;"></div>'+
       '<svg class="skyline" viewBox="0 0 300 140" preserveAspectRatio="none" style="position:absolute;bottom:0;left:0;right:0;height:46%;opacity:.9;"><g fill="rgba(255,255,255,.55)">'+
       '<rect x="10" y="60" width="34" height="80"/><rect x="52" y="30" width="28" height="110"/><rect x="88" y="75" width="30" height="65"/>'+
@@ -910,7 +925,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
   var detailVeil = document.getElementById('detail-veil');
   function openDetail(d){
     document.getElementById('detail-title').textContent = d.nombre;
-    var pal = PALETTES[d.barrio];
+    var pal = paletteFor(d.barrio);
     var galleryTile = function(h){ return '<div class="ph" style="height:'+h+'px;background:linear-gradient(160deg,'+pal[0]+','+pal[1]+');border-radius:8px;"></div>'; };
     document.getElementById('detail-body').innerHTML =
       '<div class="detail-gallery">'+galleryTile(300)+galleryTile(146)+galleryTile(146)+'</div>'+
