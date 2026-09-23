@@ -1,1 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  body{font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 20px;color:#222;}
+  h1{font-size:1.4rem;} h2{font-size:1.1rem;margin-top:32px;}
+  label{display:block;font-size:.85rem;font-weight:600;margin:12px 0 4px;}
+  input,textarea,select{width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:.9rem;box-sizing:border-box;}
+  button{margin-top:16px;padding:10px 18px;border:none;border-radius:8px;background:#E7384F;color:#fff;font-weight:600;cursor:pointer;}
+  .card{border:1px solid #e4e4e4;border-radius:12px;padding:14px;margin-bottom:10px;}
+  .msg{margin-top:12px;padding:10px;border-radius:8px;background:#E1F5EC;color:#00895D;font-size:.85rem;display:none;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700;}
+  .badge.pendiente{background:#FDE8EA;color:#C22740;}
+  .badge.activa{background:#E1F5EC;color:#00895D;}
+  .badge.aceptado{background:#E1F5EC;color:#00895D;}
+  .badge.rechazado{background:#f0f0f0;color:#717171;}
+  .row{display:flex;gap:10px;}
+  .row>div{flex:1;}
+  .muted{color:#717171;font-size:.85rem;}
+</style>
+</head>
+<body>
+  <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
+  <p class="muted" id="user-email"></p>
 
+  <div id="registro" style="display:none;">
+    <h2>Registrá tu empresa</h2>
+    <label>Nombre de la desarrolladora</label>
+    <input id="reg-empresa" placeholder="Ej. Terravista Desarrollos">
+    <button onclick="registrar()">Registrarme</button>
+    <p class="muted">Tu cuenta queda en estado "pendiente" hasta que el administrador la habilite manualmente en la planilla (pestaña Desarrolladoras, columna Estado → "activa").</p>
+  </div>
+
+  <div id="pendiente" style="display:none;">
+    <p><span class="badge pendiente">pendiente</span></p>
+    <p class="muted">Tu cuenta ya está registrada pero todavía no fue habilitada por el administrador. Una vez que la columna "Estado" diga "activa", vas a poder publicar proyectos.</p>
+  </div>
+
+  <div id="app" style="display:none;">
+    <p><span class="badge activa">activa</span> <b id="empresa-nombre"></b></p>
+
+    <h2>Publicar nuevo proyecto</h2>
+    <div class="row">
+      <div><label>Barrio</label><input id="p-barrio" placeholder="Belgrano"></div>
+      <div><label>Nombre del proyecto</label><input id="p-nombre" placeholder="Vitrum Belgrano"></div>
+    </div>
+    <div class="row">
+      <div><label>Ambientes (ej. 2,3)</label><input id="p-amb" placeholder="2,3"></div>
+      <div><label>Precio por m² (US$)</label><input id="p-precio" type="number"></div>
+    </div>
+    <div class="row">
+      <div><label>Avance de obra (%)</label><input id="p-avance" type="number" min="0" max="100"></div>
+      <div><label>Entrega (año)</label><input id="p-entrega" placeholder="2027"></div>
+    </div>
+    <div class="row">
+      <div><label>Anticipo</label><input id="p-anticipo" placeholder="30%"></div>
+      <div><label>¿Financia?</label>
+        <select id="p-financia"><option value="true">Sí</option><option value="false">No</option></select>
+      </div>
+    </div>
+    <label>Descripción</label>
+    <textarea id="p-desc" rows="3"></textarea>
+    <button onclick="crearProyecto()">Publicar proyecto</button>
+    <div class="msg" id="msg-proyecto">Proyecto publicado ✓ (ya es visible en el sitio)</div>
+
+    <h2>Mis proyectos publicados</h2>
+    <div id="lista-proyectos"></div>
+
+    <h2>Compradores interesados</h2>
+    <div id="lista-leads"></div>
+  </div>
+
+<script>
+  function init(){
+    google.script.run.withSuccessHandler(function(u){
+      document.getElementById('user-email').textContent = u.email;
+      if(!u.registrada){
+        document.getElementById('registro').style.display = 'block';
+      } else if(u.estado !== 'activa'){
+        document.getElementById('pendiente').style.display = 'block';
+      } else {
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('empresa-nombre').textContent = u.empresa;
+        cargarProyectos();
+        cargarLeads();
+      }
+    }).withFailureHandler(mostrarError).portalDatosUsuario();
+  }
+
+  function mostrarError(err){ alert('Error: ' + (err.message || err)); }
+
+  function registrar(){
+    var empresa = document.getElementById('reg-empresa').value.trim();
+    if(!empresa) return;
+    google.script.run.withSuccessHandler(function(r){
+      if(r.error){ alert(r.error); return; }
+      location.reload();
+    }).withFailureHandler(mostrarError).portalRegistrarDesarrolladora(empresa);
+  }
+
+  function crearProyecto(){
+    var datos = {
+      barrio: document.getElementById('p-barrio').value,
+      nombre: document.getElementById('p-nombre').value,
+      ambientes: document.getElementById('p-amb').value,
+      precioM2: document.getElementById('p-precio').value,
+      avance: document.getElementById('p-avance').value,
+      entrega: document.getElementById('p-entrega').value,
+      anticipo: document.getElementById('p-anticipo').value,
+      financia: document.getElementById('p-financia').value,
+      descripcion: document.getElementById('p-desc').value
+    };
+    google.script.run.withSuccessHandler(function(r){
+      if(r.error){ alert(r.error); return; }
+      document.getElementById('msg-proyecto').style.display = 'block';
+      cargarProyectos();
+    }).withFailureHandler(mostrarError).portalCrearProyecto(datos);
+  }
+
+  function cargarProyectos(){
+    google.script.run.withSuccessHandler(function(lista){
+      var html = lista.map(function(p){
+        return '<div class="card"><b>'+p.Nombre+'</b> — '+p.Barrio+'<br>US$ '+p.PrecioM2+'/m² · Avance '+p.Avance+'%</div>';
+      }).join('') || '<p class="muted">Todavía no publicaste proyectos.</p>';
+      document.getElementById('lista-proyectos').innerHTML = html;
+    }).withFailureHandler(mostrarError).portalMisProyectos();
+  }
+
+  function cargarLeads(){
+    google.script.run.withSuccessHandler(function(lista){
+      var html = lista.map(function(l){
+        var puedeResponder = l.Estado === 'pendiente';
+        return '<div class="card">'+
+          '<b>'+l.Nombre+'</b> ('+l.Email+', '+l.WhatsApp+')<br>'+
+          'Presupuesto: US$ '+l.Presupuesto+' · Anticipo: US$ '+l.Anticipo+
+          '<br><span class="badge '+l.Estado+'">'+l.Estado+'</span> '+
+          (puedeResponder
+            ? '<button onclick="responderLead('+l._row+',\'aceptado\')">Aceptar</button> '+
+              '<button onclick="responderLead('+l._row+',\'rechazado\')" style="background:#717171;">Rechazar</button>'
+            : '')+
+          '</div>';
+      }).join('') || '<p class="muted">Todavía no tenés compradores interesados.</p>';
+      document.getElementById('lista-leads').innerHTML = html;
+    }).withFailureHandler(mostrarError).portalMisLeads();
+  }
+
+  function responderLead(row, estado){
+    google.script.run.withSuccessHandler(function(){ cargarLeads(); }).withFailureHandler(mostrarError).portalActualizarLead(row, estado);
+  }
+
+  init();
+</script>
+</body>
+</html>
