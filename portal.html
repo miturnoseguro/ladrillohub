@@ -295,31 +295,34 @@
   // ====================================================================
 
   // --------------------------------------------------------------------
-  // CONTRATO CON EL BACKEND (Code.gs) — este front-end asume estas
-  // acciones y formas de respuesta. Las marcadas [NUEVA] no existían en
-  // la versión anterior y hay que agregarlas en Code.gs:
+  // CONTRATO CON EL BACKEND (Code.gs) — esto es lo que el backend REAL
+  // reconoce hoy (ejecutarAccionPortal en Code.gs). El front-end tiene
+  // que hablar exactamente este idioma:
   //
   // portalDatosUsuario()
-  //   -> { email, nombre, apellido, fotoUrl,
-  //        empresas: [{id, nombre, estado}],   // [NUEVA] antes era una sola empresa
-  //        registrada: bool }
+  //   -> { email, perfil: {nombre, apellido, fotoURL},
+  //        empresas: [{id, empresa, estado}] }
   //
-  // portalActualizarPerfil({nombre, apellido, fotoBase64})           [NUEVA]
-  // portalRegistrarDesarrolladora({empresa})            // ahora puede llamarse
-  //        de nuevo para agregar una 2da/3ra empresa al mismo usuario
+  // portalGuardarPerfil({nombre, apellido, fotoURL})
+  //   fotoURL es una URL ya subida a Drive, no base64. Para subir una
+  //   foto primero hay que llamar a portalSubirImagen.
+  // portalSubirImagen({base64, mimeType, nombreArchivo}) -> {url}
+  // portalRegistrarDesarrolladora({empresa})    // se puede llamar de nuevo
+  //        para agregar una 2da/3ra empresa al mismo usuario
   // portalMisProyectos({empresaId})
-  //   -> [{_row, Nombre, Barrio, PrecioM2, Avance, FotoRenderUrl,      // FotoRenderUrl es [NUEVA]
-  //        FotoTerrenoUrl, Ambientes, Entrega, Anticipo, Financia,
-  //        Descripcion, Mascotas, Pileta, Sum, Gimnasio, Cocheras, Seguridad}]
-  // portalCrearProyecto({empresaId, datos})       // datos incluye fotoTerrenoBase64 / fotoRenderBase64
-  // portalActualizarProyecto({empresaId, row, datos})                 [NUEVA] (modificación)
-  // portalEliminarProyecto({empresaId, row})                          [NUEVA] (baja)
+  //   -> [{_row, ID, Nombre, Barrio, PrecioM2, Avance, FotoAvanceURL,
+  //        FotoRenderURL, Ambientes, Entrega, Anticipo, Financia,
+  //        Descripcion, Mascotas, Pileta, SUM, Gimnasio, Cocheras, Seguridad}]
+  // portalCrearProyecto({empresaId, datos})
+  //   datos incluye fotoAvanceURL / fotoRenderURL (URLs, no base64)
+  // portalEditarProyecto({empresaId, proyectoId, datos})   // proyectoId = ID (uuid), no _row
+  // portalEliminarProyecto({empresaId, proyectoId})
   // portalMisLeads({empresaId})
   //   -> [{_row, Nombre, Email, WhatsApp, Presupuesto, Anticipo,
-  //        Estado, Pagado, Recibido}]             // Recibido es [NUEVA]
+  //        Estado, Pagado, Confirmado}]
   // portalActualizarLead({empresaId, leadRow, nuevoEstado})
-  // portalEnviarMensajeLead({empresaId, leadRow, mensaje})             [NUEVA]
-  // portalConfirmarRecepcionLead({empresaId, leadRow})                 [NUEVA]
+  // portalEnviarMensajeLead({empresaId, leadRow, mensaje})
+  // portalConfirmarRecepcion({empresaId, leadRow})
   // portalCrearPagoDesbloqueo({empresaId, leadRow}) -> {initPoint, sandboxInitPoint}
   // --------------------------------------------------------------------
 
@@ -330,7 +333,7 @@
   var PROYECTOS = [];
   var LEADS = [];
   var LEAD_MENSAJE_ROW = null;
-  var EDITANDO_PROYECTO_ROW = null;
+  var EDITANDO_PROYECTO_ID = null;
   var FOTO_TERRENO_BASE64 = null;
   var FOTO_RENDER_BASE64 = null;
   var FOTO_PERFIL_BASE64 = null;
@@ -346,6 +349,20 @@
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); });
+  }
+
+  // Sube una imagen en base64 (dataURL tal cual la devuelve FileReader) a
+  // Drive vía portalSubirImagen y devuelve la URL resultante. Si no hay
+  // imagen (base64DataUrl es null), resuelve a null sin llamar al backend.
+  function subirImagenSiHace(base64DataUrl, nombreArchivo){
+    if(!base64DataUrl) return Promise.resolve(null);
+    var mimeType = 'image/jpeg';
+    var m = base64DataUrl.match(/^data:([^;]+);base64,/);
+    if(m) mimeType = m[1];
+    return llamarBackend('portalSubirImagen', {base64: base64DataUrl, mimeType: mimeType, nombreArchivo: nombreArchivo}).then(function(r){
+      if(r.error) throw new Error(r.error);
+      return r.url;
+    });
   }
 
   function mostrarError(err){ alert('Error: ' + (err && err.message ? err.message : err)); }
@@ -383,8 +400,13 @@
     llamarBackend('portalDatosUsuario').then(function(u){
       if(esSesionInvalida(u)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(u.error){ mostrarError(u.error); return; }
-      USER = u;
-      EMPRESAS = u.empresas || [];
+      USER = {
+        email: u.email,
+        nombre: (u.perfil && u.perfil.nombre) || '',
+        apellido: (u.perfil && u.perfil.apellido) || '',
+        fotoUrl: (u.perfil && u.perfil.fotoURL) || ''
+      };
+      EMPRESAS = (u.empresas || []).map(function(e){ return {id: e.id, nombre: e.empresa, estado: e.estado}; });
       document.getElementById('site-header').style.display = 'block';
       pintarPerfilHeader();
 
@@ -499,8 +521,10 @@
       nombre: document.getElementById('perfil-nombre').value.trim(),
       apellido: document.getElementById('perfil-apellido').value.trim()
     };
-    if(FOTO_PERFIL_BASE64) datos.fotoBase64 = FOTO_PERFIL_BASE64;
-    llamarBackend('portalActualizarPerfil', datos).then(function(r){
+    subirImagenSiHace(FOTO_PERFIL_BASE64, 'perfil').then(function(url){
+      if(url) datos.fotoURL = url;
+      return llamarBackend('portalGuardarPerfil', datos);
+    }).then(function(r){
       if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
       cerrarModalPerfil();
@@ -542,7 +566,7 @@
   }
 
   function cancelarEdicion(){
-    EDITANDO_PROYECTO_ROW = null;
+    EDITANDO_PROYECTO_ID = null;
     limpiarFormularioProyecto();
     document.getElementById('form-titulo').textContent = 'Publicar nuevo proyecto';
     document.getElementById('btn-guardar-proyecto').textContent = 'Publicar proyecto';
@@ -564,7 +588,7 @@
   function editarProyecto(row){
     var p = PROYECTOS.find(function(x){ return x._row === row; });
     if(!p) return;
-    EDITANDO_PROYECTO_ROW = row;
+    EDITANDO_PROYECTO_ID = p.ID;
     document.getElementById('p-barrio').value = p.Barrio || '';
     document.getElementById('p-nombre').value = p.Nombre || '';
     document.getElementById('p-amb').value = p.Ambientes || '';
@@ -578,12 +602,12 @@
     document.getElementById('p-seguridad').value = p.Seguridad || '';
     document.getElementById('p-mascotas').checked = !!p.Mascotas;
     document.getElementById('p-pileta').checked = !!p.Pileta;
-    document.getElementById('p-sum').checked = !!p.Sum;
+    document.getElementById('p-sum').checked = !!p.SUM;
     document.getElementById('p-gimnasio').checked = !!p.Gimnasio;
     FOTO_TERRENO_BASE64 = null; FOTO_RENDER_BASE64 = null;
     var pt = document.getElementById('preview-terreno'); var pr = document.getElementById('preview-render');
-    if(p.FotoTerrenoUrl){ pt.src = p.FotoTerrenoUrl; pt.style.display='block'; } else { pt.style.display='none'; }
-    if(p.FotoRenderUrl){ pr.src = p.FotoRenderUrl; pr.style.display='block'; } else { pr.style.display='none'; }
+    if(p.FotoAvanceURL){ pt.src = p.FotoAvanceURL; pt.style.display='block'; } else { pt.style.display='none'; }
+    if(p.FotoRenderURL){ pr.src = p.FotoRenderURL; pr.style.display='block'; } else { pr.style.display='none'; }
 
     document.getElementById('form-titulo').textContent = 'Editar proyecto';
     document.getElementById('btn-guardar-proyecto').textContent = 'Guardar cambios';
@@ -594,8 +618,10 @@
   }
 
   function eliminarProyecto(row){
+    var p = PROYECTOS.find(function(x){ return x._row === row; });
+    if(!p) return;
     if(!confirm('¿Eliminar este proyecto? Deja de mostrarse en el sitio.')) return;
-    llamarBackend('portalEliminarProyecto', {row: row}).then(function(r){
+    llamarBackend('portalEliminarProyecto', {proyectoId: p.ID}).then(function(r){
       if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
       cargarProyectos();
@@ -620,18 +646,22 @@
       cocheras: document.getElementById('p-cocheras').value,
       seguridad: document.getElementById('p-seguridad').value
     };
-    if(FOTO_TERRENO_BASE64) datos.fotoTerrenoBase64 = FOTO_TERRENO_BASE64;
-    if(FOTO_RENDER_BASE64) datos.fotoRenderBase64 = FOTO_RENDER_BASE64;
-
     if(!datos.nombre || !datos.barrio){ alert('Completá al menos el nombre y el barrio del proyecto.'); return; }
 
-    var accion = EDITANDO_PROYECTO_ROW ? 'portalActualizarProyecto' : 'portalCrearProyecto';
-    var extra = EDITANDO_PROYECTO_ROW ? {row: EDITANDO_PROYECTO_ROW, datos: datos} : {datos: datos};
+    Promise.all([
+      subirImagenSiHace(FOTO_TERRENO_BASE64, 'avance'),
+      subirImagenSiHace(FOTO_RENDER_BASE64, 'render')
+    ]).then(function(urls){
+      if(urls[0]) datos.fotoAvanceURL = urls[0];
+      if(urls[1]) datos.fotoRenderURL = urls[1];
 
-    llamarBackend(accion, extra).then(function(r){
+      var accion = EDITANDO_PROYECTO_ID ? 'portalEditarProyecto' : 'portalCrearProyecto';
+      var extra = EDITANDO_PROYECTO_ID ? {proyectoId: EDITANDO_PROYECTO_ID, datos: datos} : {datos: datos};
+      return llamarBackend(accion, extra);
+    }).then(function(r){
       if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
-      document.getElementById('msg-proyecto').textContent = EDITANDO_PROYECTO_ROW ? 'Proyecto actualizado ✓' : 'Proyecto publicado ✓ (ya es visible en el sitio)';
+      document.getElementById('msg-proyecto').textContent = EDITANDO_PROYECTO_ID ? 'Proyecto actualizado ✓' : 'Proyecto publicado ✓ (ya es visible en el sitio)';
       document.getElementById('msg-proyecto').style.display = 'block';
       cancelarEdicion();
       cargarProyectos();
@@ -643,13 +673,13 @@
       if(esSesionInvalida(lista)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       PROYECTOS = lista;
       var html = lista.map(function(p){
-        var thumb = p.FotoRenderUrl
-          ? '<img class="thumb" src="'+p.FotoRenderUrl+'">'
+        var thumb = p.FotoRenderURL
+          ? '<img class="thumb" src="'+p.FotoRenderURL+'">'
           : '<div class="thumb-placeholder">🏢</div>';
         var chips = [];
         if(p.Mascotas) chips.push('<span class="chip">🐾 Mascotas</span>');
         if(p.Pileta) chips.push('<span class="chip">🏊 Pileta</span>');
-        if(p.Sum) chips.push('<span class="chip">🎉 SUM</span>');
+        if(p.SUM) chips.push('<span class="chip">🎉 SUM</span>');
         if(p.Gimnasio) chips.push('<span class="chip">🏋️ Gimnasio</span>');
         if(p.Cocheras) chips.push('<span class="chip">🚗 '+p.Cocheras+' cochera(s)</span>');
         if(p.Seguridad) chips.push('<span class="chip">🔒 Seguridad '+p.Seguridad+'</span>');
@@ -670,7 +700,7 @@
 
   function actualizarBannerYBadge(){
     var pendientesAccion = LEADS.filter(function(l){
-      return l.Estado === 'pendiente' || (l.Estado === 'aceptado' && l.Pagado && !l.Recibido);
+      return l.Estado === 'pendiente' || (l.Estado === 'aceptado' && l.Pagado && !l.Confirmado);
     }).length;
     var badge = document.getElementById('tab-badge-leads');
     if(pendientesAccion > 0){ badge.style.display = 'inline-block'; badge.textContent = pendientesAccion; }
@@ -717,7 +747,7 @@
         if(l.Estado === 'aceptado' && !desbloqueado){
           acciones.push('<button class="chico" onclick="pagarDesbloqueo('+l._row+')">Pagar con Mercado Pago y ver contacto</button>');
         }
-        if(l.Estado === 'aceptado' && desbloqueado && !l.Recibido){
+        if(l.Estado === 'aceptado' && desbloqueado && !l.Confirmado){
           acciones.push('<button class="chico" onclick="confirmarRecepcion('+l._row+')">Confirmar recepción del prospecto</button>');
         }
 
@@ -726,7 +756,7 @@
           'Presupuesto: US$ '+l.Presupuesto+' · Anticipo: US$ '+l.Anticipo+
           '<br><span class="badge '+l.Estado+'">'+l.Estado+'</span> '+
           (l.Estado === 'aceptado' ? '<span class="muted">Este comprador ya pagó su comisión a Ladrillo Hub</span> ' : '')+
-          (l.Recibido ? '<span class="badge activa">recibido ✓</span>' : '')+
+          (l.Confirmado ? '<span class="badge activa">recibido ✓</span>' : '')+
           '<div class="proyecto-acciones">'+acciones.join('')+'</div>'+
           '</div>';
       }).join('') || '<p class="muted">Todavía no tenés compradores interesados.</p>';
@@ -743,7 +773,7 @@
   }
 
   function confirmarRecepcion(row){
-    llamarBackend('portalConfirmarRecepcionLead', {leadRow: row}).then(function(r){
+    llamarBackend('portalConfirmarRecepcion', {leadRow: row}).then(function(r){
       if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
       cargarLeads();
