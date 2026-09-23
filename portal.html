@@ -58,6 +58,7 @@
   <div id="app" style="display:none;">
     <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
     <p><span class="badge activa">activa</span> <b id="empresa-nombre"></b></p>
+    <p class="msg" id="pago-status"></p>
 
     <h2>Publicar nuevo proyecto</h2>
     <div class="row">
@@ -87,6 +88,7 @@
     <div id="lista-proyectos"></div>
 
     <h2>Compradores interesados</h2>
+    <p class="muted">Cada comprador que ves acá ya pagó su propia comisión a Ladrillo Hub para confirmar que va en serio. Podés rechazar sin costo, o aceptar y pagar con Mercado Pago para desbloquear su nombre y contacto — el desbloqueo es automático apenas Mercado Pago confirma el pago, no hace falta que nadie lo apruebe a mano.</p>
     <div id="lista-leads"></div>
   </div>
 
@@ -159,6 +161,7 @@
         document.getElementById('empresa-nombre').textContent = u.empresa;
         cargarProyectos();
         cargarLeads();
+        manejarRetornoDePago();
       }
     }).catch(mostrarError);
   }
@@ -203,19 +206,42 @@
     }).catch(mostrarError);
   }
 
+  // Cache de la última respuesta de portalMisLeads, para no tener que
+  // volver a pedirla al backend solo para leer los datos de un lead
+  // dentro de pagarDesbloqueo().
+  var LEADS_CACHE = [];
+
   function cargarLeads(){
     llamarBackend('portalMisLeads').then(function(lista){
       if(esSesionInvalida(lista)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      LEADS_CACHE = lista;
       var html = lista.map(function(l){
         var puedeResponder = l.Estado === 'pendiente';
+        var desbloqueado = !!l.Pagado;
+
+        var contacto;
+        if(l.Estado === 'rechazado'){
+          contacto = '<span class="muted">Contacto no disponible</span>';
+        } else if(desbloqueado){
+          contacto = '<b>'+l.Nombre+'</b> ('+l.Email+', '+l.WhatsApp+')';
+        } else {
+          contacto = '<b>Comprador interesado</b> · nombre y contacto ocultos hasta desbloquear';
+        }
+
+        var acciones = '';
+        if(puedeResponder){
+          acciones = '<button onclick="responderLead('+l._row+',\'aceptado\')">Aceptar</button> '+
+                      '<button onclick="responderLead('+l._row+',\'rechazado\')" style="background:#717171;">Rechazar</button>';
+        } else if(l.Estado === 'aceptado' && !desbloqueado){
+          acciones = '<button onclick="pagarDesbloqueo('+l._row+')">Pagar con Mercado Pago y ver contacto</button>';
+        }
+
         return '<div class="card">'+
-          '<b>'+l.Nombre+'</b> ('+l.Email+', '+l.WhatsApp+')<br>'+
+          contacto+'<br>'+
           'Presupuesto: US$ '+l.Presupuesto+' · Anticipo: US$ '+l.Anticipo+
           '<br><span class="badge '+l.Estado+'">'+l.Estado+'</span> '+
-          (puedeResponder
-            ? '<button onclick="responderLead('+l._row+',\'aceptado\')">Aceptar</button> '+
-              '<button onclick="responderLead('+l._row+',\'rechazado\')" style="background:#717171;">Rechazar</button>'
-            : '')+
+          (l.Estado === 'aceptado' ? '<span class="muted">Este comprador ya pagó su comisión a Ladrillo Hub</span> ' : '')+
+          '<div style="margin-top:8px;">'+acciones+'</div>'+
           '</div>';
       }).join('') || '<p class="muted">Todavía no tenés compradores interesados.</p>';
       document.getElementById('lista-leads').innerHTML = html;
@@ -228,6 +254,43 @@
       if(r.error){ alert(r.error); return; }
       cargarLeads();
     }).catch(mostrarError);
+  }
+
+  // El desbloqueo real ya no lo decide el navegador: acá solo pedimos
+  // el link de pago y mandamos ahí a la desarrolladora. El backend
+  // (Code.gs → manejarWebhookMercadoPago) recién marca el lead como
+  // pagado cuando Mercado Pago confirma que el pago se acreditó de
+  // verdad — no antes.
+  function pagarDesbloqueo(row){
+    llamarBackend('portalCrearPagoDesbloqueo', {leadRow: row}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(r.error){ alert(r.error); return; }
+      window.location.href = r.initPoint || r.sandboxInitPoint;
+    }).catch(mostrarError);
+  }
+
+  // Cuando Mercado Pago devuelve a la desarrolladora acá después del
+  // pago (back_urls), mostramos un aviso y reintentamos cargar los
+  // leads un par de veces — el webhook puede tardar unos segundos en
+  // llegar y procesarse.
+  function manejarRetornoDePago(){
+    var params = new URLSearchParams(window.location.search);
+    var pago = params.get('pago');
+    if(!pago) return;
+    var el = document.getElementById('pago-status');
+    if(pago === 'ok'){
+      el.textContent = 'Pago recibido — confirmando con Mercado Pago, esto puede tardar unos segundos...';
+      el.style.display = 'block';
+      setTimeout(cargarLeads, 3000);
+      setTimeout(cargarLeads, 8000);
+    } else if(pago === 'pendiente'){
+      el.textContent = 'Tu pago quedó pendiente de acreditación en Mercado Pago. Cuando se acredite, el contacto se desbloquea solo.';
+      el.style.display = 'block';
+    } else if(pago === 'error'){
+      el.textContent = 'El pago no se pudo completar. Podés intentar de nuevo desde la lista de compradores.';
+      el.style.display = 'block';
+    }
+    window.history.replaceState({}, '', window.location.pathname);
   }
 </script>
 </body>
