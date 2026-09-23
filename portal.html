@@ -5,25 +5,96 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Portal de Desarrolladoras — Ladrillo Hub</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-  
+
 <style>
-  body{font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 20px;color:#222;}
-  h1{font-size:1.4rem;} h2{font-size:1.1rem;margin-top:32px;}
+  :root{
+    --accent:#E7384F;
+    --accent-dark:#C22740;
+    --green:#00895D;
+    --green-bg:#E1F5EC;
+    --pink-bg:#FDE8EA;
+    --grey:#717171;
+    --border:#e4e4e4;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:system-ui,sans-serif;margin:0;color:#222;background:#fafafa;}
+  h1{font-size:1.4rem;margin:0;} h2{font-size:1.05rem;margin:24px 0 10px;}
+  .wrap{max-width:680px;margin:0 auto;padding:0 20px 60px;}
   label{display:block;font-size:.85rem;font-weight:600;margin:12px 0 4px;}
-  input,textarea,select{width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:.9rem;box-sizing:border-box;}
-  button{margin-top:16px;padding:10px 18px;border:none;border-radius:8px;background:#E7384F;color:#fff;font-weight:600;cursor:pointer;}
-  .card{border:1px solid #e4e4e4;border-radius:12px;padding:14px;margin-bottom:10px;}
-  .msg{margin-top:12px;padding:10px;border-radius:8px;background:#E1F5EC;color:#00895D;font-size:.85rem;display:none;}
+  input,textarea,select{width:100%;padding:9px;border:1px solid #ccc;border-radius:8px;font-size:.9rem;}
+  button{padding:10px 18px;border:none;border-radius:8px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;font-size:.88rem;}
+  button.secundario{background:#f0f0f0;color:#333;}
+  button.chico{padding:6px 12px;font-size:.8rem;}
+  button.peligro{background:#fff;color:var(--accent-dark);border:1px solid var(--pink-bg);}
+  .card{border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;background:#fff;}
+  .msg{margin-top:12px;padding:10px;border-radius:8px;background:var(--green-bg);color:var(--green);font-size:.85rem;}
   .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.72rem;font-weight:700;}
-  .badge.pendiente{background:#FDE8EA;color:#C22740;}
-  .badge.activa{background:#E1F5EC;color:#00895D;}
-  .badge.aceptado{background:#E1F5EC;color:#00895D;}
-  .badge.rechazado{background:#f0f0f0;color:#717171;}
-  .row{display:flex;gap:10px;}
-  .row>div{flex:1;}
-  .muted{color:#717171;font-size:.85rem;}
+  .badge.pendiente{background:var(--pink-bg);color:var(--accent-dark);}
+  .badge.activa{background:var(--green-bg);color:var(--green);}
+  .badge.aceptado{background:var(--green-bg);color:var(--green);}
+  .badge.rechazado{background:#f0f0f0;color:var(--grey);}
+  .chip{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;background:#f5f5f5;color:#555;border-radius:999px;padding:3px 9px;margin:0 4px 4px 0;}
+  .row{display:flex;gap:10px;} .row>div{flex:1;}
+  .muted{color:var(--grey);font-size:.85rem;}
+
+  /* Header */
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);z-index:50;}
+  .header-inner{max-width:680px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+  .brand{font-weight:800;color:var(--accent);font-size:1.15rem;white-space:nowrap;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .cta-publicar{white-space:nowrap;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;cursor:pointer;overflow:hidden;flex-shrink:0;}
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+  .perfil-menu-wrap{position:relative;}
+  .perfil-dropdown{position:absolute;right:0;top:44px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);width:250px;display:none;padding:10px;z-index:60;}
+  .perfil-dropdown.abierto{display:block;}
+  .perfil-dropdown .nombre{font-weight:700;font-size:.9rem;}
+  .perfil-dropdown .email{font-size:.75rem;color:var(--grey);margin-bottom:8px;}
+  .perfil-dropdown hr{border:none;border-top:1px solid var(--border);margin:8px 0;}
+  .empresa-item{display:flex;align-items:center;justify-content:space-between;padding:6px 4px;border-radius:6px;cursor:pointer;font-size:.85rem;}
+  .empresa-item:hover{background:#f7f7f7;}
+  .empresa-item.actual{font-weight:700;}
+  .link-menu{display:block;width:100%;text-align:left;background:none;border:none;padding:6px 4px;font-size:.85rem;color:#333;cursor:pointer;font-weight:500;}
+  .link-menu:hover{background:#f7f7f7;border-radius:6px;}
+
+  /* Banner de notificación */
+  .banner{display:flex;align-items:center;gap:10px;padding:12px 16px;margin:16px 0;border-radius:10px;cursor:pointer;font-size:.88rem;font-weight:600;}
+  .banner.pend{background:var(--pink-bg);color:var(--accent-dark);}
+  .banner.ok{background:var(--green-bg);color:var(--green);}
+  .banner .icono{font-size:1.1rem;}
+
+  /* Tabs */
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-top:20px;}
+  .tab-btn{background:none;border:none;color:var(--grey);font-weight:600;padding:10px 6px;border-bottom:2px solid transparent;border-radius:0;cursor:pointer;font-size:.85rem;}
+  .tab-btn.activo{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-badge{background:var(--accent);color:#fff;border-radius:999px;font-size:.65rem;padding:1px 6px;margin-left:5px;}
+  .tab-panel{display:none;padding-top:16px;} .tab-panel.activo{display:block;}
+
+  /* Proyectos */
+  .proyecto-card{display:flex;gap:12px;}
+  .thumb{width:64px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#f0f0f0;}
+  .thumb-placeholder{width:64px;height:64px;border-radius:8px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:1.4rem;flex-shrink:0;}
+  .proyecto-card .info{flex:1;min-width:0;}
+  .proyecto-acciones{margin-top:8px;display:flex;gap:8px;}
+
+  /* Fotos */
+  .foto-input-box{border:1px dashed #ccc;border-radius:10px;padding:10px;text-align:center;margin-top:6px;}
+  .foto-preview{max-width:100%;max-height:140px;border-radius:8px;margin-top:8px;display:none;}
+  .foto-hint{font-size:.75rem;color:var(--grey);margin-top:4px;}
+
+  .amenities-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-top:6px;}
+  .amenity-check{display:flex;align-items:center;gap:6px;font-size:.85rem;font-weight:400;margin:6px 0 0;}
+  .amenity-check input{width:auto;}
+
+  /* Modal simple */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .overlay.abierto{display:flex;}
+  .modal{background:#fff;border-radius:12px;padding:20px;max-width:420px;width:100%;}
+  .modal h3{margin:0 0 10px;font-size:1rem;}
+  .modal-acciones{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+
   #login-box{text-align:center;padding:60px 0;}
-  #login-box .brand{font-weight:800;color:#E7384F;font-size:1.3rem;margin-bottom:6px;}
+  #login-box .brand{font-weight:800;color:var(--accent);font-size:1.3rem;margin-bottom:6px;}
   #g_id_signin{display:flex;justify-content:center;margin-top:20px;}
 </style>
 </head>
@@ -35,61 +106,184 @@
     <h1>Portal de Desarrolladoras</h1>
     <p class="muted">Iniciá sesión con tu cuenta de Google para continuar.</p>
     <div id="g_id_signin"></div>
-    <p class="msg" id="login-error" style="display:none;background:#FDE8EA;color:#C22740;"></p>
+    <p class="msg" id="login-error" style="display:none;background:var(--pink-bg);color:var(--accent-dark);"></p>
   </div>
 
-  <div id="registro" style="display:none;">
-    <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
-    <p class="muted" id="user-email"></p>
-    <h2>Registrá tu empresa</h2>
-    <label>Nombre de la desarrolladora</label>
-    <input id="reg-empresa" placeholder="Ej. Terravista Desarrollos">
-    <button onclick="registrar()">Registrarme</button>
-    <p class="muted">Tu cuenta queda en estado "pendiente" hasta que el administrador la habilite manualmente en la planilla (pestaña Desarrolladoras, columna Estado → "activa").</p>
-  </div>
-
-  <div id="pendiente" style="display:none;">
-    <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
-    <p class="muted" id="user-email-2"></p>
-    <p><span class="badge pendiente">pendiente</span></p>
-    <p class="muted">Tu cuenta ya está registrada pero todavía no fue habilitada por el administrador. Una vez que la columna "Estado" diga "activa", vas a poder publicar proyectos.</p>
-  </div>
-
-  <div id="app" style="display:none;">
-    <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
-    <p><span class="badge activa">activa</span> <b id="empresa-nombre"></b></p>
-    <p class="msg" id="pago-status"></p>
-
-    <h2>Publicar nuevo proyecto</h2>
-    <div class="row">
-      <div><label>Barrio</label><input id="p-barrio" placeholder="Belgrano"></div>
-      <div><label>Nombre del proyecto</label><input id="p-nombre" placeholder="Vitrum Belgrano"></div>
-    </div>
-    <div class="row">
-      <div><label>Ambientes (ej. 2,3)</label><input id="p-amb" placeholder="2,3"></div>
-      <div><label>Precio por m² (US$)</label><input id="p-precio" type="number"></div>
-    </div>
-    <div class="row">
-      <div><label>Avance de obra (%)</label><input id="p-avance" type="number" min="0" max="100"></div>
-      <div><label>Entrega (año)</label><input id="p-entrega" placeholder="2027"></div>
-    </div>
-    <div class="row">
-      <div><label>Anticipo</label><input id="p-anticipo" placeholder="30%"></div>
-      <div><label>¿Financia?</label>
-        <select id="p-financia"><option value="true">Sí</option><option value="false">No</option></select>
+  <!-- Header: se muestra siempre que haya sesión activa -->
+  <header id="site-header" style="display:none;">
+    <div class="header-inner">
+      <div class="brand">Ladrillo Hub</div>
+      <div class="header-right">
+        <button class="cta-publicar chico" onclick="irAPublicar()">+ Publicar nuevo proyecto</button>
+        <div class="perfil-menu-wrap">
+          <div class="avatar" id="avatar-header" onclick="toggleMenuPerfil()">?</div>
+          <div class="perfil-dropdown" id="perfil-dropdown">
+            <div class="nombre" id="pd-nombre">—</div>
+            <div class="email" id="pd-email">—</div>
+            <hr>
+            <div id="pd-empresas"></div>
+            <button class="link-menu" onclick="abrirModalEmpresa()">+ Agregar otra desarrolladora</button>
+            <hr>
+            <button class="link-menu" onclick="abrirModalPerfil()">Editar mi perfil</button>
+          </div>
+        </div>
       </div>
     </div>
-    <label>Descripción</label>
-    <textarea id="p-desc" rows="3"></textarea>
-    <button onclick="crearProyecto()">Publicar proyecto</button>
-    <div class="msg" id="msg-proyecto">Proyecto publicado ✓ (ya es visible en el sitio)</div>
+  </header>
 
-    <h2>Mis proyectos publicados</h2>
-    <div id="lista-proyectos"></div>
+  <div class="wrap">
 
-    <h2>Compradores interesados</h2>
-    <p class="muted">Cada comprador que ves acá ya pagó su propia comisión a Ladrillo Hub para confirmar que va en serio. Podés rechazar sin costo, o aceptar y pagar con Mercado Pago para desbloquear su nombre y contacto — el desbloqueo es automático apenas Mercado Pago confirma el pago, no hace falta que nadie lo apruebe a mano.</p>
-    <div id="lista-leads"></div>
+    <div id="registro" style="display:none;">
+      <h2>Registrá tu empresa</h2>
+      <label>Nombre de la desarrolladora</label>
+      <input id="reg-empresa" placeholder="Ej. Terravista Desarrollos">
+      <button onclick="registrar()">Registrarme</button>
+      <p class="muted">Tu cuenta queda en estado "pendiente" hasta que el administrador la habilite manualmente en la planilla (pestaña Desarrolladoras, columna Estado → "activa").</p>
+    </div>
+
+    <div id="pendiente" style="display:none;">
+      <p><span class="badge pendiente">pendiente</span> <b id="empresa-pendiente-nombre"></b></p>
+      <p class="muted">Esta empresa ya está registrada pero todavía no fue habilitada por el administrador. Una vez que la columna "Estado" diga "activa", vas a poder publicar proyectos. Si manejás otra desarrolladora ya activa, podés cambiarte desde tu perfil (arriba a la derecha).</p>
+    </div>
+
+    <div id="app" style="display:none;">
+
+      <div class="banner" id="banner-leads" onclick="switchTab('leads')">
+        <span class="icono" id="banner-icono">⏳</span>
+        <span id="banner-texto">Revisando compradores interesados…</span>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn" id="tab-btn-proyectos" onclick="switchTab('proyectos')">Mis proyectos publicados</button>
+        <button class="tab-btn" id="tab-btn-publicar" onclick="switchTab('publicar')">Publicar proyecto</button>
+        <button class="tab-btn" id="tab-btn-leads" onclick="switchTab('leads')">Compradores interesados<span class="tab-badge" id="tab-badge-leads" style="display:none;">0</span></button>
+      </div>
+
+      <!-- TAB: Mis proyectos -->
+      <div class="tab-panel" id="panel-proyectos">
+        <div id="lista-proyectos"></div>
+      </div>
+
+      <!-- TAB: Publicar / editar proyecto -->
+      <div class="tab-panel" id="panel-publicar">
+        <h2 id="form-titulo">Publicar nuevo proyecto</h2>
+        <div id="form-proyecto">
+          <div class="row">
+            <div><label>Barrio</label><input id="p-barrio" placeholder="Belgrano"></div>
+            <div><label>Nombre del proyecto</label><input id="p-nombre" placeholder="Vitrum Belgrano"></div>
+          </div>
+          <div class="row">
+            <div><label>Ambientes (ej. 2,3)</label><input id="p-amb" placeholder="2,3"></div>
+            <div><label>Precio por m² (US$)</label><input id="p-precio" type="number"></div>
+          </div>
+          <div class="row">
+            <div><label>Avance de obra (%)</label><input id="p-avance" type="number" min="0" max="100"></div>
+            <div><label>Entrega (año)</label><input id="p-entrega" placeholder="2027"></div>
+          </div>
+          <div class="row">
+            <div><label>Anticipo</label><input id="p-anticipo" placeholder="30%"></div>
+            <div><label>¿Financia?</label>
+              <select id="p-financia"><option value="true">Sí</option><option value="false">No</option></select>
+            </div>
+          </div>
+          <label>Descripción</label>
+          <textarea id="p-desc" rows="3"></textarea>
+
+          <label>Fotos del proyecto</label>
+          <div class="row">
+            <div>
+              <div class="foto-input-box">
+                <input type="file" id="foto-terreno" accept="image/*" onchange="onFotoSeleccionada(event,'terreno')">
+                <div class="foto-hint">Foto real del terreno o avance de obra, sin retocar</div>
+                <img class="foto-preview" id="preview-terreno">
+              </div>
+            </div>
+            <div>
+              <div class="foto-input-box">
+                <input type="file" id="foto-render" accept="image/*" onchange="onFotoSeleccionada(event,'render')">
+                <div class="foto-hint">Render del edificio</div>
+                <img class="foto-preview" id="preview-render">
+              </div>
+            </div>
+          </div>
+
+          <label style="margin-top:18px;">Datos extra (opcionales)</label>
+          <div class="amenities-grid">
+            <label class="amenity-check"><input type="checkbox" id="p-mascotas"> Permite mascotas</label>
+            <label class="amenity-check"><input type="checkbox" id="p-pileta"> Pileta</label>
+            <label class="amenity-check"><input type="checkbox" id="p-sum"> SUM</label>
+            <label class="amenity-check"><input type="checkbox" id="p-gimnasio"> Gimnasio</label>
+          </div>
+          <div class="row" style="margin-top:8px;">
+            <div><label>Cocheras disponibles</label><input id="p-cocheras" type="number" min="0" placeholder="Ej. 1"></div>
+            <div><label>Nivel de seguridad del barrio</label>
+              <select id="p-seguridad">
+                <option value="">No especificado</option>
+                <option value="baja">Baja</option>
+                <option value="media">Media</option>
+                <option value="alta">Alta</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;display:flex;gap:8px;">
+            <button onclick="guardarProyecto()" id="btn-guardar-proyecto">Publicar proyecto</button>
+            <button class="secundario" id="btn-cancelar-edicion" style="display:none;" onclick="cancelarEdicion()">Cancelar edición</button>
+          </div>
+          <div class="msg" id="msg-proyecto" style="display:none;">Proyecto guardado ✓ (ya es visible en el sitio)</div>
+        </div>
+      </div>
+
+      <!-- TAB: Compradores interesados -->
+      <div class="tab-panel" id="panel-leads">
+        <p class="muted">Cada comprador que ves acá ya pagó su propia comisión a Ladrillo Hub para confirmar que va en serio. Podés rechazar sin costo, mandarle un mensaje sin revelar sus datos, o aceptar y pagar con Mercado Pago para desbloquear su nombre y contacto — el desbloqueo es automático apenas Mercado Pago confirma el pago.</p>
+        <div id="lista-leads"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal: mensaje a lead -->
+  <div class="overlay" id="overlay-mensaje">
+    <div class="modal">
+      <h3>Enviar mensaje sin datos de contacto</h3>
+      <p class="muted" style="margin-top:0;">Le llega al comprador sin revelar tu email ni tu teléfono. Usalo para hacer una pregunta o coordinar antes de desbloquear el contacto.</p>
+      <textarea id="mensaje-texto" rows="4" placeholder="Escribí tu mensaje…"></textarea>
+      <div class="modal-acciones">
+        <button class="secundario" onclick="cerrarModalMensaje()">Cancelar</button>
+        <button onclick="confirmarEnvioMensaje()">Enviar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: nueva empresa -->
+  <div class="overlay" id="overlay-empresa">
+    <div class="modal">
+      <h3>Agregar otra desarrolladora</h3>
+      <p class="muted" style="margin-top:0;">Vas a poder manejarla desde la misma cuenta de Google. Queda en estado "pendiente" hasta que el administrador la habilite.</p>
+      <label>Nombre de la desarrolladora</label>
+      <input id="nueva-empresa-nombre" placeholder="Ej. Terravista Desarrollos">
+      <div class="modal-acciones">
+        <button class="secundario" onclick="cerrarModalEmpresa()">Cancelar</button>
+        <button onclick="confirmarNuevaEmpresa()">Agregar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: editar perfil -->
+  <div class="overlay" id="overlay-perfil">
+    <div class="modal">
+      <h3>Editar mi perfil</h3>
+      <label>Nombre</label><input id="perfil-nombre">
+      <label>Apellido</label><input id="perfil-apellido">
+      <label>Foto</label>
+      <input type="file" id="perfil-foto" accept="image/*" onchange="onFotoPerfilSeleccionada(event)">
+      <img class="foto-preview" id="preview-perfil-foto">
+      <div class="modal-acciones">
+        <button class="secundario" onclick="cerrarModalPerfil()">Cancelar</button>
+        <button onclick="confirmarPerfil()">Guardar</button>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -97,17 +291,56 @@
   // CONFIGURACIÓN — completá estos dos valores.
   // ====================================================================
   var APP_URL = 'https://script.google.com/macros/s/AKfycbwkmhXbwE-aZ_aejnETWkrAKjwDNGTNA4X0HfSKMz9P0xk6vGQDGQzR4e7SGiJWiYmC/exec';
-  // Tiene que ser EXACTAMENTE el mismo Client ID que pegaste en Code.gs.
   var GOOGLE_CLIENT_ID = '301482797864-8fcdh1k5da2018ug9mrd6kodjs674vbk.apps.googleusercontent.com';
   // ====================================================================
 
-  var idToken = null;
+  // --------------------------------------------------------------------
+  // CONTRATO CON EL BACKEND (Code.gs) — este front-end asume estas
+  // acciones y formas de respuesta. Las marcadas [NUEVA] no existían en
+  // la versión anterior y hay que agregarlas en Code.gs:
+  //
+  // portalDatosUsuario()
+  //   -> { email, nombre, apellido, fotoUrl,
+  //        empresas: [{id, nombre, estado}],   // [NUEVA] antes era una sola empresa
+  //        registrada: bool }
+  //
+  // portalActualizarPerfil({nombre, apellido, fotoBase64})           [NUEVA]
+  // portalRegistrarDesarrolladora({empresa})            // ahora puede llamarse
+  //        de nuevo para agregar una 2da/3ra empresa al mismo usuario
+  // portalMisProyectos({empresaId})
+  //   -> [{_row, Nombre, Barrio, PrecioM2, Avance, FotoRenderUrl,      // FotoRenderUrl es [NUEVA]
+  //        FotoTerrenoUrl, Ambientes, Entrega, Anticipo, Financia,
+  //        Descripcion, Mascotas, Pileta, Sum, Gimnasio, Cocheras, Seguridad}]
+  // portalCrearProyecto({empresaId, datos})       // datos incluye fotoTerrenoBase64 / fotoRenderBase64
+  // portalActualizarProyecto({empresaId, row, datos})                 [NUEVA] (modificación)
+  // portalEliminarProyecto({empresaId, row})                          [NUEVA] (baja)
+  // portalMisLeads({empresaId})
+  //   -> [{_row, Nombre, Email, WhatsApp, Presupuesto, Anticipo,
+  //        Estado, Pagado, Recibido}]             // Recibido es [NUEVA]
+  // portalActualizarLead({empresaId, leadRow, nuevoEstado})
+  // portalEnviarMensajeLead({empresaId, leadRow, mensaje})             [NUEVA]
+  // portalConfirmarRecepcionLead({empresaId, leadRow})                 [NUEVA]
+  // portalCrearPagoDesbloqueo({empresaId, leadRow}) -> {initPoint, sandboxInitPoint}
+  // --------------------------------------------------------------------
 
-  // Todas las llamadas al backend pasan por acá. Content-Type text/plain
-  // (no application/json) a propósito: evita que el navegador dispare un
-  // preflight OPTIONS, que Apps Script no sabe responder.
+  var idToken = null;
+  var USER = null;
+  var EMPRESAS = [];
+  var EMPRESA_ACTUAL = null;
+  var PROYECTOS = [];
+  var LEADS = [];
+  var LEAD_MENSAJE_ROW = null;
+  var EDITANDO_PROYECTO_ROW = null;
+  var FOTO_TERRENO_BASE64 = null;
+  var FOTO_RENDER_BASE64 = null;
+  var FOTO_PERFIL_BASE64 = null;
+
   function llamarBackend(action, extra){
-    var payload = Object.assign({action: action, idToken: idToken}, extra || {});
+    var payload = Object.assign({
+      action: action,
+      idToken: idToken,
+      empresaId: EMPRESA_ACTUAL ? EMPRESA_ACTUAL.id : null
+    }, extra || {});
     return fetch(APP_URL, {
       method: 'POST',
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
@@ -115,16 +348,12 @@
     }).then(function(r){ return r.json(); });
   }
 
-  function mostrarError(err){
-    alert('Error: ' + (err && err.message ? err.message : err));
-  }
-
-  function esSesionInvalida(r){
-    return r && r.error && r.error.indexOf('Sesión inválida') !== -1;
-  }
+  function mostrarError(err){ alert('Error: ' + (err && err.message ? err.message : err)); }
+  function esSesionInvalida(r){ return r && r.error && r.error.indexOf('Sesión inválida') !== -1; }
 
   function mostrarLogin(mensaje){
     idToken = null;
+    document.getElementById('site-header').style.display = 'none';
     ['registro','pendiente','app'].forEach(function(id){ document.getElementById(id).style.display = 'none'; });
     document.getElementById('login-box').style.display = 'block';
     var errEl = document.getElementById('login-error');
@@ -139,31 +368,79 @@
   }
 
   window.onload = function(){
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleCredentialResponse
-    });
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
     google.accounts.id.renderButton(document.getElementById('g_id_signin'), {theme:'outline', size:'large'});
+    document.addEventListener('click', function(e){
+      var dd = document.getElementById('perfil-dropdown');
+      var av = document.getElementById('avatar-header');
+      if(dd.classList.contains('abierto') && !dd.contains(e.target) && e.target !== av){ dd.classList.remove('abierto'); }
+    });
   };
+
+  // ---------------- init / usuario / empresas ----------------
 
   function init(){
     llamarBackend('portalDatosUsuario').then(function(u){
       if(esSesionInvalida(u)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(u.error){ mostrarError(u.error); return; }
-      document.getElementById('user-email').textContent = u.email;
-      document.getElementById('user-email-2').textContent = u.email;
-      if(!u.registrada){
-        document.getElementById('registro').style.display = 'block';
-      } else if(u.estado !== 'activa'){
-        document.getElementById('pendiente').style.display = 'block';
-      } else {
-        document.getElementById('app').style.display = 'block';
-        document.getElementById('empresa-nombre').textContent = u.empresa;
-        cargarProyectos();
-        cargarLeads();
-        manejarRetornoDePago();
+      USER = u;
+      EMPRESAS = u.empresas || [];
+      document.getElementById('site-header').style.display = 'block';
+      pintarPerfilHeader();
+
+      if(EMPRESAS.length === 0){
+        setPantalla('registro');
+        return;
       }
+      var guardadaId = localStorage.getItem('empresaActualId');
+      EMPRESA_ACTUAL = EMPRESAS.find(function(e){ return String(e.id) === guardadaId; })
+                     || EMPRESAS.find(function(e){ return e.estado === 'activa'; })
+                     || EMPRESAS[0];
+      renderizarSegunEmpresa();
     }).catch(mostrarError);
+  }
+
+  function renderizarSegunEmpresa(){
+    localStorage.setItem('empresaActualId', EMPRESA_ACTUAL.id);
+    pintarPerfilHeader();
+    if(EMPRESA_ACTUAL.estado !== 'activa'){
+      document.getElementById('empresa-pendiente-nombre').textContent = EMPRESA_ACTUAL.nombre;
+      setPantalla('pendiente');
+    } else {
+      setPantalla('app');
+      switchTab('proyectos');
+      cargarProyectos();
+      cargarLeads();
+      manejarRetornoDePago();
+    }
+  }
+
+  function setPantalla(id){
+    ['registro','pendiente','app'].forEach(function(p){ document.getElementById(p).style.display = (p===id)?'block':'none'; });
+  }
+
+  function pintarPerfilHeader(){
+    var iniciales = ((USER.nombre||USER.email||'?')[0]||'?').toUpperCase();
+    var av = document.getElementById('avatar-header');
+    av.innerHTML = USER.fotoUrl ? '<img src="'+USER.fotoUrl+'">' : iniciales;
+    document.getElementById('pd-nombre').textContent = (USER.nombre||'') + ' ' + (USER.apellido||'') || USER.email;
+    document.getElementById('pd-email').textContent = USER.email;
+    var wrap = document.getElementById('pd-empresas');
+    wrap.innerHTML = EMPRESAS.map(function(e){
+      var esActual = EMPRESA_ACTUAL && e.id === EMPRESA_ACTUAL.id;
+      return '<div class="empresa-item'+(esActual?' actual':'')+'" onclick="cambiarEmpresa(\''+e.id+'\')">'
+        + e.nombre + ' <span class="badge '+e.estado+'">'+e.estado+'</span></div>';
+    }).join('');
+  }
+
+  function toggleMenuPerfil(){ document.getElementById('perfil-dropdown').classList.toggle('abierto'); }
+
+  function cambiarEmpresa(id){
+    var e = EMPRESAS.find(function(x){ return String(x.id) === String(id); });
+    if(!e) return;
+    EMPRESA_ACTUAL = e;
+    document.getElementById('perfil-dropdown').classList.remove('abierto');
+    renderizarSegunEmpresa();
   }
 
   function registrar(){
@@ -172,11 +449,160 @@
     llamarBackend('portalRegistrarDesarrolladora', {empresa: empresa}).then(function(r){
       if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
-      init(); // vuelve a pedir el estado, sin perder la sesión
+      init();
     }).catch(mostrarError);
   }
 
-  function crearProyecto(){
+  // ---------------- modal: agregar otra desarrolladora ----------------
+
+  function abrirModalEmpresa(){
+    document.getElementById('perfil-dropdown').classList.remove('abierto');
+    document.getElementById('nueva-empresa-nombre').value = '';
+    document.getElementById('overlay-empresa').classList.add('abierto');
+  }
+  function cerrarModalEmpresa(){ document.getElementById('overlay-empresa').classList.remove('abierto'); }
+  function confirmarNuevaEmpresa(){
+    var nombre = document.getElementById('nueva-empresa-nombre').value.trim();
+    if(!nombre) return;
+    llamarBackend('portalRegistrarDesarrolladora', {empresa: nombre}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(r.error){ alert(r.error); return; }
+      cerrarModalEmpresa();
+      init();
+    }).catch(mostrarError);
+  }
+
+  // ---------------- modal: editar perfil ----------------
+
+  function abrirModalPerfil(){
+    document.getElementById('perfil-dropdown').classList.remove('abierto');
+    document.getElementById('perfil-nombre').value = USER.nombre || '';
+    document.getElementById('perfil-apellido').value = USER.apellido || '';
+    var prev = document.getElementById('preview-perfil-foto');
+    if(USER.fotoUrl){ prev.src = USER.fotoUrl; prev.style.display='block'; } else { prev.style.display='none'; }
+    FOTO_PERFIL_BASE64 = null;
+    document.getElementById('overlay-perfil').classList.add('abierto');
+  }
+  function cerrarModalPerfil(){ document.getElementById('overlay-perfil').classList.remove('abierto'); }
+  function onFotoPerfilSeleccionada(ev){
+    var file = ev.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      FOTO_PERFIL_BASE64 = reader.result;
+      var prev = document.getElementById('preview-perfil-foto');
+      prev.src = reader.result; prev.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+  function confirmarPerfil(){
+    var datos = {
+      nombre: document.getElementById('perfil-nombre').value.trim(),
+      apellido: document.getElementById('perfil-apellido').value.trim()
+    };
+    if(FOTO_PERFIL_BASE64) datos.fotoBase64 = FOTO_PERFIL_BASE64;
+    llamarBackend('portalActualizarPerfil', datos).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(r.error){ alert(r.error); return; }
+      cerrarModalPerfil();
+      init();
+    }).catch(mostrarError);
+  }
+
+  // ---------------- tabs ----------------
+
+  function switchTab(nombre){
+    ['proyectos','publicar','leads'].forEach(function(t){
+      document.getElementById('tab-btn-'+t).classList.toggle('activo', t===nombre);
+      document.getElementById('panel-'+t).classList.toggle('activo', t===nombre);
+    });
+  }
+
+  function irAPublicar(){
+    if(EMPRESA_ACTUAL && EMPRESA_ACTUAL.estado !== 'activa') return;
+    cancelarEdicion();
+    switchTab('publicar');
+    setTimeout(function(){
+      document.getElementById('form-proyecto').scrollIntoView({behavior:'smooth', block:'start'});
+    }, 50);
+  }
+
+  // ---------------- proyectos: alta / baja / modificación ----------------
+
+  function limpiarFormularioProyecto(){
+    ['p-barrio','p-nombre','p-amb','p-precio','p-avance','p-entrega','p-anticipo','p-desc','p-cocheras'].forEach(function(id){
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('p-financia').value = 'true';
+    document.getElementById('p-seguridad').value = '';
+    ['p-mascotas','p-pileta','p-sum','p-gimnasio'].forEach(function(id){ document.getElementById(id).checked = false; });
+    ['preview-terreno','preview-render'].forEach(function(id){
+      var el = document.getElementById(id); el.style.display='none'; el.src='';
+    });
+    FOTO_TERRENO_BASE64 = null; FOTO_RENDER_BASE64 = null;
+  }
+
+  function cancelarEdicion(){
+    EDITANDO_PROYECTO_ROW = null;
+    limpiarFormularioProyecto();
+    document.getElementById('form-titulo').textContent = 'Publicar nuevo proyecto';
+    document.getElementById('btn-guardar-proyecto').textContent = 'Publicar proyecto';
+    document.getElementById('btn-cancelar-edicion').style.display = 'none';
+    document.getElementById('msg-proyecto').style.display = 'none';
+  }
+
+  function onFotoSeleccionada(ev, tipo){
+    var file = ev.target.files[0]; if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      if(tipo === 'terreno') FOTO_TERRENO_BASE64 = reader.result; else FOTO_RENDER_BASE64 = reader.result;
+      var prev = document.getElementById('preview-'+tipo);
+      prev.src = reader.result; prev.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function editarProyecto(row){
+    var p = PROYECTOS.find(function(x){ return x._row === row; });
+    if(!p) return;
+    EDITANDO_PROYECTO_ROW = row;
+    document.getElementById('p-barrio').value = p.Barrio || '';
+    document.getElementById('p-nombre').value = p.Nombre || '';
+    document.getElementById('p-amb').value = p.Ambientes || '';
+    document.getElementById('p-precio').value = p.PrecioM2 || '';
+    document.getElementById('p-avance').value = p.Avance || '';
+    document.getElementById('p-entrega').value = p.Entrega || '';
+    document.getElementById('p-anticipo').value = p.Anticipo || '';
+    document.getElementById('p-financia').value = String(p.Financia) === 'true' ? 'true' : 'false';
+    document.getElementById('p-desc').value = p.Descripcion || '';
+    document.getElementById('p-cocheras').value = p.Cocheras || '';
+    document.getElementById('p-seguridad').value = p.Seguridad || '';
+    document.getElementById('p-mascotas').checked = !!p.Mascotas;
+    document.getElementById('p-pileta').checked = !!p.Pileta;
+    document.getElementById('p-sum').checked = !!p.Sum;
+    document.getElementById('p-gimnasio').checked = !!p.Gimnasio;
+    FOTO_TERRENO_BASE64 = null; FOTO_RENDER_BASE64 = null;
+    var pt = document.getElementById('preview-terreno'); var pr = document.getElementById('preview-render');
+    if(p.FotoTerrenoUrl){ pt.src = p.FotoTerrenoUrl; pt.style.display='block'; } else { pt.style.display='none'; }
+    if(p.FotoRenderUrl){ pr.src = p.FotoRenderUrl; pr.style.display='block'; } else { pr.style.display='none'; }
+
+    document.getElementById('form-titulo').textContent = 'Editar proyecto';
+    document.getElementById('btn-guardar-proyecto').textContent = 'Guardar cambios';
+    document.getElementById('btn-cancelar-edicion').style.display = 'inline-block';
+    document.getElementById('msg-proyecto').style.display = 'none';
+    switchTab('publicar');
+    document.getElementById('form-proyecto').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function eliminarProyecto(row){
+    if(!confirm('¿Eliminar este proyecto? Deja de mostrarse en el sitio.')) return;
+    llamarBackend('portalEliminarProyecto', {row: row}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(r.error){ alert(r.error); return; }
+      cargarProyectos();
+    }).catch(mostrarError);
+  }
+
+  function guardarProyecto(){
     var datos = {
       barrio: document.getElementById('p-barrio').value,
       nombre: document.getElementById('p-nombre').value,
@@ -186,12 +612,28 @@
       entrega: document.getElementById('p-entrega').value,
       anticipo: document.getElementById('p-anticipo').value,
       financia: document.getElementById('p-financia').value,
-      descripcion: document.getElementById('p-desc').value
+      descripcion: document.getElementById('p-desc').value,
+      mascotas: document.getElementById('p-mascotas').checked,
+      pileta: document.getElementById('p-pileta').checked,
+      sum: document.getElementById('p-sum').checked,
+      gimnasio: document.getElementById('p-gimnasio').checked,
+      cocheras: document.getElementById('p-cocheras').value,
+      seguridad: document.getElementById('p-seguridad').value
     };
-    llamarBackend('portalCrearProyecto', {datos: datos}).then(function(r){
+    if(FOTO_TERRENO_BASE64) datos.fotoTerrenoBase64 = FOTO_TERRENO_BASE64;
+    if(FOTO_RENDER_BASE64) datos.fotoRenderBase64 = FOTO_RENDER_BASE64;
+
+    if(!datos.nombre || !datos.barrio){ alert('Completá al menos el nombre y el barrio del proyecto.'); return; }
+
+    var accion = EDITANDO_PROYECTO_ROW ? 'portalActualizarProyecto' : 'portalCrearProyecto';
+    var extra = EDITANDO_PROYECTO_ROW ? {row: EDITANDO_PROYECTO_ROW, datos: datos} : {datos: datos};
+
+    llamarBackend(accion, extra).then(function(r){
       if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
+      document.getElementById('msg-proyecto').textContent = EDITANDO_PROYECTO_ROW ? 'Proyecto actualizado ✓' : 'Proyecto publicado ✓ (ya es visible en el sitio)';
       document.getElementById('msg-proyecto').style.display = 'block';
+      cancelarEdicion();
       cargarProyectos();
     }).catch(mostrarError);
   }
@@ -199,22 +641,58 @@
   function cargarProyectos(){
     llamarBackend('portalMisProyectos').then(function(lista){
       if(esSesionInvalida(lista)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      PROYECTOS = lista;
       var html = lista.map(function(p){
-        return '<div class="card"><b>'+p.Nombre+'</b> — '+p.Barrio+'<br>US$ '+p.PrecioM2+'/m² · Avance '+p.Avance+'%</div>';
+        var thumb = p.FotoRenderUrl
+          ? '<img class="thumb" src="'+p.FotoRenderUrl+'">'
+          : '<div class="thumb-placeholder">🏢</div>';
+        var chips = [];
+        if(p.Mascotas) chips.push('<span class="chip">🐾 Mascotas</span>');
+        if(p.Pileta) chips.push('<span class="chip">🏊 Pileta</span>');
+        if(p.Sum) chips.push('<span class="chip">🎉 SUM</span>');
+        if(p.Gimnasio) chips.push('<span class="chip">🏋️ Gimnasio</span>');
+        if(p.Cocheras) chips.push('<span class="chip">🚗 '+p.Cocheras+' cochera(s)</span>');
+        if(p.Seguridad) chips.push('<span class="chip">🔒 Seguridad '+p.Seguridad+'</span>');
+        return '<div class="card proyecto-card">'+thumb+
+          '<div class="info"><b>'+p.Nombre+'</b> — '+p.Barrio+'<br>'+
+          '<span class="muted">US$ '+p.PrecioM2+'/m² · Avance '+p.Avance+'%</span><br>'+
+          chips.join('')+
+          '<div class="proyecto-acciones">'+
+          '<button class="secundario chico" onclick="editarProyecto('+p._row+')">Editar</button>'+
+          '<button class="peligro chico" onclick="eliminarProyecto('+p._row+')">Eliminar</button>'+
+          '</div></div></div>';
       }).join('') || '<p class="muted">Todavía no publicaste proyectos.</p>';
       document.getElementById('lista-proyectos').innerHTML = html;
     }).catch(mostrarError);
   }
 
-  // Cache de la última respuesta de portalMisLeads, para no tener que
-  // volver a pedirla al backend solo para leer los datos de un lead
-  // dentro de pagarDesbloqueo().
-  var LEADS_CACHE = [];
+  // ---------------- leads ----------------
+
+  function actualizarBannerYBadge(){
+    var pendientesAccion = LEADS.filter(function(l){
+      return l.Estado === 'pendiente' || (l.Estado === 'aceptado' && l.Pagado && !l.Recibido);
+    }).length;
+    var badge = document.getElementById('tab-badge-leads');
+    if(pendientesAccion > 0){ badge.style.display = 'inline-block'; badge.textContent = pendientesAccion; }
+    else { badge.style.display = 'none'; }
+
+    var banner = document.getElementById('banner-leads');
+    if(pendientesAccion > 0){
+      banner.className = 'banner pend';
+      document.getElementById('banner-icono').textContent = '⏳';
+      document.getElementById('banner-texto').textContent = 'Tenés ' + pendientesAccion + ' comprador(es) interesados esperando una acción tuya';
+    } else {
+      banner.className = 'banner ok';
+      document.getElementById('banner-icono').textContent = '✅';
+      document.getElementById('banner-texto').textContent = 'Estás al día con tus compradores interesados';
+    }
+  }
 
   function cargarLeads(){
     llamarBackend('portalMisLeads').then(function(lista){
       if(esSesionInvalida(lista)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
-      LEADS_CACHE = lista;
+      LEADS = lista;
+      actualizarBannerYBadge();
       var html = lista.map(function(l){
         var puedeResponder = l.Estado === 'pendiente';
         var desbloqueado = !!l.Pagado;
@@ -228,12 +706,19 @@
           contacto = '<b>Comprador interesado</b> · nombre y contacto ocultos hasta desbloquear';
         }
 
-        var acciones = '';
+        var acciones = [];
         if(puedeResponder){
-          acciones = '<button onclick="responderLead('+l._row+',\'aceptado\')">Aceptar</button> '+
-                      '<button onclick="responderLead('+l._row+',\'rechazado\')" style="background:#717171;">Rechazar</button>';
-        } else if(l.Estado === 'aceptado' && !desbloqueado){
-          acciones = '<button onclick="pagarDesbloqueo('+l._row+')">Pagar con Mercado Pago y ver contacto</button>';
+          acciones.push('<button class="chico" onclick="responderLead('+l._row+',\'aceptado\')">Aceptar</button>');
+          acciones.push('<button class="secundario chico" onclick="responderLead('+l._row+',\'rechazado\')">Rechazar</button>');
+        }
+        if(l.Estado !== 'rechazado'){
+          acciones.push('<button class="secundario chico" onclick="abrirModalMensaje('+l._row+')">Enviar mensaje</button>');
+        }
+        if(l.Estado === 'aceptado' && !desbloqueado){
+          acciones.push('<button class="chico" onclick="pagarDesbloqueo('+l._row+')">Pagar con Mercado Pago y ver contacto</button>');
+        }
+        if(l.Estado === 'aceptado' && desbloqueado && !l.Recibido){
+          acciones.push('<button class="chico" onclick="confirmarRecepcion('+l._row+')">Confirmar recepción del prospecto</button>');
         }
 
         return '<div class="card">'+
@@ -241,7 +726,8 @@
           'Presupuesto: US$ '+l.Presupuesto+' · Anticipo: US$ '+l.Anticipo+
           '<br><span class="badge '+l.Estado+'">'+l.Estado+'</span> '+
           (l.Estado === 'aceptado' ? '<span class="muted">Este comprador ya pagó su comisión a Ladrillo Hub</span> ' : '')+
-          '<div style="margin-top:8px;">'+acciones+'</div>'+
+          (l.Recibido ? '<span class="badge activa">recibido ✓</span>' : '')+
+          '<div class="proyecto-acciones">'+acciones.join('')+'</div>'+
           '</div>';
       }).join('') || '<p class="muted">Todavía no tenés compradores interesados.</p>';
       document.getElementById('lista-leads').innerHTML = html;
@@ -256,11 +742,31 @@
     }).catch(mostrarError);
   }
 
-  // El desbloqueo real ya no lo decide el navegador: acá solo pedimos
-  // el link de pago y mandamos ahí a la desarrolladora. El backend
-  // (Code.gs → manejarWebhookMercadoPago) recién marca el lead como
-  // pagado cuando Mercado Pago confirma que el pago se acreditó de
-  // verdad — no antes.
+  function confirmarRecepcion(row){
+    llamarBackend('portalConfirmarRecepcionLead', {leadRow: row}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(r.error){ alert(r.error); return; }
+      cargarLeads();
+    }).catch(mostrarError);
+  }
+
+  function abrirModalMensaje(row){
+    LEAD_MENSAJE_ROW = row;
+    document.getElementById('mensaje-texto').value = '';
+    document.getElementById('overlay-mensaje').classList.add('abierto');
+  }
+  function cerrarModalMensaje(){ document.getElementById('overlay-mensaje').classList.remove('abierto'); }
+  function confirmarEnvioMensaje(){
+    var texto = document.getElementById('mensaje-texto').value.trim();
+    if(!texto) return;
+    llamarBackend('portalEnviarMensajeLead', {leadRow: LEAD_MENSAJE_ROW, mensaje: texto}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(r.error){ alert(r.error); return; }
+      cerrarModalMensaje();
+      alert('Mensaje enviado.');
+    }).catch(mostrarError);
+  }
+
   function pagarDesbloqueo(row){
     llamarBackend('portalCrearPagoDesbloqueo', {leadRow: row}).then(function(r){
       if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
@@ -269,26 +775,14 @@
     }).catch(mostrarError);
   }
 
-  // Cuando Mercado Pago devuelve a la desarrolladora acá después del
-  // pago (back_urls), mostramos un aviso y reintentamos cargar los
-  // leads un par de veces — el webhook puede tardar unos segundos en
-  // llegar y procesarse.
   function manejarRetornoDePago(){
     var params = new URLSearchParams(window.location.search);
     var pago = params.get('pago');
     if(!pago) return;
-    var el = document.getElementById('pago-status');
+    switchTab('leads');
     if(pago === 'ok'){
-      el.textContent = 'Pago recibido — confirmando con Mercado Pago, esto puede tardar unos segundos...';
-      el.style.display = 'block';
       setTimeout(cargarLeads, 3000);
       setTimeout(cargarLeads, 8000);
-    } else if(pago === 'pendiente'){
-      el.textContent = 'Tu pago quedó pendiente de acreditación en Mercado Pago. Cuando se acredite, el contacto se desbloquea solo.';
-      el.style.display = 'block';
-    } else if(pago === 'error'){
-      el.textContent = 'El pago no se pudo completar. Podés intentar de nuevo desde la lista de compradores.';
-      el.style.display = 'block';
     }
     window.history.replaceState({}, '', window.location.pathname);
   }
