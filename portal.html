@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="es-AR">
 <head>
-<base target="_top">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal de Desarrolladoras — Ladrillo Hub</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   body{font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 20px;color:#222;}
   h1{font-size:1.4rem;} h2{font-size:1.1rem;margin-top:32px;}
@@ -19,15 +21,25 @@
   .row{display:flex;gap:10px;}
   .row>div{flex:1;}
   .muted{color:#717171;font-size:.85rem;}
+  #login-box{text-align:center;padding:60px 0;}
+  #login-box .brand{font-weight:800;color:#E7384F;font-size:1.3rem;margin-bottom:6px;}
+  #g_id_signin{display:flex;justify-content:center;margin-top:20px;}
 </style>
-  
 </head>
+
 <body>
 
-  <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
-  <p class="muted" id="user-email"></p>
+  <div id="login-box">
+    <div class="brand">Ladrillo Hub</div>
+    <h1>Portal de Desarrolladoras</h1>
+    <p class="muted">Iniciá sesión con tu cuenta de Google para continuar.</p>
+    <div id="g_id_signin"></div>
+    <p class="msg" id="login-error" style="display:none;background:#FDE8EA;color:#C22740;"></p>
+  </div>
 
   <div id="registro" style="display:none;">
+    <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
+    <p class="muted" id="user-email"></p>
     <h2>Registrá tu empresa</h2>
     <label>Nombre de la desarrolladora</label>
     <input id="reg-empresa" placeholder="Ej. Terravista Desarrollos">
@@ -36,11 +48,14 @@
   </div>
 
   <div id="pendiente" style="display:none;">
+    <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
+    <p class="muted" id="user-email-2"></p>
     <p><span class="badge pendiente">pendiente</span></p>
     <p class="muted">Tu cuenta ya está registrada pero todavía no fue habilitada por el administrador. Una vez que la columna "Estado" diga "activa", vas a poder publicar proyectos.</p>
   </div>
 
   <div id="app" style="display:none;">
+    <h1>Portal de Desarrolladoras — Ladrillo Hub</h1>
     <p><span class="badge activa">activa</span> <b id="empresa-nombre"></b></p>
 
     <h2>Publicar nuevo proyecto</h2>
@@ -75,9 +90,65 @@
   </div>
 
 <script>
+  // ====================================================================
+  // CONFIGURACIÓN — completá estos dos valores.
+  // ====================================================================
+  var APP_URL = 'https://script.google.com/macros/s/AKfycbxDY93d6KAK1OOn3ozpH2bUQyUmOMm27BrtxEmE-AVxAGNlmi7eNjSKdFas6Ladmb_d/exec';
+  // Tiene que ser EXACTAMENTE el mismo Client ID que pegaste en Code.gs.
+  var GOOGLE_CLIENT_ID = 'PEGÁ_ACÁ_TU_CLIENT_ID.apps.googleusercontent.com';
+  // ====================================================================
+
+  var idToken = null;
+
+  // Todas las llamadas al backend pasan por acá. Content-Type text/plain
+  // (no application/json) a propósito: evita que el navegador dispare un
+  // preflight OPTIONS, que Apps Script no sabe responder.
+  function llamarBackend(action, extra){
+    var payload = Object.assign({action: action, idToken: idToken}, extra || {});
+    return fetch(APP_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); });
+  }
+
+  function mostrarError(err){
+    alert('Error: ' + (err && err.message ? err.message : err));
+  }
+
+  function esSesionInvalida(r){
+    return r && r.error && r.error.indexOf('Sesión inválida') !== -1;
+  }
+
+  function mostrarLogin(mensaje){
+    idToken = null;
+    ['registro','pendiente','app'].forEach(function(id){ document.getElementById(id).style.display = 'none'; });
+    document.getElementById('login-box').style.display = 'block';
+    var errEl = document.getElementById('login-error');
+    if(mensaje){ errEl.textContent = mensaje; errEl.style.display = 'block'; }
+    else { errEl.style.display = 'none'; }
+  }
+
+  function handleCredentialResponse(response){
+    idToken = response.credential;
+    document.getElementById('login-box').style.display = 'none';
+    init();
+  }
+
+  window.onload = function(){
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(document.getElementById('g_id_signin'), {theme:'outline', size:'large'});
+  };
+
   function init(){
-    google.script.run.withSuccessHandler(function(u){
+    llamarBackend('portalDatosUsuario').then(function(u){
+      if(esSesionInvalida(u)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(u.error){ mostrarError(u.error); return; }
       document.getElementById('user-email').textContent = u.email;
+      document.getElementById('user-email-2').textContent = u.email;
       if(!u.registrada){
         document.getElementById('registro').style.display = 'block';
       } else if(u.estado !== 'activa'){
@@ -88,18 +159,17 @@
         cargarProyectos();
         cargarLeads();
       }
-    }).withFailureHandler(mostrarError).portalDatosUsuario();
+    }).catch(mostrarError);
   }
-
-  function mostrarError(err){ alert('Error: ' + (err.message || err)); }
 
   function registrar(){
     var empresa = document.getElementById('reg-empresa').value.trim();
     if(!empresa) return;
-    google.script.run.withSuccessHandler(function(r){
+    llamarBackend('portalRegistrarDesarrolladora', {empresa: empresa}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
-      location.reload();
-    }).withFailureHandler(mostrarError).portalRegistrarDesarrolladora(empresa);
+      init(); // vuelve a pedir el estado, sin perder la sesión
+    }).catch(mostrarError);
   }
 
   function crearProyecto(){
@@ -114,24 +184,27 @@
       financia: document.getElementById('p-financia').value,
       descripcion: document.getElementById('p-desc').value
     };
-    google.script.run.withSuccessHandler(function(r){
+    llamarBackend('portalCrearProyecto', {datos: datos}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       if(r.error){ alert(r.error); return; }
       document.getElementById('msg-proyecto').style.display = 'block';
       cargarProyectos();
-    }).withFailureHandler(mostrarError).portalCrearProyecto(datos);
+    }).catch(mostrarError);
   }
 
   function cargarProyectos(){
-    google.script.run.withSuccessHandler(function(lista){
+    llamarBackend('portalMisProyectos').then(function(lista){
+      if(esSesionInvalida(lista)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       var html = lista.map(function(p){
         return '<div class="card"><b>'+p.Nombre+'</b> — '+p.Barrio+'<br>US$ '+p.PrecioM2+'/m² · Avance '+p.Avance+'%</div>';
       }).join('') || '<p class="muted">Todavía no publicaste proyectos.</p>';
       document.getElementById('lista-proyectos').innerHTML = html;
-    }).withFailureHandler(mostrarError).portalMisProyectos();
+    }).catch(mostrarError);
   }
 
   function cargarLeads(){
-    google.script.run.withSuccessHandler(function(lista){
+    llamarBackend('portalMisLeads').then(function(lista){
+      if(esSesionInvalida(lista)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
       var html = lista.map(function(l){
         var puedeResponder = l.Estado === 'pendiente';
         return '<div class="card">'+
@@ -145,14 +218,16 @@
           '</div>';
       }).join('') || '<p class="muted">Todavía no tenés compradores interesados.</p>';
       document.getElementById('lista-leads').innerHTML = html;
-    }).withFailureHandler(mostrarError).portalMisLeads();
+    }).catch(mostrarError);
   }
 
   function responderLead(row, estado){
-    google.script.run.withSuccessHandler(function(){ cargarLeads(); }).withFailureHandler(mostrarError).portalActualizarLead(row, estado);
+    llamarBackend('portalActualizarLead', {leadRow: row, nuevoEstado: estado}).then(function(r){
+      if(esSesionInvalida(r)){ mostrarLogin('Tu sesión venció, iniciá sesión de nuevo.'); return; }
+      if(r.error){ alert(r.error); return; }
+      cargarLeads();
+    }).catch(mostrarError);
   }
-
-  init();
 </script>
 </body>
 </html>
