@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="es-AR">
 <head>
@@ -588,8 +587,8 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
           <button type="button" data-v="invertir">Quiero invertir</button>
         </div>
         <div class="form-row">
-          <div class="field-block"><label>Presupuesto total (US$)</label><input type="number" placeholder="Ej. 130.000"></div>
-          <div class="field-block"><label>Anticipo disponible (US$)</label><input type="number" placeholder="Ej. 45.000"></div>
+          <div class="field-block"><label>Presupuesto total (US$)</label><input type="number" id="lead-presupuesto" placeholder="Ej. 130.000"></div>
+          <div class="field-block"><label>Anticipo disponible (US$)</label><input type="number" id="lead-anticipo" placeholder="Ej. 45.000"></div>
         </div>
         <div class="form-row">
           <div class="field-block"><label>Barrio</label><select><option>Belgrano</option><option>Núñez</option><option>Olivos</option></select></div>
@@ -600,10 +599,10 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
           <div class="field-block"><label>Forma de pago</label><select><option>Financiar el saldo</option><option>Contado</option></select></div>
         </div>
         <div class="form-row">
-          <div class="field-block"><label>Nombre</label><input type="text" placeholder="Tu nombre"></div>
-          <div class="field-block"><label>WhatsApp</label><input type="tel" placeholder="+54 9 11..."></div>
+          <div class="field-block"><label>Nombre</label><input type="text" id="lead-nombre" placeholder="Tu nombre"></div>
+          <div class="field-block"><label>WhatsApp</label><input type="tel" id="lead-whatsapp" placeholder="+54 9 11..."></div>
         </div>
-        <div class="field-block"><label>Email</label><input type="email" placeholder="tu@email.com"></div>
+        <div class="field-block"><label>Email</label><input type="email" id="lead-email" placeholder="tu@email.com"></div>
         <label class="consent"><input type="checkbox" id="consent-check">Acepto que mis datos se compartan con las desarrolladoras elegidas para que me contacten.</label>
         <button type="submit" class="btn btn-primary btn-full btn-round">Solicitar información</button>
         <div class="confirm-msg" id="confirm-msg">Listo — en un sitio real esto activaría tu búsqueda. Acá es un prototipo con datos de ejemplo: no se envía ninguna información.</div>
@@ -763,12 +762,21 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
 
 <script>
 (function(){
+  /* ======================================================================
+     CONFIGURACIÓN — pegá acá las URLs que te da Apps Script al desplegar
+     (ver INSTRUCCIONES.md, pasos 5 y 6). Mientras estén vacías, el sitio
+     sigue funcionando con los datos de ejemplo (DEV_DEMO) como fallback.
+     ====================================================================== */
+  var APP_URL = '';    // URL del Web App público (API de lectura + leads)
+  var PORTAL_URL = ''; // URL del Web App del Portal de Desarrolladoras
+
   var PALETTES = {
     "Belgrano": ["#FCD9C8","#F7B48E"],
     "Núñez": ["#CDE6E0","#8FC7BB"],
     "Olivos": ["#E4DBF6","#B9A4E8"]
   };
-  var DEV = [
+  // Datos de ejemplo — se usan solo si APP_URL está vacío o falla el fetch.
+  var DEV_DEMO = [
     {id:1,barrio:"Belgrano",nombre:"Vitrum Belgrano",desarrolladora:"Terravista Desarrollos",amb:[2,3],precioM2:3450,avance:62,entrega:"2027",anticipo:"30%",financia:true,desc:"Torre boutique a metros de Cabildo, con amenities completos y unidades a estrenar de 2 y 3 ambientes."},
     {id:2,barrio:"Belgrano",nombre:"Cabildo 4200",desarrolladora:"Obring Norte",amb:[2],precioM2:2980,avance:18,entrega:"2028",anticipo:"25%",financia:true,desc:"Desarrollo en pozo sobre avenida Cabildo, ideal para quienes buscan anticipo bajo y financiación extendida."},
     {id:3,barrio:"Belgrano",nombre:"Parque Sarmiento Residence",desarrolladora:"Coto Urbano",amb:[3],precioM2:3720,avance:84,entrega:"2026",anticipo:"40%",financia:false,desc:"Últimas unidades de 3 ambientes frente al parque, entrega próxima y terminaciones premium."},
@@ -779,6 +787,37 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
     {id:8,barrio:"Olivos",nombre:"Corvalán 1500",desarrolladora:"Obring Norte",amb:[2],precioM2:2650,avance:12,entrega:"2028",anticipo:"20%",financia:true,desc:"El precio por m² más accesible de Olivos, en etapa temprana de construcción."},
     {id:9,barrio:"Olivos",nombre:"Rambla Olivos",desarrolladora:"Grupo Amarilo",amb:[3],precioM2:3050,avance:95,entrega:"2026",anticipo:"40%",financia:false,desc:"A entregarse este año, muy cerca de la costanera. Últimas unidades de 3 ambientes."}
   ];
+
+  var DEV = DEV_DEMO.slice();
+
+  // Convierte el formato de la planilla (Ambientes:"2,3", Financia:"true")
+  // al formato que ya espera el resto del código (amb:[2,3], financia:true).
+  function normalizarProyecto(p){
+    return {
+      id: p.ID,
+      barrio: p.Barrio,
+      nombre: p.Nombre,
+      desarrolladora: p.EmailDesarrolladora,
+      amb: String(p.Ambientes).split(',').map(function(n){return Number(n.trim());}),
+      precioM2: Number(p.PrecioM2),
+      avance: Number(p.Avance),
+      entrega: p.Entrega,
+      anticipo: p.Anticipo,
+      financia: String(p.Financia).toLowerCase() === 'true',
+      desc: p.Descripcion
+    };
+  }
+
+  function cargarProyectos(){
+    if(!APP_URL){ applyFilters(); return; } // sin backend configurado: usa DEV_DEMO
+    fetch(APP_URL + '?action=listarProyectos')
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(Array.isArray(data) && data.length){ DEV = data.map(normalizarProyecto); }
+        applyFilters();
+      })
+      .catch(function(){ applyFilters(); }); // si falla el fetch, se queda con DEV_DEMO
+  }
 
   var favorites = new Set();
   var selected = new Set();
@@ -866,7 +905,7 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
     });
   });
 
-  render(DEV);
+  cargarProyectos();
 
   var detailVeil = document.getElementById('detail-veil');
   function openDetail(d){
@@ -995,13 +1034,37 @@ footer{border-top:1px solid var(--line);background:var(--bg-soft);padding:44px 0
   document.querySelectorAll('#toggle-goal button').forEach(function(b){
     b.addEventListener('click', function(){ document.querySelectorAll('#toggle-goal button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
   });
-  document.getElementById('lead-form').addEventListener('submit', function(e){ e.preventDefault(); document.getElementById('confirm-msg').classList.add('show'); });
+  document.getElementById('lead-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var lead = {
+      action: 'crearLead',
+      proyectoId: Array.from(selected).join(','),
+      nombre: document.getElementById('lead-nombre').value,
+      email: document.getElementById('lead-email').value,
+      whatsapp: document.getElementById('lead-whatsapp').value,
+      presupuesto: document.getElementById('lead-presupuesto').value,
+      anticipo: document.getElementById('lead-anticipo').value
+    };
+    if(APP_URL){
+      // text/plain evita el preflight CORS que Apps Script no responde bien
+      fetch(APP_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(lead) })
+        .catch(function(){ /* si falla, igual mostramos la confirmación visual */ });
+    }
+    document.getElementById('confirm-msg').classList.add('show');
+  });
 
   var pubVeil = document.getElementById('publish-veil');
   document.getElementById('open-publish').addEventListener('click', function(){pubVeil.classList.add('show');});
   document.getElementById('publish-close').addEventListener('click', function(){pubVeil.classList.remove('show');});
   pubVeil.addEventListener('click', function(e){if(e.target===pubVeil) pubVeil.classList.remove('show');});
-  document.getElementById('publish-form').addEventListener('submit', function(e){ e.preventDefault(); document.getElementById('publish-confirm').classList.add('show'); });
+  document.getElementById('publish-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    if(PORTAL_URL){
+      window.open(PORTAL_URL, '_blank'); // ahí inicia sesión con Google y carga el proyecto de verdad
+    } else {
+      document.getElementById('publish-confirm').classList.add('show');
+    }
+  });
 
   var barsData = [62,74,58,91,120,103,138];
   var days = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
