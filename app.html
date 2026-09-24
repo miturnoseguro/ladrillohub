@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Ladrillo Hub — Desarrollos comparables</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{--rc:#e7384f;--rt:#fde8ea;--ink:#222;--gr:#717171;--ln:#e4e4e4;--bg:#fff;--soft:#f7f7f7;--ok:#00895d;--okt:#e1f5ec;--wn:#b8860b;--wnt:#fff6de;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{height:auto;background:#fff}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Plus Jakarta Sans",system-ui,sans-serif}
+h2,h3,h4,p{margin:0}h2{font-size:1.4rem}h3{font-size:.98rem}h4{font-size:.86rem;margin:14px 0 6px}
+a{color:var(--rc)}button,input,select,textarea{font:inherit;color:inherit}
+.sb{color:var(--gr);font-size:.82rem}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--ln)}
+.hd{max-width:1200px;margin:auto;display:flex;align-items:center;gap:14px;padding:10px 16px}
+.brand{font-weight:800;color:var(--rc);font-size:1.1rem;white-space:nowrap}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1}
+.role{display:flex;gap:6px;align-items:center}
+nav button,.tb button,.role button{border:1px solid var(--ln);background:var(--bg);color:var(--gr);border-radius:99px;padding:7px 14px;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap}
+nav button.on,.tb button.on{background:var(--rc);color:#fff;border-color:var(--rc)}
+.role button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+@media (max-width:700px){.hd{flex-wrap:wrap}nav{order:3;flex-basis:100%}}
+main{max-width:1200px;margin:auto;padding:18px 16px 70px}
+.lay{display:grid;gap:22px}
+.fl{display:none;border:1px solid var(--ln);border-radius:16px;padding:14px}
+.fl.open{display:block}
+@media (min-width:900px){.lay{grid-template-columns:290px 1fr}.fl{display:block;position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto}.fb{display:none!important}.fx{grid-template-columns:1fr 320px!important}.as{position:sticky;top:76px}}
+.c{display:inline-block;margin:0 6px 6px 0;padding:7px 12px;border:1px solid var(--ln);border-radius:99px;font-size:.78rem;cursor:pointer;background:var(--bg)}
+.c.w{border-color:var(--rc);background:var(--rt);color:var(--rc)}
+.c.m{background:var(--rc);border-color:var(--rc);color:#fff}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:14px}
+.g2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{border:1px solid var(--ln);border-radius:16px;overflow:hidden;cursor:pointer}
+.card.dim{opacity:.55}
+.ph{position:relative;aspect-ratio:16/10;overflow:hidden;background:#ddd;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;font-size:.7rem;text-align:center;padding:8px}
+.card .ph{border-radius:0}
+.ph::after{content:attr(data-l);position:absolute;right:8px;top:8px;background:rgba(0,0,0,.55);color:#fff;font-size:.6rem;padding:2px 7px;border-radius:99px}
+.cm{position:absolute;left:10px;bottom:10px;background:#fff;color:#222;font-weight:800;font-size:.72rem;padding:4px 10px;border-radius:99px;z-index:1}
+.bd{padding:12px 14px}
+.r1{display:flex;justify-content:space-between;gap:8px}
+.wn{color:var(--wn);font-size:.78rem;font-weight:700;margin-top:4px}
+.ok{color:var(--ok);font-weight:700}
+.best{color:var(--ok);font-weight:800}
+.fx{display:grid;gap:22px;margin-top:8px}
+.as,.bx{border:1px solid var(--ln);border-radius:16px;padding:16px}
+.as{align-self:start}
+.bx{margin-top:12px;border-radius:14px;padding:12px 14px}
+.tb{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--ln);font-size:.86rem}
+.kv span{color:var(--gr)}.kv b{text-align:right}
+.ring{width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p)*1%),var(--ln) 0);display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.ring i{width:68px;height:68px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:1.1rem}
+.btn{display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;border:1px solid var(--ink);background:none;font-weight:700;cursor:pointer;text-align:center}
+.pri{background:var(--rc);border-color:var(--rc);color:#fff}
+.bar{height:8px;border-radius:9px;background:var(--ln);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--ok)}
+.row{display:flex;gap:12px;align-items:center;margin:8px 0}
+.av{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:none;background:var(--rt);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--rc)}
+.tg{font-size:.66rem;padding:2px 7px;border-radius:99px;font-weight:700;white-space:nowrap}
+.tg.v{background:var(--okt);color:var(--ok)}.tg.e{background:var(--wnt);color:var(--wn)}.tg.d{background:var(--rt);color:var(--rc)}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+td,th{padding:9px 6px;border-bottom:1px solid var(--ln);text-align:center}
+td:first-child,th:first-child{text-align:left}
+.st{width:100%;padding:10px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);margin-top:6px}
+input[type="range"]{width:100%;accent-color:var(--rc)}
+.ml{display:flex;justify-content:space-between;font-size:.8rem;padding:5px 0;border-bottom:1px solid var(--ln)}
+.ts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:.8rem;opacity:0;transition:.3s;pointer-events:none;z-index:30}
+.load{text-align:center;padding:40px;color:var(--gr)}
+.setup{max-width:520px;margin:60px auto;border:1px solid var(--ln);border-radius:16px;padding:24px}
+.setup code{background:var(--soft);padding:2px 6px;border-radius:6px;font-size:.82rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="hd">
+    <div class="brand" style="cursor:pointer" onclick="go('inicio')">Ladrillo Hub</div>
+    <nav id="nav"></nav>
+    <div class="role" id="roleBox"></div>
+  </div>
+</header>
+<main id="M"><div class="load">Cargando…</div></main>
+<div class="ts" id="ts"></div>
+
+<script>
+// =====================================================================
+// CONFIGURACIÓN — completá esto con los datos de TU proyecto de Supabase
+// Dashboard de Supabase → Project Settings → API
+// =====================================================================
+const SUPABASE_URL = "https://bakizufgwpdmxfxdqglw.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJha2l6dWZnd3BkbXhmeGRxZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjE0ODMsImV4cCI6MjEwNTgzNzQ4M30.zilP-A0HvChtG6SMNVP_kqKtg6P_-L2ppwyrGixWikw";
+// =====================================================================
+
+let sb = null;
+const configurado = !SUPABASE_URL.includes("TU-PROYECTO") && !SUPABASE_ANON_KEY.includes("TU-ANON-KEY");
+if (configurado) {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+}
+
+const n = (x) => Math.round(x || 0).toLocaleString("es-AR");
+const toast = (m) => { const t = document.getElementById("ts"); t.textContent = m; t.style.opacity = 1; setTimeout(() => (t.style.opacity = 0), 2200); };
+
+// -------- estado global en memoria --------
+const st = {
+  v: "inicio",          // vista actual
+  session: null,
+  perfil: null,          // fila de public.perfiles
+  desarrolladora: null,  // fila de public.desarrolladoras (si perfil.rol === 'desarrolladora')
+  ficha: null,            // fila de public.fichas_compradoras (si perfil.rol === 'comprador')
+  proyectos: [],          // cache de proyectos publicados
+  featureCatalog: [],     // catálogo de amenities
+  featuresByGroup: {},
+  labByKey: {},
+  p: 0,                   // índice de proyecto abierto (dentro de st.proyectos)
+  tab: 0,
+  leads: [],
+  resenas: {},            // { proyecto_id: [reseñas] }
+  b: [], t: [], m: 4000, e: 300, // filtros de búsqueda
+  q: {},                  // prioridades marcadas en "Buscar" (0/1/2)
+};
+
+const TN = ["Resumen", "Costos y escribano", "Sociedad", "Obra", "Reseñas", "Convivencia"];
+
+// =====================================================================
+// ARRANQUE
+// =====================================================================
+async function boot() {
+  if (!configurado) {
+    document.getElementById("M").innerHTML = `<div class="setup">
+      <h2>Falta configurar Supabase</h2>
+      <p class="sb" style="margin-top:10px">Este archivo es la app real, pero necesita apuntar a tu proyecto de Supabase. Editá las primeras líneas del <code>&lt;script&gt;</code>:</p>
+      <div class="bx"><code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code></div>
+      <p class="sb" style="margin-top:10px">Los sacás de tu Dashboard de Supabase → Project Settings → API. Después corré <code>supabase/schema.sql</code> y <code>supabase/seed_real_data.sql</code> en el SQL Editor, y activá el proveedor Google en Authentication → Providers.</p>
+    </div>`;
+    document.getElementById("nav").innerHTML = "";
+    return;
+  }
+
+  sb.auth.onAuthStateChange((_event, session) => {
+    st.session = session;
+    afterAuth();
+  });
+
+  const { data } = await sb.auth.getSession();
+  st.session = data.session;
+  await cargarCatalogoFeatures();
+  await cargarProyectos();
+  await afterAuth();
+}
+
+async function cargarCatalogoFeatures() {
+  const { data, error } = await sb.from("feature_catalog").select("*").order("orden");
+  if (error) { console.error(error); return; }
+  st.featureCatalog = data || [];
+  st.featuresByGroup = {};
+  st.labByKey = {};
+  for (const f of st.featureCatalog) {
+    st.labByKey[f.key] = f.label;
+    (st.featuresByGroup[f.grupo] ??= []).push(f);
+  }
+}
+
+async function cargarProyectos() {
+  const { data, error } = await sb
+    .from("proyectos")
+    .select("*, desarrolladoras(nombre, verificado, anios_trayectoria, obras_entregadas, sin_juicios_registrados, sitio_web, perfil_id)")
+    .eq("publicado", true)
+    .order("indice_confiabilidad", { ascending: false });
+  if (error) { console.error(error); toast("Error cargando proyectos"); return; }
+  st.proyectos = data || [];
+}
+
+async function afterAuth() {
+  if (st.session) {
+    const { data: perfil } = await sb.from("perfiles").select("*").eq("id", st.session.user.id).single();
+    st.perfil = perfil;
+    if (perfil?.rol === "desarrolladora") {
+      const { data: des } = await sb.from("desarrolladoras").select("*").eq("perfil_id", perfil.id).maybeSingle();
+      st.desarrolladora = des;
+    }
+    if (perfil?.rol === "comprador") {
+      const { data: ficha } = await sb.from("fichas_compradoras").select("*").eq("perfil_id", perfil.id).maybeSingle();
+      st.ficha = ficha;
+      await cargarLeadsComprador();
+    }
+    if (perfil?.rol === "desarrolladora" && st.desarrolladora) {
+      await cargarLeadsDesarrolladora();
+    }
+  } else {
+    st.perfil = null; st.desarrolladora = null; st.ficha = null; st.leads = [];
+  }
+  render();
+}
+
+async function cargarLeadsComprador() {
+  const { data } = await sb.from("leads").select("*, proyectos(nombre)").eq("comprador_id", st.session.user.id);
+  st.leads = data || [];
+}
+async function cargarLeadsDesarrolladora() {
+  if (!st.desarrolladora) return;
+  const { data: proys } = await sb.from("proyectos").select("id").eq("desarrolladora_id", st.desarrolladora.id);
+  const ids = (proys || []).map((p) => p.id);
+  if (!ids.length) { st.leads = []; return; }
+  const { data } = await sb.from("leads").select("*, perfiles(nombre,email), proyectos(nombre)").in("proyecto_id", ids);
+  st.leads = data || [];
+}
+
+// =====================================================================
+// AUTH
+// =====================================================================
+async function loginGoogle() {
+  await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
+}
+async function logout() {
+  await sb.auth.signOut();
+}
+async function elegirRol(rol) {
+  await sb.from("perfiles").update({ rol }).eq("id", st.session.user.id);
+  if (rol === "comprador") {
+    await sb.from("fichas_compradoras").upsert({ perfil_id: st.session.user.id }, { onConflict: "perfil_id" });
+  }
+  await afterAuth();
+  go("buscar");
+}
+
+// =====================================================================
+// NAV + RENDER
+// =====================================================================
+function go(v) { st.v = v; st.tab = 0; render(); window.scrollTo(0, 0); }
+function tab(i) { st.tab = i; render(); }
+function op(idx) { st.p = idx; go("ficha"); }
+
+function nav() {
+  const items = st.perfil?.rol === "desarrolladora"
+    ? [["inicio","Inicio"],["buscar","Explorar"],["mercado","Mercado"],["proyecto","Mi proyecto"],["leads","Leads"],["resenasD","Reseñas"],["obra","Obra"],["como","Cómo funciona"]]
+    : [["inicio","Inicio"],["buscar","Buscar"],["mercado","Mercado"],["compartir","Mi ficha"],["como","Cómo funciona"]];
+  document.getElementById("nav").innerHTML = items.map(([v,l]) => `<button class="${st.v===v?"on":""}" onclick="go('${v}')">${l}</button>`).join("");
+
+  const rb = document.getElementById("roleBox");
+  if (!st.session) {
+    rb.innerHTML = `<button class="on" onclick="loginGoogle()">Ingresar con Google</button>`;
+  } else if (!st.perfil?.rol) {
+    rb.innerHTML = `<span class="sb">${st.perfil?.nombre||""}</span>`;
+  } else {
+    rb.innerHTML = `<span class="sb" style="margin-right:6px">${st.perfil.nombre||""} · ${st.perfil.rol}</span><button onclick="logout()">Salir</button>`;
+  }
+}
+
+async function render() {
+  nav();
+  const M = document.getElementById("M");
+  if (st.session && !st.perfil?.rol) { M.innerHTML = await onboarding(); return; }
+  const views = { inicio, buscar, mercado, como, ficha, comparar, compartir, proyecto, leads: leadsView, obra, resenasD };
+  M.innerHTML = await (views[st.v] || inicio)();
+}
+
+async function onboarding() {
+  return `<section style="text-align:center;padding:40px 0">
+    <h2>¡Bienvenido/a!</h2>
+    <p class="sb" style="margin:10px auto;max-width:420px">Contanos con qué perfil vas a usar Ladrillo Hub. Podés cambiarlo después desde tu perfil.</p>
+    <div class="g2" style="max-width:520px;margin:20px auto">
+      <div class="bx"><h3>Soy comprador/a</h3><p class="sb">Comparo proyectos y comparto mi ficha con las desarrolladoras que me cierran.</p><button class="btn pri" onclick="elegirRol('comprador')">Elegir comprador</button></div>
+      <div class="bx"><h3>Soy desarrolladora</h3><p class="sb">Publico mi proyecto, recibo leads y respondo reseñas.</p><button class="btn pri" onclick="elegirRol('desarrolladora')">Elegir desarrolladora</button></div>
+    </div>
+  </section>`;
+}
+
+// =====================================================================
+// COMPATIBILIDAD (equivalente a sc() del prototipo)
+// =====================================================================
+function sc(p) {
+  const K = Object.keys(st.q);
+  if (!K.length) return { s: 60 };
+  let total = 0, logrado = 0;
+  for (const k of K) {
+    const peso = st.q[k] === 2 ? 2 : 1;
+    total += peso;
+    if ((p.features || []).includes(k)) logrado += peso;
+  }
+  return { s: total ? Math.round((logrado / total) * 100) : 60 };
+}
+
+// =====================================================================
+// VISTAS
+// =====================================================================
+const inicio = () => `
+<section style="text-align:center;padding:30px 0 10px">
+  <h1 style="font-size:clamp(1.8rem,5vw,3rem);margin:0;letter-spacing:-.02em">Elegí tu desarrollo con datos, no con folletos</h1>
+  <p class="sb" style="max-width:640px;margin:12px auto 18px;font-size:1rem">Datos reales de desarrolladoras en Palermo, Belgrano y Núñez: precio por m², expensas, confiabilidad y compatibilidad hecha a tu medida.</p>
+  <div style="max-width:280px;margin:auto"><button class="btn pri" onclick="go('buscar')">Empezar a buscar</button></div>
+</section>
+<div class="g2" style="margin-top:20px">
+  ${[["🎯","Índice de compatibilidad","Marcás lo imprescindible y lo deseable; ordenamos los proyectos por cuánto te cierran."],
+     ["🔎","Transparencia total","Desarrolladora, arquitecta, trayectoria e hitos con documentos."],
+     ["🧾","Datos reales","Proyectos relevados de Palermo, Belgrano y Núñez con fuente verificable."],
+     ["🤝","Match con garantía","Tu ficha es privada y solo se comparte cuando ambas partes pagan por Mercado Pago."]]
+    .map(x=>`<div class="bx"><div style="font-size:1.6rem">${x[0]}</div><b>${x[1]}</b><p class="sb">${x[2]}</p></div>`).join("")}
+</div>
+<h2 style="margin-top:26px">Proyectos destacados</h2>
+<div class="grid">${st.proyectos.slice(0,6).map((p,i)=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})"><div class="ph" data-l="${p.barrio}">${p.nombre}</div><div class="bd"><h3>${p.nombre}</h3><p class="sb">${p.barrio} · USD ${n(p.precio_usd_m2)}/m²</p></div></div>`).join("")}</div>`;
+
+function filtros() {
+  const grupos = Object.entries(st.featuresByGroup);
+  return `<h4>Barrio</h4>${["Palermo","Belgrano","Núñez"].map(b=>`<span class="c${st.b.includes(b)?" m":""}" onclick="toggleArr(st.b,'${b}')">${b}</span>`).join("")}
+  <h4>Tipo</h4>${["Depto","PH","Casa"].map(t=>`<span class="c${st.t.includes(t)?" m":""}" onclick="toggleArr(st.t,'${t}')">${t}</span>`).join("")}
+  <h4>Tope USD/m²: ${st.m}</h4><input type="range" min="2000" max="6000" step="50" value="${st.m}" oninput="st.m=+this.value;render()">
+  <h4>Tope expensas ($ miles): ${st.e}</h4><input type="range" min="100" max="400" step="10" value="${st.e}" oninput="st.e=+this.value;render()">
+  ${grupos.map(([g,items])=>`<h4>${g}</h4>${items.map(x=>`<span class="c${st.q[x.key]?" "+(st.q[x.key]===2?"m":"w"):""}" onclick="cicloPrioridad('${x.key}')">${x.label}${st.q[x.key]===2?" ★":""}</span>`).join("")}`).join("")}
+  <p class="sb" style="margin-top:8px">Click: deseable (naranja) → imprescindible ★ (rojo) → quitar.</p>`;
+}
+function toggleArr(arr, v) { const i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); render(); }
+function cicloPrioridad(k) { st.q[k] = st.q[k] === 2 ? undefined : (st.q[k] === 1 ? 2 : 1); if(!st.q[k]) delete st.q[k]; render(); }
+
+function buscar() {
+  const res = st.proyectos.filter(p =>
+    (!st.b.length || st.b.includes(p.barrio)) &&
+    (!st.t.length || st.t.includes(p.tipo)) &&
+    (p.precio_usd_m2||0) <= st.m &&
+    (p.expensas_miles||9999) <= st.e
+  ).map(p => ({ p, s: sc(p).s })).sort((a,b) => b.s - a.s);
+
+  return `<div class="lay"><div class="fl">${filtros()}</div><div>
+    <h2>${res.length} proyectos encontrados</h2>
+    <div class="grid">${res.map(({p,s},i)=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})">
+      <div class="ph" data-l="${p.desarrolladoras?.verificado?"Verificada":"Sin verificar"}"><span class="cm">${s}% match</span>${p.nombre}</div>
+      <div class="bd"><div class="r1"><h3>${p.nombre}</h3><b>${p.rating||"–"} ★</b></div>
+      <p class="sb">${p.barrio} · ${p.tipo} · USD ${n(p.precio_usd_m2)}/m²</p>
+      <p class="sb">${p.desarrolladoras?.nombre||""} · entrega ${p.trimestre_entrega||p.anio_entrega||"a confirmar"}</p></div></div>`).join("") || '<p class="sb" style="margin-top:14px">No hay proyectos que cumplan estos filtros todavía.</p>'}</div>
+  </div></div>`;
+}
+
+function mercado() {
+  if (!st.proyectos.length) return `<h2>Mercado por barrio</h2><p class="sb">Todavía no hay proyectos cargados.</p>`;
+  const row = (t, get, fmt) => {
+    const vals = st.proyectos.map(get), mx = Math.max(...vals, 1);
+    return `<h4>${t}</h4>` + st.proyectos.map(p=>`<div class="ml"><span style="width:170px">${p.barrio} · ${p.nombre}</span><div class="bar" style="flex:1;margin:6px 10px"><i style="width:${(get(p)/mx)*100}%;background:var(--rc)"></i></div><b>${fmt(get(p))}</b></div>`).join("");
+  };
+  return `<h2>Mercado por barrio</h2><p class="sb">Cruce automático de los proyectos reales cargados en Palermo, Belgrano y Núñez</p>
+  ${row("Valor USD/m²", p=>p.precio_usd_m2||0, v=>"USD "+n(v))}
+  ${row("Índice de confiabilidad", p=>p.indice_confiabilidad||0, v=>v)}
+  ${row("Reseñas", p=>p.rating||0, v=>v+" ★")}`;
+}
+
+const como = () => `<h2>Cómo funciona</h2><div class="g2" style="margin-top:12px">
+  ${[["1","Filtrás gratis","Marcás tus prioridades y ves el índice de compatibilidad de cada proyecto."],
+     ["2","Compartís tu ficha","Cuando algo te cierra, pagás $10.000 por Mercado Pago para enviarla."],
+     ["3","La desarrolladora acepta","Paga $50.000 para recibir un prospecto con alta compatibilidad."],
+     ["4","Contacto directo","Con ambos pagos aprobados el sistema revela los datos de contacto."]]
+    .map(x=>`<div class="bx"><h3>${x[0]}. ${x[1]}</h3><p class="sb">${x[2]}</p></div>`).join("")}
+  </div>
+  <div class="bx"><h4>Privacidad</h4><p class="sb">Tu ficha es privada (RLS en Supabase): solo vos la ves hasta que hay match, y podés borrarla cuando quieras.</p></div>
+  <div class="bx"><h4>Pagos</h4><p class="sb">Los pagos se procesan con Mercado Pago Checkout Pro. El token de cobro nunca viaja al navegador: vive en una Edge Function de Supabase.</p></div>`;
+
+async function ficha() {
+  const p = st.proyectos[st.p];
+  if (!p) return `<p class="sb">Proyecto no encontrado. <a href="#" onclick="go('buscar');return false">Volver</a></p>`;
+  if (!st.resenas[p.id]) {
+    const { data } = await sb.from("resenas").select("*, perfiles(nombre)").eq("proyecto_id", p.id).order("created_at",{ascending:false});
+    st.resenas[p.id] = data || [];
+  }
+  const x = sc(p), K = Object.keys(st.q);
+  const tabsHTML = [tabResumen, tabCostos, tabSociedad, tabObraP, tabResenasP, tabConvivencia];
+  const yaEnLead = st.leads?.some(l => l.proyecto_id === p.id);
+  return `<p class="sb"><a href="#" onclick="go('buscar');return false">← Volver a resultados</a></p>
+  <div class="fx"><div><h2>${p.nombre}</h2><p class="sb">${p.barrio}${p.subzona?" · "+p.subzona:""} · ${p.tipo} · ${p.desarrolladoras?.nombre||""}</p>
+  <div class="tb">${TN.map((t,i)=>`<button class="${i==st.tab?"on":""}" onclick="tab(${i})">${t}</button>`).join("")}</div>
+  ${await tabsHTML[st.tab](p)}</div>
+  <aside class="as"><div class="ring" style="--p:${x.s}"><i>${x.s}%</i></div><p style="text-align:center"><b>Compatibilidad con vos</b></p>
+  <div style="margin:10px 0">${K.map(k=>{const h=(p.features||[]).includes(k);return `<div class="ml"><span>${st.labByKey[k]||k}${st.q[k]==2?" ★":""}</span><span class="${h?"ok":"wn"}">${h?"Cumple":"No tiene"}</span></div>`}).join("") || '<p class="sb">Marcá tus prioridades en Buscar.</p>'}</div>
+  <button class="btn" onclick="go('comparar')">Comparar con otros</button>
+  ${st.perfil?.rol==="comprador" ? (yaEnLead ? '<p class="ok" style="margin-top:10px">✔ Ya compartiste tu ficha con este proyecto</p>' : `<button class="btn pri" onclick="compartirFicha('${p.id}')">Compartir mi ficha</button>`) : ""}
+  ${!st.session ? `<button class="btn pri" onclick="loginGoogle()">Ingresar para comparar</button>` : ""}
+  </aside></div>`;
+}
+
+const tabResumen = (p) => `<div class="bx"><h4>Resumen</h4><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Expensas</span><b>${p.expensas_miles?"$"+p.expensas_miles+"k":"a confirmar"}</b></div><div class="kv"><span>Entrega</span><b>${p.trimestre_entrega||p.anio_entrega||"a confirmar"}</b></div><div class="kv"><span>Confiabilidad</span><b>${p.indice_confiabilidad||"–"}/100</b></div><div class="kv"><span>Reseñas</span><b>${p.rating||"–"} ★</b></div></div><div class="bx"><h4>Descripción</h4><p class="sb">${p.descripcion||"—"}</p>${p.fuente_url?`<p class="sb" style="margin-top:8px">Fuente: <a href="${p.fuente_url}" target="_blank" rel="noopener">${p.fuente_url}</a></p>`:""}</div>`;
+
+const tabCostos = (p) => { const pr = (p.precio_usd_m2||0)*55; return `<h4>Escribano y cierre estimado</h4><div class="bx"><div class="kv"><span>Escribano designado</span><b>${p.escribano||"a informar"}</b></div><div class="kv"><span>Precio unidad tipo (55 m²)</span><b>USD ${n(pr)}</b></div><div class="kv"><span>Honorarios (1,5%–2,2% + IVA)</span><b>USD ${n(pr*0.015*1.21)} – ${n(pr*0.022*1.21)}</b></div><div class="kv"><span>Sellos (est. 1,5%)</span><b>USD ${n(pr*0.015)}</b></div></div>`; };
+
+const tabSociedad = (p) => { const socios = Array.isArray(p.socios) && p.socios.length ? p.socios : [{nombre:p.desarrolladoras?.nombre,rol:"Desarrolla y construye",pct:100}]; return `<h4>Sociedad</h4><div class="bx"><b>${(p.features||[]).includes("fid")?"Fideicomiso al costo":"Sociedad"} · ${p.desarrolladoras?.nombre||""}</b>${socios.map(s=>`<div class="row">${avatar(s.nombre)}<div><b>${s.nombre}</b><p class="sb">${s.rol||""}${s.pct?" · "+s.pct+"%":""}</p></div></div>`).join("")}</div>${p.arquitecta?`<h4>Arquitecta / estudio</h4><div class="bx"><div class="row">${avatar(p.arquitecta)}<div><b>${p.arquitecta}</b></div></div></div>`:""}<h4>Trayectoria de la desarrolladora</h4><div class="bx"><div class="kv"><span>Años de trayectoria</span><b>${p.desarrolladoras?.anios_trayectoria??"–"}</b></div><div class="kv"><span>Obras entregadas</span><b>${p.desarrolladoras?.obras_entregadas??"–"}</b></div><div class="kv"><span>Sin juicios registrados</span><b>${p.desarrolladoras?.sin_juicios_registrados?"Sí":"a verificar"}</b></div>${p.desarrolladoras?.sitio_web?`<div class="kv"><span>Sitio oficial</span><b><a href="${p.desarrolladoras.sitio_web}" target="_blank">Visitar</a></b></div>`:""}</div>`; };
+
+const avatar = (nombre) => `<div class="av">${(nombre||"?").trim().split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase()}</div>`;
+
+async function tabObraP(p) {
+  const { data } = await sb.from("hitos_obra").select("*").eq("proyecto_id", p.id).order("orden");
+  const H = data || [];
+  const d = H.filter(h=>h.cumplido).length;
+  return `<h4>Avance de trámites y obra: ${d} de ${H.length||1} hitos</h4><div class="bar"><i style="width:${H.length?(d/H.length)*100:0}%"></i></div><div class="bx">${H.map(h=>`<div class="kv"><span>${h.cumplido?"✅":"⬜"} ${h.nombre}</span><b>${h.cumplido?"Cumplido"+(h.documento_url?` · <a href="${h.documento_url}" target="_blank">Descargar</a>`:""):"Estimado "+(h.fecha_estimada||"a definir")}</b></div>`).join("") || '<p class="sb">Todavía no hay hitos cargados.</p>'}</div>`;
+}
+
+async function tabResenasP(p) {
+  const R = st.resenas[p.id] || [];
+  const propia = R.find(r => r.perfil_id === st.session?.user?.id);
+  const avg = R.length ? (R.reduce((s,r)=>s+r.estrellas,0)/R.length).toFixed(1) : "–";
+  return `<h2>★ ${avg} <span class="sb">· ${R.length} reseñas verificadas con Gmail</span></h2>
+  <div class="bx">${R.map(r=>`<div class="kv"><span><b>${r.perfiles?.nombre||"Usuario"}</b> ${"★".repeat(r.estrellas)}${"☆".repeat(5-r.estrellas)}<br>${r.comentario||""}${r.respuesta_desarrolladora?`<br><i class="sb">Respuesta: ${r.respuesta_desarrolladora}</i>`:""}</span></div>`).join("") || '<p class="sb">Todavía no hay reseñas.</p>'}</div>
+  <h4>Dejá tu reseña (una por cuenta)</h4>
+  ${propia ? '<p class="ok">Ya dejaste tu reseña. ¡Gracias!</p>' :
+    !st.session ? '<button class="btn" onclick="loginGoogle()">Continuar con Google</button>' :
+    `<select id="rn" class="st"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select>
+     <textarea id="rt" maxlength="140" rows="3" class="st" placeholder="Contá algo puntual (máx. 140 caracteres)"></textarea>
+     <button class="btn pri" onclick="publicarResena('${p.id}')">Publicar reseña</button>`}`;
+}
+
+async function publicarResena(proyectoId) {
+  const estrellas = +document.getElementById("rn").value;
+  const comentario = document.getElementById("rt").value || "Sin comentario";
+  const { error } = await sb.from("resenas").insert({ proyecto_id: proyectoId, perfil_id: st.session.user.id, estrellas, comentario });
+  if (error) { toast("No se pudo publicar: " + error.message); return; }
+  delete st.resenas[proyectoId];
+  toast("Reseña publicada");
+  render();
+}
+
+const tabConvivencia = (p) => `<h4>Normas de convivencia tentativas</h4><div class="bx">
+  <div class="kv"><span>Mascotas</span><b>${(p.features||[]).includes("mas")?"Permitidas":"No permitidas"}</b></div>
+  <div class="kv"><span>Fumar en comunes</span><b>${(p.features||[]).includes("nof")?"Prohibido":"Sin definir"}</b></div>
+  <div class="kv"><span>Alquiler temporario</span><b>${(p.features||[]).includes("alt")?"Permitido":"Sujeto a asamblea"}</b></div>
+</div>`;
+
+function comparar() {
+  if (!st.proyectos.length) return `<h2>Comparar proyectos</h2><p class="sb">No hay proyectos cargados.</p>`;
+  const K = [["USD/m²", p=>p.precio_usd_m2||0, -1, v=>"USD "+n(v)], ["Expensas ($ miles)", p=>p.expensas_miles||0, -1, v=>v||"–"], ["Entrega", p=>p.anio_entrega||0, -1, v=>v||"–"], ["Confiabilidad", p=>p.indice_confiabilidad||0, 1, v=>v], ["Reseñas ★", p=>p.rating||0, 1, v=>v], ["Compatibilidad %", p=>sc(p).s, 1, v=>v]];
+  const P = st.proyectos;
+  return `<h2>Comparar proyectos</h2><p class="sb">Lo mejor de cada fila aparece en verde</p><div style="overflow-x:auto;margin-top:12px"><table><tr><th></th>${P.map((p,i)=>`<th><a href="#" onclick="op(${i});return false">${p.nombre}</a></th>`).join("")}</tr>
+  ${K.map(k=>{const v=P.map(k[1]);const b=k[2]<0?Math.min(...v):Math.max(...v);return `<tr><td>${k[0]}</td>${v.map(x=>`<td class="${x===b?"best":""}">${k[3](x)}</td>`).join("")}</tr>`}).join("")}
+  </table></div>`;
+}
+
+// -------- COMPRADOR: mi ficha / compartir --------
+async function guardarFicha() {
+  if (!st.ficha) st.ficha = {};
+  const patch = {
+    perfil_id: st.session.user.id,
+    barrios: st.b, tipos: st.t,
+    presupuesto_max_usd_m2: st.m, expensas_max_miles: st.e,
+    imprescindibles: Object.keys(st.q).filter(k=>st.q[k]===2),
+    deseables: Object.keys(st.q).filter(k=>st.q[k]===1),
+  };
+  const { data, error } = await sb.from("fichas_compradoras").upsert(patch, { onConflict: "perfil_id" }).select().single();
+  if (error) { toast("Error guardando ficha: " + error.message); return; }
+  st.ficha = data;
+  toast("Ficha guardada");
+}
+
+async function compartirFicha(proyectoId) {
+  if (!st.session) { loginGoogle(); return; }
+  await guardarFicha();
+  const p = st.proyectos.find(x=>x.id===proyectoId);
+  const { data: lead, error } = await sb.from("leads")
+    .upsert({ proyecto_id: proyectoId, comprador_id: st.session.user.id, compatibilidad: sc(p).s }, { onConflict: "proyecto_id,comprador_id" })
+    .select().single();
+  if (error) { toast("Error: " + error.message); return; }
+  await pagar(lead.id, "comprador");
+}
+
+async function pagar(leadId, rol) {
+  toast("Redirigiendo a Mercado Pago…");
+  const { data, error } = await sb.functions.invoke("create-preference", { body: { lead_id: leadId, rol } });
+  if (error) { toast("No se pudo iniciar el pago. ¿Configuraste MP_ACCESS_TOKEN en la Edge Function?"); console.error(error); return; }
+  if (data?.init_point) window.location.href = data.init_point;
+}
+
+async function compartir() {
+  if (!st.session) return `<h2>Mi ficha de comprador</h2><p class="sb">Ingresá con Google para armar y compartir tu ficha.</p><button class="btn pri" onclick="loginGoogle()">Ingresar con Google</button>`;
+  const c = (arr) => arr.map(k=>`<span class="c">${st.labByKey[k]||k}</span>`).join("") || '<span class="sb">—</span>';
+  const im = Object.keys(st.q).filter(k=>st.q[k]===2), de = Object.keys(st.q).filter(k=>st.q[k]===1);
+  await cargarLeadsComprador();
+  return `<h2>Mi ficha de comprador</h2><p class="sb">Es privada: solo vos la ves hasta que hay match, y podés borrarla cuando quieras.</p>
+  <div class="g2" style="margin-top:14px"><div class="bx"><h4>Tu búsqueda</h4>
+  <div class="kv"><span>Barrios</span><b>${st.b.join(", ")||"Todos"}</b></div>
+  <div class="kv"><span>Tipo</span><b>${st.t.join(", ")||"Todos"}</b></div>
+  <div class="kv"><span>Topes</span><b>USD ${n(st.m)}/m² · exp. $${st.e}k</b></div>
+  <h4>Imprescindibles</h4>${c(im)}<h4>Deseables</h4>${c(de)}
+  <button class="btn" onclick="guardarFicha()">Guardar ficha</button>
+  <button class="btn" style="border-color:var(--wn);color:var(--wn)" onclick="borrarFicha()">Borrar mi ficha</button></div>
+  <div class="bx"><h4>Mis leads</h4>${st.leads.length ? st.leads.map(l=>`<div class="kv"><span>${l.proyectos?.nombre||""} · ${l.compatibilidad||""}%</span><b class="${l.estado==='match'?'ok':''}">${estadoLegible(l.estado)}</b></div>`).join("") : '<p class="sb">Todavía no compartiste tu ficha con ningún proyecto. Hacelo desde la ficha de cada proyecto.</p>'}</div></div>`;
+}
+function estadoLegible(e) { return { nuevo:"Enviada, sin pago", comprador_pago:"Pagaste, esperando desarrolladora", desarrolladora_pago:"Desarrolladora pagó, esperando tu pago", match:"✔ Match — contacto revelado", descartado:"Descartado" }[e] || e; }
+
+async function borrarFicha() {
+  if (!confirm("¿Borrar tu ficha de comprador? Esta acción no se puede deshacer.")) return;
+  await sb.from("fichas_compradoras").delete().eq("perfil_id", st.session.user.id);
+  st.ficha = null; st.q = {}; st.b = []; st.t = [];
+  toast("Ficha borrada");
+  render();
+}
+
+// -------- DESARROLLADORA: mi proyecto / leads / reseñas --------
+async function proyecto() {
+  if (!st.session) return `<h2>Mi proyecto</h2><p class="sb">Ingresá con Google para gestionar tu proyecto.</p><button class="btn pri" onclick="loginGoogle()">Ingresar con Google</button>`;
+  if (!st.desarrolladora) {
+    return `<h2>Creá tu cuenta de desarrolladora</h2><p class="sb">Cargá el nombre de tu empresa para empezar a publicar proyectos.</p>
+    <input class="st" id="nombreDes" placeholder="Nombre de la desarrolladora">
+    <button class="btn pri" onclick="crearDesarrolladora()">Crear</button>`;
+  }
+  const { data: misProyectos } = await sb.from("proyectos").select("*").eq("desarrolladora_id", st.desarrolladora.id).order("created_at",{ascending:false});
+  const P = misProyectos || [];
+  return `<h2>Mi proyecto: ${st.desarrolladora.nombre}</h2><p class="sb">Publicá tus desarrollos con datos reales; se comparan automáticamente contra el resto del mercado.</p>
+  <div class="bx"><h4>Nuevo proyecto</h4>
+  <input class="st" id="pNombre" placeholder="Nombre del proyecto">
+  <select class="st" id="pBarrio"><option>Palermo</option><option>Belgrano</option><option>Núñez</option><option>Otro</option></select>
+  <input class="st" id="pPrecio" type="number" placeholder="USD por m²">
+  <input class="st" id="pEntrega" type="number" placeholder="Año de entrega">
+  <button class="btn pri" onclick="crearProyecto()">Publicar proyecto</button></div>
+  ${P.map(p=>`<div class="bx"><div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div></div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}`;
+}
+
+async function crearDesarrolladora() {
+  const nombre = document.getElementById("nombreDes").value.trim();
+  if (!nombre) { toast("Falta el nombre"); return; }
+  const { data, error } = await sb.from("desarrolladoras").insert({ nombre, perfil_id: st.session.user.id }).select().single();
+  if (error) { toast("Error: " + error.message); return; }
+  st.desarrolladora = data;
+  render();
+}
+
+async function crearProyecto() {
+  const nombre = document.getElementById("pNombre").value.trim();
+  const barrio = document.getElementById("pBarrio").value;
+  const precio = +document.getElementById("pPrecio").value || null;
+  const entrega = +document.getElementById("pEntrega").value || null;
+  if (!nombre) { toast("Falta el nombre del proyecto"); return; }
+  const { error } = await sb.from("proyectos").insert({ nombre, barrio, precio_usd_m2: precio, anio_entrega: entrega, desarrolladora_id: st.desarrolladora.id });
+  if (error) { toast("Error: " + error.message); return; }
+  toast("Proyecto publicado");
+  await cargarProyectos();
+  render();
+}
+
+async function leadsView() {
+  if (!st.desarrolladora) return `<h2>Leads</h2><p class="sb">Primero creá tu cuenta de desarrolladora en "Mi proyecto".</p>`;
+  await cargarLeadsDesarrolladora();
+  return `<h2>Leads compatibles con tus proyectos</h2><p class="sb">Recibís la ficha completa cuando pagás $50.000 y el comprador paga $10.000.</p>
+  <div class="grid">${st.leads.map(l=>`<div class="bx" style="margin:0"><div class="row"><div class="ring" style="--p:${l.compatibilidad||0};width:64px;height:64px;margin:0"><i style="width:52px;height:52px;font-size:.85rem">${l.compatibilidad||0}%</i></div><div><b>${l.proyectos?.nombre||""}</b><p class="sb">${(l.compatibilidad||0)>90?"Alta probabilidad de compra":"Buena coincidencia"}</p></div></div>
+  <div class="kv"><span>Estado</span><b>${estadoLegible(l.estado)}</b></div>
+  ${l.contacto_revelado ? `<div class="bx" style="background:var(--okt)"><b>Match confirmado</b><p class="sb">${l.perfiles?.nombre||""} · ${l.perfiles?.email||""}</p></div>` : `<button class="btn pri" onclick="pagar('${l.id}','desarrolladora')">Recibir ficha · $50.000</button>`}
+  </div>`).join("") || '<p class="sb">Todavía no tenés leads.</p>'}</div>`;
+}
+
+async function resenasD() {
+  if (!st.desarrolladora) return `<h2>Reseñas</h2><p class="sb">Primero creá tu cuenta de desarrolladora.</p>`;
+  const { data: misProyectos } = await sb.from("proyectos").select("id,nombre").eq("desarrolladora_id", st.desarrolladora.id);
+  const ids = (misProyectos||[]).map(p=>p.id);
+  if (!ids.length) return `<h2>Reseñas</h2><p class="sb">Todavía no tenés proyectos publicados.</p>`;
+  const { data: R } = await sb.from("resenas").select("*, perfiles(nombre), proyectos(nombre)").in("proyecto_id", ids).order("created_at",{ascending:false});
+  return `<h2>Reseñas recibidas</h2><div class="bx">${(R||[]).map(r=>`<div class="kv"><span><b>${r.perfiles?.nombre||"Usuario"}</b> (${r.proyectos?.nombre}) ${"★".repeat(r.estrellas)}<br>${r.comentario||""}</span></div>`).join("") || '<p class="sb">Sin reseñas todavía.</p>'}</div>`;
+}
+
+async function obra() {
+  if (!st.desarrolladora) return `<h2>Obra e hitos regulatorios</h2><p class="sb">Primero creá tu cuenta de desarrolladora.</p>`;
+  const { data: misProyectos } = await sb.from("proyectos").select("id,nombre").eq("desarrolladora_id", st.desarrolladora.id);
+  return `<h2>Obra e hitos regulatorios</h2><p class="sb">Los hitos se cargan por proyecto directamente en la tabla <code>hitos_obra</code> desde el panel de Supabase o vía API; lo que tildes se publica en la ficha pública del proyecto.</p>
+  ${(misProyectos||[]).map(p=>`<div class="bx"><b>${p.nombre}</b><p class="sb">Ver / editar hitos en Supabase → tabla hitos_obra, filtrando por proyecto_id = ${p.id}</p></div>`).join("") || '<p class="sb">Todavía no tenés proyectos.</p>'}`;
+}
+
+// =====================================================================
+window.addEventListener("load", boot);
+// Manejo simple del regreso de Mercado Pago (?pago=ok|error|pendiente)
+window.addEventListener("load", () => {
+  const qp = new URLSearchParams(location.search);
+  if (qp.get("pago")) {
+    const map = { ok: "¡Pago aprobado!", error: "El pago no se pudo procesar.", pendiente: "Pago pendiente de aprobación." };
+    setTimeout(() => toast(map[qp.get("pago")] || ""), 800);
+    history.replaceState({}, "", location.pathname);
+  }
+});
+</script>
+</body>
+</html>
