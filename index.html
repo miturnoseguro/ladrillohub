@@ -1,370 +1,123 @@
-<!DOCTYPE html>
-<html lang="es-AR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ladrillo Hub — Pantallas</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+<!DOCTYPE html><html lang="es-AR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Ladrillo Hub — Desarrollos comparables</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--rausch:#E7384F;--rausch-dark:#C22740;--rausch-tint:#FDE8EA;--ink:#222;--grey:#717171;--line:#E4E4E4;--bg:#FFF;--bg-soft:#F7F7F7;--verify:#00895D;--verify-tint:#E1F5EC;--warn:#B8860B;--warn-tint:#FFF6DE;--r-card:16px;--r-pill:999px;--shadow-sm:0 2px 8px rgba(0,0,0,.08);--shadow-md:0 6px 20px rgba(0,0,0,.13);color-scheme:light;}
-*{box-sizing:border-box;}
-:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:15px;line-height:1.45;}
-h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:-.01em;}
-p{margin:0;}
-button{font-family:inherit;}
-img{max-width:100%;display:block;}
-.wrap{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:70px;}
-.ph{background:linear-gradient(135deg,#e9e9e9,#d7d7d7);border-radius:var(--r-card);}
-
-/* top bar */
-.topbar{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--line);padding:14px 16px;padding-top:calc(14px + env(safe-area-inset-top,0px));}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem;color:var(--rausch);}
-.brand .mark{width:22px;height:22px;flex:none;}
-.roletoggle{display:flex;background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px;margin-top:12px;}
-.roletoggle button{flex:1;padding:9px 6px;border:none;background:none;border-radius:var(--r-pill);font-size:.82rem;font-weight:700;color:var(--grey);cursor:pointer;}
-.roletoggle button.on{background:var(--ink);color:#fff;}
-.scrtabs{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px;}
-.scrtabs::-webkit-scrollbar{display:none;}
-.scrtabs button{flex:none;padding:7px 13px;border-radius:var(--r-pill);border:1px solid var(--line);background:var(--bg);font-size:.74rem;font-weight:600;color:var(--grey);cursor:pointer;}
-.scrtabs button.on{background:var(--rausch);border-color:var(--rausch);color:#fff;}
-
-/* screens */
-.screen{display:none;padding:18px 16px 30px;}
-.screen.on{display:block;}
-.eyebrow{font-size:.72rem;font-weight:700;color:var(--rausch);text-transform:uppercase;letter-spacing:.03em;}
-h1.scr-title{font-size:1.3rem;margin-top:4px;}
-.scr-sub{color:var(--grey);font-size:.86rem;margin-top:6px;}
-
-/* buttons */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px 18px;border-radius:12px;border:1px solid var(--ink);font-size:.9rem;font-weight:700;cursor:pointer;background:none;color:var(--ink);}
-.btn-primary{background:var(--rausch);border-color:var(--rausch);color:#fff;}
-.btn-dark{background:var(--ink);border-color:var(--ink);color:#fff;}
-.btn-ghost{border-color:var(--line);background:var(--bg);}
-.btn-sm{padding:9px 14px;font-size:.8rem;width:auto;}
-.btn-row{display:flex;gap:10px;}
-.btn:disabled{opacity:.4;}
-
-/* form */
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:.78rem;color:var(--grey);font-weight:600;margin-bottom:6px;}
-.field input,.field select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-family:inherit;font-size:.9rem;}
-.chiprow{display:flex;flex-wrap:wrap;gap:8px;}
-.chip{padding:9px 14px;border-radius:var(--r-pill);border:1px solid var(--line);font-size:.82rem;cursor:pointer;background:var(--bg);}
-.chip.on{background:var(--ink);color:#fff;border-color:var(--ink);}
-.mustpref{display:flex;gap:6px;margin-top:6px;}
-.mustpref button{flex:1;padding:7px;font-size:.72rem;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--grey);cursor:pointer;}
-.mustpref button.on{background:var(--rausch-tint);color:var(--rausch-dark);border-color:var(--rausch-tint);font-weight:700;}
-
-/* cards / listing */
-.card{border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;margin-bottom:14px;cursor:pointer;}
-.card .ph{aspect-ratio:16/10;border-radius:0;position:relative;}
-.card .cmp{position:absolute;bottom:10px;left:10px;background:#fff;color:var(--ink);font-size:.72rem;font-weight:800;padding:5px 10px;border-radius:var(--r-pill);box-shadow:var(--shadow-sm);}
-.card .heart{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.25);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
-.card .body{padding:12px 14px;}
-.card .row1{display:flex;justify-content:space-between;gap:8px;}
-.card h3{font-size:.94rem;}
-.card .dev{font-size:.78rem;color:var(--grey);margin-top:2px;}
-.card .price{font-weight:800;font-size:.9rem;white-space:nowrap;}
-.card .meta{font-size:.78rem;color:var(--grey);margin-top:6px;}
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:var(--r-pill);}
-.badge.v{background:var(--verify-tint);color:var(--verify);}
-.badge.est{background:var(--warn-tint);color:var(--warn);}
-.badge.dev{background:var(--rausch-tint);color:var(--rausch-dark);}
-
-/* project detail */
-.gallery{display:grid;grid-template-columns:2fr 1fr;gap:5px;border-radius:var(--r-card);overflow:hidden;margin-bottom:16px;height:170px;}
-.gallery .ph{border-radius:0;}
-.tags2{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
-.modblock{border-top:1px solid var(--line);padding:14px 0;}
-.modblock h4{font-size:.88rem;margin-bottom:8px;}
-.kv{display:flex;justify-content:space-between;font-size:.84rem;padding:5px 0;color:var(--grey);}
-.kv b{color:var(--ink);font-weight:600;}
-.compat-ring{width:64px;height:64px;border-radius:50%;background:conic-gradient(var(--rausch) calc(var(--pct,90)*1%),var(--line) 0);display:flex;align-items:center;justify-content:center;flex:none;}
-.compat-ring i{width:52px;height:52px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.86rem;font-style:normal;}
-.matchrow{display:flex;align-items:center;gap:12px;background:var(--bg-soft);border-radius:14px;padding:14px;margin:12px 0;}
-.matchline{display:flex;justify-content:space-between;font-size:.82rem;padding:6px 0;border-bottom:1px solid var(--line);}
-.matchline:last-child{border:none;}
-.ok{color:var(--verify);font-weight:700;}
-.warn-t{color:var(--warn);font-weight:700;}
-
-/* compare table */
-.cmp-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:10px;}
-.cmp-table th,.cmp-table td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center;}
-.cmp-table th{color:var(--grey);font-weight:700;text-align:left;}
-.cmp-table td:first-child,.cmp-table th:first-child{text-align:left;}
-
-/* calc */
-.calcline{display:flex;justify-content:space-between;font-size:.86rem;padding:8px 0;border-bottom:1px solid var(--line);}
-.calcline.total{font-weight:800;font-size:1rem;border-top:2px solid var(--ink);border-bottom:none;padding-top:12px;margin-top:4px;}
-
-/* wizard */
-.wizsteps{display:flex;gap:6px;margin-bottom:16px;}
-.wizsteps span{flex:1;height:4px;border-radius:99px;background:var(--line);}
-.wizsteps span.done{background:var(--rausch);}
-.devlist label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px;font-size:.86rem;}
-.devlist input{accent-color:var(--rausch);width:17px;height:17px;}
-
-/* leads */
-.lead-card{border:1px solid var(--line);border-radius:var(--r-card);padding:14px;margin-bottom:12px;}
-.lead-card.unlocked{border-color:var(--verify);}
-.lead-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.lead-id{font-weight:700;font-size:.88rem;}
-.status-pill{font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:var(--r-pill);background:var(--verify-tint);color:var(--verify);}
-.lead-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:.8rem;margin:10px 0;}
-.lead-grid span.l{display:block;color:var(--grey);font-size:.7rem;}
-.lead-grid span.v{font-weight:600;}
-.lc-contact{background:var(--verify-tint);color:var(--verify);border-radius:10px;padding:10px 12px;font-size:.82rem;font-weight:600;margin-top:8px;}
-
-/* modal */
-.veil{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;display:none;align-items:flex-end;justify-content:center;}
-.veil.show{display:flex;}
-.modal{background:var(--bg);width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto;}
-.modal h3{font-size:1.05rem;margin-bottom:6px;}
-.modal p{color:var(--grey);font-size:.86rem;margin-bottom:16px;}
-.pay-summary{background:var(--bg-soft);border-radius:12px;padding:14px;font-size:.86rem;margin-bottom:16px;}
-.pay-amount{font-size:1.6rem;font-weight:800;margin:6px 0;}
-.paylock{display:flex;align-items:center;gap:7px;font-size:.76rem;color:var(--grey);margin-top:12px;justify-content:center;}
-
-.stat3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
-.stat3 .s{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;}
-.stat3 .s b{display:block;font-size:1.2rem;}
-.stat3 .s span{font-size:.68rem;color:var(--grey);}
-</style>
-</head>
-<body>
-<div class="wrap" id="app">
-
-<div class="topbar">
-  <div class="brand"><svg class="mark" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#E7384F"/><rect x="9" y="9" width="6" height="6" fill="#fff"/><rect x="17" y="9" width="6" height="6" fill="#fff" opacity=".7"/><rect x="9" y="17" width="6" height="6" fill="#fff" opacity=".7"/><rect x="17" y="17" width="6" height="6" fill="#fff"/></svg>Ladrillo Hub</div>
-  <div class="roletoggle">
-    <button class="on" data-role="comprador">Comprador</button>
-    <button data-role="dev">Desarrolladora</button>
-  </div>
-  <div class="scrtabs" id="tabs-comprador">
-    <button class="on" data-scr="c1">Perfil</button>
-    <button data-scr="c2">Resultados</button>
-    <button data-scr="c3">Proyecto</button>
-    <button data-scr="c4">Comparar</button>
-    <button data-scr="c5">Calculadora</button>
-    <button data-scr="c6">Checkout</button>
-  </div>
-  <div class="scrtabs" id="tabs-dev" style="display:none;">
-    <button class="on" data-scr="d1">Leads</button>
-    <button data-scr="d2">Ficha lead</button>
-    <button data-scr="d3">Mi proyecto</button>
-  </div>
-</div>
-
-<!-- C1 PERFIL DE BUSQUEDA -->
-<div class="screen on" id="scr-c1">
-  <span class="eyebrow">Pantalla 1 de 6 · gratis</span>
-  <h1 class="scr-title">Contanos qué buscás</h1>
-  <p class="scr-sub">Marcá cada condición como imprescindible o deseable. Nada de esto se comparte todavía.</p>
-  <div class="field"><label>Presupuesto máximo (USD)</label><input value="180.000"></div>
-  <div class="field"><label>Barrio</label><div class="chiprow"><span class="chip on">Núñez</span><span class="chip on">Belgrano</span><span class="chip">Olivos</span></div></div>
-  <div class="field"><label>Ambientes</label><div class="chiprow"><span class="chip">1</span><span class="chip on">2</span><span class="chip on">3</span></div></div>
-  <div class="field"><label>Cochera</label><div class="mustpref"><button class="on">Imprescindible</button><button>Deseable</button><button>No me importa</button></div></div>
-  <div class="field"><label>Mascotas permitidas</label><div class="mustpref"><button class="on">Imprescindible</button><button>Deseable</button><button>No me importa</button></div></div>
-  <div class="field"><label>Piscina</label><div class="mustpref"><button>Imprescindible</button><button class="on">Deseable</button><button>No me importa</button></div></div>
-  <div class="field"><label>Entrega</label><select><option>Antes de dic. 2028</option></select></div>
-  <button class="btn btn-primary" onclick="go('c2')">Ver 12 proyectos compatibles</button>
-</div>
-
-<!-- C2 RESULTADOS -->
-<div class="screen" id="scr-c2">
-  <span class="eyebrow">Pantalla 2 · gratis</span>
-  <h1 class="scr-title">12 proyectos</h1>
-  <p class="scr-sub">Ordenado por compatibilidad</p>
-  <div style="margin-top:14px;" id="listing"></div>
-</div>
-
-<!-- C3 FICHA DE PROYECTO -->
-<div class="screen" id="scr-c3">
-  <span class="eyebrow">Pantalla 3 · gratis</span>
-  <div class="gallery"><div class="ph"></div><div><div class="ph" style="height:82px;margin-bottom:5px;"></div><div class="ph" style="height:82px;"></div></div></div>
-  <div class="row1" style="display:flex;justify-content:space-between;align-items:flex-start;">
-    <div><h1 class="scr-title">Aura Núñez</h1><p class="scr-sub">Av. Libertador 5200 · Desarrollador: Grupo Cronos</p></div>
-    <div class="compat-ring" style="--pct:94"><i>94%</i></div>
-  </div>
-  <div class="tags2"><span class="badge v">🟢 Dato verificado</span><span class="badge dev">🔵 Informado por desarrollador</span><span class="badge est">🟡 Estimación</span></div>
-  <div class="matchrow"><div class="compat-ring" style="--pct:94;width:44px;height:44px;"><i style="width:36px;height:36px;font-size:.7rem;">94%</i></div><div><b style="font-size:.86rem;">Por qué coincide</b><p style="font-size:.78rem;color:var(--grey);">5 de 5 condiciones obligatorias · 12 de 14 preferencias</p></div></div>
-  <div class="matchline"><span>Precio</span><span class="ok">97%</span></div>
-  <div class="matchline"><span>Ubicación (Núñez)</span><span class="ok">100%</span></div>
-  <div class="matchline"><span>Financiación</span><span class="ok">100%</span></div>
-  <div class="matchline"><span>SUM (deseable, no tiene)</span><span class="warn-t">Parcial</span></div>
-  <div class="modblock"><h4>Unidad</h4><div class="kv"><span>Tipo</span><b>2 amb · balcón</b></div><div class="kv"><span>Superficie</span><b>58 m²</b></div><div class="kv"><span>Precio</span><b>USD 3.150/m² · vs. barrio +2,1%</b></div></div>
-  <div class="modblock"><h4>Construcción</h4><div class="kv"><span>DVH</span><b>Confirmado (memoria técnica) <span class="badge v">🟢</span></b></div><div class="kv"><span>Calefacción</span><b>Radiante <span class="badge dev">🔵</span></b></div></div>
-  <div class="modblock"><h4>Expensas</h4><div class="kv"><span>Estimadas</span><b>$185.000/mes</b></div><div class="kv"><span>vs. edificios comparables</span><b class="ok">🟢 4% por debajo</b></div></div>
-  <div class="modblock"><h4>Timeline de obra</h4><div class="kv"><span>🟢 Fundaciones</span><b>Cumplido</b></div><div class="kv"><span>🟡 Estructura</span><b>En curso</b></div><div class="kv"><span>⚪ Final de obra</span><b>Est. dic. 2028</b></div></div>
-  <div class="modblock"><h4>Desarrollador</h4><div class="kv"><span>Trayectoria</span><b>7 proyectos · 5 finalizados</b></div><div class="kv"><span>Reseñas</span><b>★★★★☆ 4,6 (127 verificadas)</b></div></div>
-  <div class="modblock"><h4>Documentación</h4><div class="kv"><span>📷 Fotos reales</span><b>Actualizadas 12/09/2026</b></div><div class="kv"><span>🖼️ Renders</span><b>Etiquetados aparte</b></div></div>
-  <div class="btn-row" style="margin-top:16px;"><button class="btn btn-ghost" onclick="go('c4')">Comparar</button><button class="btn btn-primary" onclick="go('c5')">Calcular costo real</button></div>
-</div>
-
-<!-- C4 COMPARADOR -->
-<div class="screen" id="scr-c4">
-  <span class="eyebrow">Pantalla 4 · gratis</span>
-  <h1 class="scr-title">Comparar proyectos</h1>
-  <p class="scr-sub">Hasta 4 lado a lado</p>
-  <table class="cmp-table">
-    <tr><th>—</th><th>Aura Núñez</th><th>Bosque B.</th><th>Vista Oliv.</th></tr>
-    <tr><td>USD/m²</td><td><b>3.150</b></td><td>3.280</td><td>2.950</td></tr>
-    <tr><td>Entrega</td><td>2028</td><td>2027</td><td>2029</td></tr>
-    <tr><td>Expensas</td><td>$185k</td><td>$210k</td><td>$160k</td></tr>
-    <tr><td>Piscina</td><td>—</td><td>✓</td><td>✓</td></tr>
-    <tr><td>SUM</td><td>✓</td><td>✓</td><td>—</td></tr>
-    <tr><td>Financiación</td><td>✓</td><td>✓</td><td>—</td></tr>
-    <tr><td>Compatibilidad</td><td><b>94%</b></td><td>87%</td><td>81%</td></tr>
-  </table>
-  <button class="btn btn-dark" style="margin-top:18px;" onclick="go('c5')">Ver costo real de Aura Núñez</button>
-</div>
-
-<!-- C5 CALCULADORA -->
-<div class="screen" id="scr-c5">
-  <span class="eyebrow">Pantalla 5 · gratis</span>
-  <h1 class="scr-title">Costo real de compra</h1>
-  <p class="scr-sub">Unidad 5B · Aura Núñez</p>
-  <div style="margin-top:14px;">
-    <div class="calcline"><span>Precio unidad <span class="badge v">🟢</span></span><b>USD 182.700</b></div>
-    <div class="calcline"><span>Cochera <span class="badge v">🟢</span></span><b>USD 14.000</b></div>
-    <div class="calcline"><span>Escrituración + honorarios <span class="badge est">🟡 estimado</span></span><b>USD 7.300</b></div>
-    <div class="calcline"><span>Fondo de reserva <span class="badge dev">🔵</span></span><b>USD 1.800</b></div>
-    <div class="calcline total"><span>Costo total estimado</span><b>USD 205.800</b></div>
-    <div class="calcline"><span>Costo efectivo</span><b>USD 3.548/m²</b></div>
-  </div>
-  <button class="btn btn-primary" style="margin-top:18px;" onclick="go('c6')">Avanzar y compartir mi perfil</button>
-</div>
-
-<!-- C6 CHECKOUT / PAGO 1 -->
-<div class="screen" id="scr-c6">
-  <span class="eyebrow">Pantalla 6 · Pago #1</span>
-  <h1 class="scr-title">Compartir tu perfil</h1>
-  <div class="wizsteps" id="wsteps"><span class="done"></span><span></span><span></span></div>
-  <div id="wpanel1">
-    <p class="scr-sub" style="margin-bottom:10px;">Elegí hasta 3 proyectos a los que se enviará tu ficha anonimizada.</p>
-    <div class="devlist">
-      <label><input type="checkbox" checked><span><b>Aura Núñez</b><br><small style="color:var(--grey);">Núñez · USD 3.150/m²</small></span></label>
-      <label><input type="checkbox" checked><span><b>Bosque Belgrano</b><br><small style="color:var(--grey);">Belgrano · USD 3.280/m²</small></span></label>
-      <label><input type="checkbox"><span><b>Vista Olivos</b><br><small style="color:var(--grey);">Olivos · USD 2.950/m²</small></span></label>
-    </div>
-    <button class="btn btn-primary" onclick="wstep(2)">Continuar</button>
-  </div>
-  <div id="wpanel2" style="display:none;">
-    <p class="scr-sub" style="margin-bottom:10px;">Confirmá tu perfil (esto es lo único que verán, anonimizado).</p>
-    <div class="field"><label>Presupuesto</label><input value="USD 150.000–200.000"></div>
-    <div class="field"><label>Anticipo disponible</label><input value="USD 60.000"></div>
-    <div class="field"><label>Ventana de compra</label><select><option>Próximos 3 meses</option></select></div>
-    <div class="btn-row"><button class="btn btn-ghost" onclick="wstep(1)">Atrás</button><button class="btn btn-primary" onclick="wstep(3)">Ir a pagar</button></div>
-  </div>
-  <div id="wpanel3" style="display:none;">
-    <div class="pay-summary"><b>Comprador #LH-04213</b><br>2 proyectos · Núñez / Belgrano<br>Vas a pagar por compartir tu ficha anonimizada.</div>
-    <div class="pay-amount">USD 10.000 <small style="font-size:.7rem;color:var(--grey);font-weight:400;">equiv. ARS, tarjeta o transferencia</small></div>
-    <div class="field"><label>Número de tarjeta</label><input placeholder="•••• •••• •••• ••••"></div>
-    <div class="btn-row"><input class="field" style="flex:1;" placeholder="MM/AA"><input class="field" style="flex:1;" placeholder="CVV"></div>
-    <div class="btn-row"><button class="btn btn-ghost" onclick="wstep(2)">Atrás</button><button class="btn btn-primary" onclick="wstep(4)">Pagar y compartir</button></div>
-    <p class="paylock">🔒 Procesado por pasarela de pago certificada PCI-DSS. No guardamos tu tarjeta.</p>
-  </div>
-  <div id="wpanel4" style="display:none;text-align:center;">
-    <div style="width:56px;height:56px;border-radius:50%;background:var(--verify-tint);color:var(--verify);display:flex;align-items:center;justify-content:center;margin:10px auto 16px;font-size:1.5rem;">✓</div>
-    <h3 style="text-align:center;">Ficha enviada</h3>
-    <p style="text-align:center;margin-bottom:14px;">Comprador #LH-04213 quedó anonimizada a la espera de que las desarrolladoras confirmen interés.</p>
-    <div class="stat3"><div class="s"><b>2</b><span>proyectos</span></div><div class="s"><b>94%</b><span>match top</span></div><div class="s"><b>—</b><span>tu identidad</span></div></div>
-    <button class="btn btn-dark" onclick="go('c2')">Volver a resultados</button>
-  </div>
-</div>
-
-<!-- D1 LEADS -->
-<div class="screen" id="scr-d1">
-  <span class="eyebrow">Panel desarrolladora</span>
-  <h1 class="scr-title">Leads compatibles</h1>
-  <p class="scr-sub">3 pendientes de revisión</p>
-  <div style="margin-top:14px;">
-    <div class="lead-card"><div class="lead-top"><span class="lead-id">Comprador #LH-04213</span><span class="status-pill">94% match</span></div>
-      <div class="lead-grid"><div><span class="l">Zona</span><span class="v">Núñez / Belgrano</span></div><div><span class="l">Ambientes</span><span class="v">2/3</span></div><div><span class="l">Presupuesto</span><span class="v">USD 150–200k</span></div><div><span class="l">Anticipo</span><span class="v">USD 60.000</span></div></div>
-      <div class="btn-row"><button class="btn btn-ghost btn-sm">Rechazar</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="go('d2')">Ver ficha</button></div>
-    </div>
-    <div class="lead-card"><div class="lead-top"><span class="lead-id">Comprador #LH-04198</span><span class="status-pill">87% match</span></div>
-      <div class="lead-grid"><div><span class="l">Zona</span><span class="v">Belgrano</span></div><div><span class="l">Ambientes</span><span class="v">2</span></div><div><span class="l">Presupuesto</span><span class="v">USD 95–110k</span></div><div><span class="l">Anticipo</span><span class="v">USD 30.000</span></div></div>
-      <div class="btn-row"><button class="btn btn-ghost btn-sm">Rechazar</button><button class="btn btn-primary btn-sm" style="flex:1;">Ver ficha</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- D2 FICHA LEAD / PAGO 2 -->
-<div class="screen" id="scr-d2">
-  <span class="eyebrow">Pago #2 para desbloquear</span>
-  <h1 class="scr-title">Comprador #LH-04213</h1>
-  <div class="lead-grid" style="margin-top:14px;"><div><span class="l">Zona</span><span class="v">Núñez / Belgrano</span></div><div><span class="l">Ambientes</span><span class="v">2/3</span></div><div><span class="l">Presupuesto</span><span class="v">USD 150–200.000</span></div><div><span class="l">Anticipo</span><span class="v">USD 60.000</span></div><div><span class="l">Ventana de compra</span><span class="v">3 meses</span></div><div><span class="l">Financiación</span><span class="v">Sí</span></div><div><span class="l">Proyectos comparados</span><span class="v">2</span></div><div><span class="l">Estado</span><span class="v">Comprador verificado ✓</span></div></div>
-  <div id="d2-contact"></div>
-  <button class="btn btn-primary" style="margin-top:16px;" onclick="openUnlock()">Aceptar y desbloquear contacto</button>
-</div>
-
-<!-- D3 GESTION FICHA -->
-<div class="screen" id="scr-d3">
-  <span class="eyebrow">Mi proyecto</span>
-  <h1 class="scr-title">Aura Núñez</h1>
-  <div class="stat3"><div class="s"><b>18</b><span>leads recibidos</span></div><div class="s"><b>6</b><span>desbloqueados</span></div><div class="s"><b>94%</b><span>match top</span></div></div>
-  <div class="modblock"><h4>Data room</h4><div class="kv"><span>Memoria técnica</span><b class="ok">Verificado</b></div><div class="kv"><span>Plano PH</span><b class="warn-t">Pendiente</b></div><div class="kv"><span>Fotos vs. renders</span><b>Etiquetados</b></div></div>
-  <div class="modblock"><h4>Timeline de obra</h4><div class="kv"><span>🟢 Fundaciones</span><b>Cumplido</b></div><div class="kv"><span>🟡 Estructura</span><b>En curso</b></div><div class="kv"><span>⚪ Terminaciones</span><b>Pendiente</b></div></div>
-  <button class="btn btn-ghost" style="margin-top:14px;">Editar ficha</button>
-</div>
-
-<div class="veil" id="unlockVeil">
-  <div class="modal">
-    <h3>Desbloquear contacto</h3>
-    <p>Comprador #LH-04213 · Núñez/Belgrano · 94% match</p>
-    <div class="pay-summary"><b>Incluye</b><br>Email y teléfono reales + solicitud de presentación formal.</div>
-    <div class="pay-amount">USD 50.000</div>
-    <button class="btn btn-primary" onclick="payUnlock()">Confirmar pago y desbloquear</button>
-    <button class="btn btn-ghost" style="margin-top:10px;" onclick="closeUnlock()">Cancelar</button>
-    <p class="paylock">🔒 Se libera solo tras confirmación del pago por el servidor</p>
-  </div>
-</div>
-
-</div>
+:root{--rc:#E7384F;--rt:#FDE8EA;--ink:#222;--gr:#717171;--ln:#E4E4E4;--bg:#fff;--soft:#F7F7F7;--ok:#00895D;--okt:#E1F5EC;--wn:#B8860B;--wnt:#FFF6DE;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html,body{height:auto;background:#fff}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 'Plus Jakarta Sans',system-ui,sans-serif}
+h2,h3,h4,p{margin:0}h2{font-size:1.4rem}h3{font-size:.98rem}h4{font-size:.86rem;margin:14px 0 6px}a{color:var(--rc)}
+button,input,select,textarea{font:inherit;color:inherit}.sb{color:var(--gr);font-size:.82rem}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--ln)}
+.hd{max-width:1200px;margin:auto;display:flex;align-items:center;gap:14px;padding:10px 16px}
+.brand{font-weight:800;color:var(--rc);font-size:1.1rem;white-space:nowrap}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1}.role{display:flex;gap:6px}
+nav button,.tb button,.role button{border:1px solid var(--ln);background:var(--bg);color:var(--gr);border-radius:99px;padding:7px 14px;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap}
+nav button.on,.tb button.on{background:var(--rc);color:#fff;border-color:var(--rc)}.role button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+@media(max-width:700px){.hd{flex-wrap:wrap}nav{order:3;flex-basis:100%}}
+main{max-width:1200px;margin:auto;padding:18px 16px 70px}
+.lay{display:grid;gap:22px}.fl{display:none;border:1px solid var(--ln);border-radius:16px;padding:14px}.fl.open{display:block}
+@media(min-width:900px){.lay{grid-template-columns:290px 1fr}.fl{display:block;position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto}.fb{display:none!important}.fx{grid-template-columns:1fr 320px!important}.as{position:sticky;top:76px}}
+.c{display:inline-block;margin:0 6px 6px 0;padding:7px 12px;border:1px solid var(--ln);border-radius:99px;font-size:.78rem;cursor:pointer;background:var(--bg)}.c.w{border-color:var(--rc);background:var(--rt);color:var(--rc)}.c.m{background:var(--rc);border-color:var(--rc);color:#fff}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));margin-top:14px}.g2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.card{border:1px solid var(--ln);border-radius:16px;overflow:hidden;cursor:pointer}.card.dim{opacity:.55}
+.ph{position:relative;aspect-ratio:16/10;overflow:hidden;background:#ddd;border-radius:12px}.card .ph{border-radius:0}.ph svg{width:100%;height:100%;display:block}
+.ph::after{content:attr(data-l);position:absolute;right:8px;top:8px;background:rgba(0,0,0,.55);color:#fff;font-size:.6rem;padding:2px 7px;border-radius:99px}
+.cm{position:absolute;left:10px;bottom:10px;background:#fff;color:#222;font-weight:800;font-size:.72rem;padding:4px 10px;border-radius:99px;z-index:1}
+.bd{padding:12px 14px}.r1{display:flex;justify-content:space-between;gap:8px}.wn{color:var(--wn);font-size:.78rem;font-weight:700;margin-top:4px}.ok{color:var(--ok);font-weight:700}.best{color:var(--ok);font-weight:800}
+.fx{display:grid;gap:22px;margin-top:8px}.as,.bx{border:1px solid var(--ln);border-radius:16px;padding:16px}.as{align-self:start}.bx{margin-top:12px;border-radius:14px;padding:12px 14px}
+.tb{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
+.gal{display:grid;gap:6px;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;height:300px;border-radius:16px;overflow:hidden}.gal .ph{aspect-ratio:auto;height:100%;border-radius:0}.gal .ph:first-child{grid-row:span 2}
+@media(max-width:600px){.gal{height:200px}}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--ln);font-size:.86rem}.kv span{color:var(--gr)}.kv b{text-align:right}
+.ring{width:84px;height:84px;border-radius:50%;background:conic-gradient(var(--rc) calc(var(--p)*1%),var(--ln) 0);display:flex;align-items:center;justify-content:center;margin:0 auto 8px}.ring i{width:68px;height:68px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:800;font-size:1.1rem}
+.btn{display:block;width:100%;margin-top:10px;padding:12px;border-radius:12px;border:1px solid var(--ink);background:none;font-weight:700;cursor:pointer;text-align:center}.pri{background:var(--rc);border-color:var(--rc);color:#fff}
+.bar{height:8px;border-radius:9px;background:var(--ln);overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+.row{display:flex;gap:12px;align-items:center;margin:8px 0}.av{width:52px;height:52px;border-radius:50%;overflow:hidden;flex:none}
+.tg{font-size:.66rem;padding:2px 7px;border-radius:99px;font-weight:700;white-space:nowrap}.tg.v{background:var(--okt);color:var(--ok)}.tg.e{background:var(--wnt);color:var(--wn)}.tg.d{background:var(--rt);color:var(--rc)}
+table{width:100%;border-collapse:collapse;font-size:.84rem}td,th{padding:9px 6px;border-bottom:1px solid var(--ln);text-align:center}td:first-child,th:first-child{text-align:left}
+.st{width:100%;padding:10px;border:1px solid var(--ln);border-radius:10px;background:var(--bg);margin-top:6px}input[type=range]{width:100%;accent-color:var(--rc)}
+.ml{display:flex;justify-content:space-between;font-size:.8rem;padding:5px 0;border-bottom:1px solid var(--ln)}
+.ts{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:.8rem;opacity:0;transition:.3s;pointer-events:none;z-index:30}
+</style></head><body>
+<header><div class="hd"><div class="brand" style="cursor:pointer" onclick="go('inicio')">▦ Ladrillo Hub</div><nav></nav><div class="role"><button id="rc" onclick="setR('c')">Comprador</button><button id="rd" onclick="setR('d')">Desarrolladora</button></div></div></header>
+<main id="m"></main><div id="ts" class="ts"></div>
 <script>
-var PROJ=[
- {n:'Aura Núñez',dev:'Grupo Cronos',b:'Núñez',pm2:3150,amb:'2/3',cmp:94},
- {n:'Bosque Belgrano',dev:'Constructora Sur',b:'Belgrano',pm2:3280,amb:'2/3',cmp:87},
- {n:'Vista Olivos',dev:'Norte Devs',b:'Olivos',pm2:2950,amb:'2',cmp:81},
- {n:'Loma Verde',dev:'Grupo Cronos',b:'Núñez',pm2:2890,amb:'1/2',cmp:76}
-];
-function money(n){return 'USD '+n.toLocaleString('es-AR');}
-document.getElementById('listing').innerHTML=PROJ.map(function(p){
- return '<div class="card" onclick="go(\'c3\')"><div class="ph"><span class="cmp">'+p.cmp+'% match</span><span class="heart">♡</span></div>'+
- '<div class="body"><div class="row1"><div><h3>'+p.n+'</h3><div class="dev">'+p.dev+'</div></div><div class="price">'+money(p.pm2)+'<span style="color:var(--grey);font-weight:400;"> /m²</span></div></div>'+
- '<div class="meta">'+p.b+' · '+p.amb+' amb · <span class="badge v" style="margin-left:2px;">🟢 verificado</span></div></div></div>';
-}).join('');
+const $=s=>document.querySelector(s),n=x=>Math.round(x).toLocaleString('es-AR'),M=$('#m');
+const dif=(a,b)=>{const d=(a/b-1)*100;return(d>0?'+':'')+d.toFixed(1).replace('.',',')+'%'},stars=k=>'★'.repeat(k)+'☆'.repeat(5-k);
+const FL=[['Unidad',[['mas','Acepta mascotas'],['bal','Balcón / terraza'],['coc','Cochera'],['dvh','DVH'],['tec','Techo ≥ 2,60 m'],['rad','Calefacción radiante']]],
+['Amenities',[['sum','SUM'],['pil','Pileta'],['gym','Gimnasio'],['par','Parrilla'],['sol','Solárium'],['lav','Laundry'],['cow','Coworking'],['bic','Bicicletero'],['sj','Salón de juegos'],['tv','Terraza verde'],['sau','Sauna'],['cin','Cine / SUM audiovisual'],['pet','Espacio para mascotas']]],
+['Seguridad',[['s24','Seguridad 24 hs'],['tot','Tótem de acceso'],['cam','Cámaras CCTV'],['por','Portería / encargado'],['bio','Acceso biométrico'],['vid','Videoportero'],['ala','Alarma perimetral']]],
+['Construcción',[['hor','Hormigón armado'],['lad','Ladrillo hueco']]],
+['Financiación y costos',[['fin','Financiación en cuotas'],['exb','Expensas bajo el promedio'],['m2b','USD/m² bajo el barrio'],['abl','ABL individual por unidad']]],
+['Confianza',[['fid','Fideicomiso'],['pub','Socios con nombre público'],['esc','Escribano informado'],['tr5','≥ 5 obras entregadas'],['r45','Reseñas ≥ 4,5 ★'],['fr','Fotos reales de obra'],['pla','Planos y brochure'],['ini','Obra ya iniciada']]],
+['Ubicación y entorno',[['sub','Cerca de subte / tren'],['pla2','Plaza o parque cerca'],['com','Comercios a pie'],['col','Colegios cerca'],['rui','Calle tranquila']]],['Unidad (más detalle)',[['nor','Orientación norte'],['fre','Frente luminoso'],['bau','Baulera'],['asc','Ascensor'],['acc','Accesible'],['aac','Preinstalación de aire'],['lvp','Lavadero propio'],['pro','Apto profesional']]],['Sustentabilidad',[['sol2','Paneles solares'],['agu','Reúso de agua'],['med','Medidores individuales']]],['Financiación y legales',[['ant','Anticipo bajo (≤30%)'],['pes','Cuotas en pesos'],['per','Acepta permuta'],['hip','Apto crédito hipotecario'],['ent','Entrega inmediata'],['sin','Sin juicios registrados'],['cau','Seguro de caución'],['cui','CUIT y matrícula verificados']]],['Convivencia',[['nof','No se fuma en comunes'],['reg','Proforma de reglamento'],['mag','Mascotas grandes'],['alt','Alquiler temporario permitido'],['nin','Apto niños (juegos)']]]];
+const lab={};FL.forEach(g=>g[1].forEach(x=>lab[x[0]]=x[1]));
+const P=[{n:'Aura Núñez',b:'Núñez',t:'Depto',d:'Grupo Cronos',u:3150,e:185,y:2028,c:91,r:4.6,z:'Ricardo Bianchi',s:'Martín Salas|Lucía Ferrari|Paula Ibarra',f:'mas bal coc dvh tec rad sum gym par sol lav s24 tot cam por hor fin exb abl fid pub esc tr5 r45 fr pla ini nof reg'},
+{n:'Bosque Belgrano',b:'Belgrano',t:'Depto',d:'Vértice Desarrollos',u:3280,e:210,y:2027,c:84,r:4.3,z:'Marta Goyeneche',s:'Andrés Molina|Carla Vidal|Tomás Ruiz',f:'bal coc dvh tec sum pil gym sol s24 tot cam por hor fin fid pub esc tr5 fr pla ini reg'},
+{n:'Vista Olivos',b:'Olivos',t:'PH',d:'Norte Constructora',u:2950,e:160,y:2029,c:72,r:4.0,z:'Julián Ortiz',s:'Diego Paz|Romina Sosa|Elena Cruz',f:'mas bal coc par lav cam lad m2b exb pub esc pla'},
+{n:'Casas del Parque',b:'Villa Urquiza',t:'Casa',d:'Lenz & Asoc.',u:2700,e:120,y:2028,c:88,r:4.7,z:'Sofía Peralta',s:'Hugo Lenz|Mabel Ríos|Iván Lenz',f:'mas bal coc tec par sol cam lad m2b exb fin pub esc tr5 r45 fr pla ini nof reg'}];
+const X=['sub pla2 com col nor fre bau asc acc aac lvp sol2 med ant per hip sin cau cui bio vid sj tv mag nin rui','sub com col fre bau asc acc aac med ant hip sin cui vid sau cin nin','pla2 rui lvp pes per sin cui ent tv pet mag alt pro','pla2 com col rui nor fre lvp sol2 agu med ant pes hip sin cau cui ent tv pet mag nin'];P.forEach((p,i)=>p.f=p.f.split(' ').concat(X[i].split(' ')));
+const H=[['Permiso y aviso de obra','mar 2026',1],['Fundaciones','jun 2026',1],['Estructura de hormigón','ene 2027',0],['Cerramientos y terminaciones','jun 2028',0],['Plano conforme a obra presentado','sep 2028',0],['Final de obra y habilitaciones','nov 2028',0],['Plano de mensura y división (PH)','dic 2028',0],['Reglamento de copropiedad inscripto','dic 2028',0],['Alta de ABL/ARBA por unidad','ene 2029',0],['Escrituras a compradores','feb 2029',0]];
+const R=[['Gabriela T.',5,'Entregaron en fecha y la comunicación fue clara.'],['Nicolás P.',4,'Buena obra, la escritura demoró un poco.'],['Ana L.',5,'Transparentes con las expensas desde el primer día.']];
+const L=[{id:'#4821',c:96,bud:'USD 150–185k',bar:'Núñez, Belgrano',must:'Mascotas, cochera',ent:'Antes de 2028',dp:0,bp:0},{id:'#4790',c:91,bud:'USD 120–160k',bar:'Belgrano',must:'Pileta, seguridad 24 hs',ent:'2027',dp:0,bp:1},{id:'#4755',c:84,bud:'USD 200k+',bar:'Núñez',must:'Financiación',ent:'Indistinto',dp:0,bp:0}];
+let st={v:'inicio',role:'c',b:[],t:[],m:4000,e:300,q:{mas:2,coc:2,pil:1,sum:1,s24:1},p:0,tab:0,g:0,paid:0,sel:[0,1],px:0,m2:58,co:1,gl:0,rv:0};
+const ph=(s,t)=>{const c=[[210,50],[20,60],[150,40],[280,35]][s%4],r=t==='r';let b='';for(let i=0;i<5;i++){const x=20+i*72+(s*13+i*7)%14,y=50+(i*37+s*29)%80;b+=`<rect x="${x}" y="${y}" width="58" height="${230-y}" fill="hsl(${c[0]},${c[1]}%,${38+i*7}%)"/>`;for(let a=0;a<7;a++)for(let k=0;k<3;k++)if((a*3+k+i+s)%3)b+=`<rect x="${x+8+k*16}" y="${y+8+a*16}" width="9" height="10" fill="#fff" opacity="${r?.85:.5}"/>`}return`<svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><rect width="400" height="250" fill="${r?'#ffe1c6':'#a9d4f2'}"/>${b}${r?'':'<path d="M370 10v220M330 22h60M370 22l-30-8" stroke="#e7a800" stroke-width="4" fill="none"/>'}<rect y="228" width="400" height="22" fill="#8c8c8c"/></svg>`};
+const av=h=>`<div class="av"><svg viewBox="0 0 40 40" width="52" height="52"><rect width="40" height="40" fill="hsl(${h},35%,55%)"/><circle cx="20" cy="15" r="7" fill="#fff" opacity=".85"/><path d="M6 40c2-13 26-13 28 0z" fill="#fff" opacity=".85"/></svg></div>`;
+const bg=k=>`<span class="tg ${k}">${{v:'🟢 verificado',e:'🟡 estimado',d:'🔵 desarrolladora'}[k]}</span>`;
+const sc=p=>{let w=0,g=0,miss=[];for(const k in st.q){const v=st.q[k],x=v==2?3:1;w+=x;if(p.f.includes(k))g+=x;else if(v==2)miss.push(lab[k])}return{s:w?Math.round(g/w*100):100,miss,hard:(st.b.length&&!st.b.includes(p.b))||(st.t.length&&!st.t.includes(p.t))||p.u>st.m||p.e>st.e}};
+const dl=m=>{const t=$('#ts');t.textContent=m||'Descarga simulada (demo)';t.style.opacity=1;setTimeout(()=>t.style.opacity=0,1800)};
+const go=v=>{st.v=v;render();scrollTo(0,0)},op=i=>{st.p=i;st.tab=0;go('ficha')},setR=r=>{st.role=r;go(r=='c'?'inicio':'leads')},tab=i=>{st.tab=i;render()},sl=i=>{const a=st.sel,j=a.indexOf(i);j<0?a.push(i):a.splice(j,1);render()};
+const tg=(k,v)=>{const a=st[k],i=a.indexOf(v);i<0?a.push(v):a.splice(i,1);render()},q=k=>{const v=((st.q[k]||0)+1)%3;v?st.q[k]=v:delete st.q[k];render()};
+function nav(){const N=st.role=='c'?[['inicio','Inicio'],['buscar','Buscar'],['mercado','Mercado'],['comparar','Comparar'],['costos','Costos reales'],['compartir','Mi ficha'],['como','Cómo funciona']]:[['leads','Leads'],['proyecto','Mi proyecto'],['obra','Obra e hitos'],['resenas','Reseñas']];
+$('nav').innerHTML=N.map(x=>`<button class="${st.v==x[0]||(x[0]=='buscar'&&(st.v=='ficha'||st.v=='perfil'))?'on':''}" onclick="go('${x[0]}')">${x[1]}</button>`).join('');$('#rc').className=st.role=='c'?'on':'';$('#rd').className=st.role=='d'?'on':''}
+const chips=(t,k,A)=>`<h4>${t}</h4>${A.map(a=>`<span class="c${st[k].includes(a)?' m':''}" onclick="tg('${k}','${a}')">${a}</span>`).join('')}`;
+const buscar=()=>`<div class="lay"><div><button class="btn fb" style="margin:0 0 12px" onclick="$('#fl').classList.toggle('open')">Filtros (${Object.keys(st.q).length} criterios)</button><aside class="fl" id="fl"><h3>Tus prioridades</h3><p class="sb" style="margin:4px 0 8px">Tocá una condición: 1 vez = <span class="c w">Deseable</span> 2 veces = <span class="c m">Imprescindible</span> 3 = quitar.</p>
+${chips('Barrio','b',['Núñez','Belgrano','Olivos','Villa Urquiza'])}${chips('Tipo de vivienda','t',['Depto','PH','Casa'])}
+<h4>USD/m² máximo: <span id="vm">${n(st.m)}</span></h4><input type="range" min="2500" max="4000" step="50" value="${st.m}" oninput="st.m=+this.value;$('#vm').textContent=n(st.m);res()">
+<h4>Expensas máximas: $<span id="ve">${st.e}</span>k</h4><input type="range" min="100" max="300" step="5" value="${st.e}" oninput="st.e=+this.value;$('#ve').textContent=st.e;res()">
+${FL.map(g=>`<h4>${g[0]}</h4>`+g[1].map(x=>`<span class="c${st.q[x[0]]==2?' m':st.q[x[0]]==1?' w':''}" onclick="q('${x[0]}')">${x[1]}</span>`).join('')).join('')}</aside></div><section id="rs"></section></div>`;
+function res(){const A=P.map((p,i)=>({p,i,x:sc(p)})).filter(a=>!a.x.hard).sort((a,b)=>(a.x.miss.length>0)-(b.x.miss.length>0)||b.x.s-a.x.s);
+$('#rs').innerHTML=`<h2>${A.length} proyectos</h2><p class="sb">Ordenados por índice de compatibilidad con tus prioridades</p><div class="grid">${A.map(({p,i,x})=>`<div class="card${x.miss.length?' dim':''}" onclick="op(${i})"><div class="ph" data-l="Foto simulada">${ph(i)}<span class="cm">${x.s}% compatible</span></div><div class="bd"><div class="r1"><h3>${p.n}</h3><b>USD ${n(p.u)}/m²</b></div><p class="sb">${p.b} · ${p.t} · ${p.d}</p><p class="sb">Expensas ~$${p.e}k · Entrega ${p.y} · ★${p.r} · Confiabilidad ${p.c}/100</p>${x.miss.length?`<p class="wn">No cumple: ${x.miss.join(', ')}</p>`:''}</div></div>`).join('')||'<p class="sb">Ningún proyecto cumple esos topes.</p>'}</div>`}
+const TN=['Resumen','Costos y expensas','Equipo y sociedad','Obra e hitos','Reseñas','Convivencia'];
+const T=[p=>`<div class="gal">${[0,1,2].map(i=>`<div class="ph" data-l="${st.g?'Render (demo)':'Foto simulada'}">${ph(st.p+i,st.g?'r':'f')}</div>`).join('')}</div>
+<div class="tb"><button class="${st.g?'':'on'}" onclick="st.g=0;render()">Fotos reales de obra</button><button class="${st.g?'on':''}" onclick="st.g=1;render()">Renders</button></div>
+<h4>Cómo nació el proyecto</h4><p class="sb">Un terreno familiar en ${p.b} y la idea de un edificio de baja altura con expensas contenidas. (Texto de ejemplo.)</p>
+<h4>La unidad</h4><div class="kv"><span>Tipo</span><b>${p.t}</b></div><div class="kv"><span>Valor por m²</span><b>USD ${n(p.u)} · ${dif(p.u,3080)} vs. barrio</b></div><div class="kv"><span>Altura de techo</span><b>${p.f.includes('tec')?'2,70 m':'2,50 m'}</b></div><div class="kv"><span>Material</span><b>${p.f.includes('hor')?'Hormigón armado':'Ladrillo hueco + losa'}</b></div><div class="kv"><span>Financiación</span><b>${p.f.includes('fin')?'30% anticipo + 36 cuotas en USD':'Contado / a consultar'}</b></div><div class="kv"><span>Inicio de obra</span><b>${p.f.includes('ini')?'Obra iniciada':'Estimado 2027'}</b></div>
+<h4>Amenities</h4>${FL[1][1].filter(x=>p.f.includes(x[0])).map(x=>`<span class="c">${x[1]}</span>`).join('')||'—'}
+<h4>Seguridad</h4>${FL[2][1].filter(x=>p.f.includes(x[0])).map(x=>`<span class="c">${x[1]}</span>`).join('')||'—'}
+<div class="row"><button class="btn" onclick="dl()">Descargar brochure</button><button class="btn" onclick="dl()">Ver planos</button></div>`,
+p=>{const ex=p.e*1000,tot=ex/.02,C=[['Sueldos y cargas',38],['Servicios comunes',14],['Mantenimiento (ascensores, pileta)',12],['Limpieza',10],['Administración',8],['Seguros',6],['Fondo de reserva',7],['Fondo de equipamiento',5]],pr=p.u*58;
+return`<h4>Expensas de la unidad tipo (58 m²): $${n(ex)}/mes</h4><p class="sb">Es el 2,0% del edificio (48 unidades, $${n(tot)}/mes en total). ${dif(p.e,198)} vs. comparables ($198k): <b class="${p.e<198?'ok':'wn'}">${p.e<198?'barata':'cara'}</b></p><div class="bx">${C.map(c=>`<div class="kv"><span>${c[0]} (${c[1]}%)</span><b>$${n(ex*c[1]/100)}</b></div>`).join('')}</div>
+<h4>Escribano y cierre</h4><div class="kv"><span>Escribano designado</span><b>Esc. ${p.z}</b></div><div class="kv"><span>Honorarios (1,5%–2,2% + IVA)</span><b>USD ${n(pr*.015*1.21)} – ${n(pr*.022*1.21)}</b></div><button class="btn pri" onclick="st.px=st.p;go('costos')">Ver proforma completa</button>`},
+p=>{const S=p.s.split('|');return`<h4>Sociedad</h4><div class="bx"><b>${p.f.includes('fid')?'Fideicomiso al costo':'Sociedad'} · ${p.d}</b>${[[S[0],'Aporta el terreno · 40%',30],[S[1],'Aporta capital · 35%',200],['Constructora '+p.d,'Dirige y construye · 25%',340]].map(x=>`<div class="row">${av(x[2])}<div><b>${x[0]}</b><p class="sb">${x[1]}</p></div></div>`).join('')}<p class="sb">Nombres públicos y verificables. Fotos simuladas en esta demo.</p></div>
+<h4>Arquitecta</h4><div class="bx"><div class="row">${av(260)}<div><b>Arq. ${S[2]}</b><p class="sb">18 años de trayectoria en vivienda multifamiliar. 9 edificios entregados en CABA y GBA norte.</p></div></div></div>
+<h4>Índice de confiabilidad</h4><div class="bx"><div class="ring" style="--p:${p.c}"><i>${p.c}</i></div>${[['Cumplimiento de plazos',p.c-4],['Obras entregadas',p.c+3],['Reseñas verificadas',p.r*20],['Transparencia de datos',p.c]].map(x=>`<div class="ml"><span>${x[0]}</span><b>${Math.min(100,Math.round(x[1]))}</b></div>`).join('')}</div>
+<h4>Desarrollos anteriores</h4><div class="bx">${[[2015,'Torre Cabildo 120','Entregada 2 meses antes','🟢'],[2018,'Edificio Zapiola','Entregada en fecha','🟢'],[2021,'Casas Ciudad Jardín','Entregada con 3 meses de demora','🟡']].map(x=>`<div class="kv"><span>${x[3]} ${x[0]} · ${x[1]}</span><b>${x[2]}</b></div>`).join('')}</div>`},
+p=>{const d=H.filter(x=>x[2]).length;return`<h4>Avance de trámites y obra: ${d} de ${H.length} hitos</h4><div class="bar"><i style="width:${d/H.length*100}%"></i></div><div class="bx">${H.map(x=>`<div class="kv"><span>${x[2]?'✅':'⬜'} ${x[0]}</span><b>${x[2]?'Cumplido · <a href="#" onclick="dl();return false">Descargar</a>':'Estimado '+x[1]}</b></div>`).join('')}</div><h4>Fotos reales del avance</h4><div class="g2">${[0,1,2].map(i=>`<div class="ph" data-l="Foto simulada">${ph(st.p+i+2,'f')}</div>`).join('')}</div>`},
+p=>{const own=R.some(r=>r[0].startsWith('Vos'));return`<h2>★ ${p.r} <span class="sb">· ${127+R.length} reseñas verificadas con Gmail</span></h2><div class="bx">${R.map(r=>`<div class="kv"><span><b>${r[0]}</b> ${stars(r[1])}<br>${r[2]}</span></div>`).join('')}</div><h4>Dejá tu reseña (una por cuenta)</h4>${own?'<p class="ok">Ya dejaste tu reseña. ¡Gracias!</p>':!st.gl?'<button class="btn" onclick="st.gl=1;render()">Continuar con Google</button>':'<select id="rn" class="st"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option><option value="2">★★☆☆☆</option><option value="1">★☆☆☆☆</option></select><textarea id="rt" maxlength="140" rows="3" class="st" placeholder="Contá algo puntual (máx. 140 caracteres)"></textarea><button class="btn pri" onclick="R.unshift([\'Vos (Gmail verificado)\',+$(\'#rn\').value,$(\'#rt\').value||\'Sin comentario\']);render()">Publicar reseña</button>'}`},
+p=>`<h4>Normas de convivencia tentativas</h4><div class="bx">${[['Mascotas',p.f.includes('mas')?'Permitidas (hasta 2, con registro)':'No permitidas'],['Fumar en espacios comunes',p.f.includes('nof')?'Prohibido':'Sin definir'],['Uso del SUM','Reserva online hasta las 22 hs'],['Ruidos','Silencio de 22 a 8 hs'],['Alquiler temporario','Sujeto a asamblea'],['Mudanzas','Lunes a sábado, con aviso']].map(x=>`<div class="kv"><span>${x[0]}</span><b>${x[1]}</b></div>`).join('')}</div><button class="btn" onclick="dl()">Descargar proforma de reglamento</button>`];
+const ficha=()=>{const p=P[st.p],x=sc(p),K=Object.keys(st.q);return`<p class="sb"><a href="#" onclick="go('buscar');return false">← Volver a resultados</a></p><div class="fx"><div><h2>${p.n}</h2><p class="sb">${p.b} · ${p.t} · ${p.d}</p><div class="tb">${TN.map((t,i)=>`<button class="${i==st.tab?'on':''}" onclick="tab(${i})">${t}</button>`).join('')}</div>${T[st.tab](p)}</div>
+<aside class="as"><div class="ring" style="--p:${x.s}"><i>${x.s}%</i></div><p style="text-align:center"><b>Compatibilidad con vos</b></p><div style="margin:10px 0">${K.map(k=>{const h=p.f.includes(k);return`<div class="ml"><span>${lab[k]}${st.q[k]==2?' ★':''}</span><span class="${h?'ok':'wn'}">${h?'Cumple':'No tiene'}</span></div>`}).join('')||'<p class="sb">Marcá tus prioridades en Buscar.</p>'}</div>
+<p class="sb">${bg('v')} ${bg('d')} ${bg('e')}</p><button class="btn" onclick="go('perfil')">Perfil de la desarrolladora</button><button class="btn" onclick="go('comparar')">Comparar</button><button class="btn" onclick="st.px=st.p;go('costos')">Calcular costo real</button><button class="btn pri" onclick="if(!st.sel.includes(st.p))st.sel.push(st.p);go('compartir')">Compartir mi ficha</button></aside></div>`};
+const comparar=()=>{const K=[['USD/m²',p=>p.u,-1,n],['Expensas ($ miles)',p=>p.e,-1],['Entrega',p=>p.y,-1],['Confiabilidad',p=>p.c,1],['Reseñas ★',p=>p.r,1],['Compatibilidad %',p=>sc(p).s,1]];
+return`<h2>Comparar proyectos</h2><p class="sb">Lo mejor de cada fila aparece en verde</p><div style="overflow-x:auto;margin-top:12px"><table><tr><th></th>${P.map((p,i)=>`<th><a href="#" onclick="op(${i});return false">${p.n}</a></th>`).join('')}</tr>${K.map(k=>{const v=P.map(k[1]),b=k[2]<0?Math.min(...v):Math.max(...v);return`<tr><td>${k[0]}</td>${v.map(x=>`<td class="${x==b?'best':''}">${(k[3]||(y=>y))(x)}</td>`).join('')}</tr>`}).join('')}${['mas','sum','pil','s24','tot','fin','fid','fr','abl'].map(f=>`<tr><td>${lab[f]}</td>${P.map(p=>`<td>${p.f.includes(f)?'✓':'—'}</td>`).join('')}</tr>`).join('')}</table></div>`};
+const costos=()=>{const p=P[st.px],pr=p.u*st.m2,co=st.co?14000:0,A=[['Precio de la unidad','v',pr],['Cochera','v',co],['Sellos (est. 1,5%)','e',pr*.015],['Honorarios de escribano (1,5–2,2% + IVA)','e',pr*.0185*1.21],['Registro de la Propiedad','e',pr*.006],['Reglamento de copropiedad y PH','e',pr*.003],['Fondo de reserva y equipamiento (aporte inicial)','d',pr*.01],['Gastos administrativos','d',pr*.004],['Alta de ABL / ARBA por unidad','d',150]],tot=A.reduce((a,x)=>a+x[2],0),cl=tot-pr-co;
+return`<h2>Proforma: costo real de escriturar</h2><p class="sb">Valores de ejemplo: confirmá cada rubro con el escribano.</p><div class="lay" style="margin-top:12px"><div><h4>Proyecto</h4><select class="st" onchange="st.px=+this.value;render()">${P.map((x,i)=>`<option value="${i}" ${i==st.px?'selected':''}>${x.n}</option>`).join('')}</select><h4>Superficie: ${st.m2} m²</h4><input type="range" min="35" max="120" value="${st.m2}" onchange="st.m2=+this.value;render()"><label class="kv"><span><input type="checkbox" ${st.co?'checked':''} onchange="st.co^=1;render()"> Incluir cochera</span></label></div>
+<div>${A.map(x=>`<div class="kv"><span>${x[0]} ${bg(x[1])}</span><b>USD ${n(x[2])}</b></div>`).join('')}<div class="kv" style="font-size:1.05rem;border-top:2px solid var(--ink)"><b>Costo total estimado</b><b>USD ${n(tot)}</b></div><div class="kv"><span>Costo efectivo</span><b>USD ${n(tot/st.m2)}/m²</b></div><div class="kv"><span>Gastos de cierre vs. otros desarrollos (prom. 6,8%)</span><b class="${cl/pr*100<6.8?'ok':'wn'}">${(cl/pr*100).toFixed(1).replace('.',',')}%</b></div></div></div>`};
+const compartir=()=>{const K=Object.keys(st.q),m=K.filter(k=>st.q[k]==2),w=K.filter(k=>st.q[k]==1),c=a=>a.map(k=>`<span class="c">${lab[k]}</span>`).join('')||'<span class="sb">—</span>';
+return`<h2>Mi ficha de comprador</h2><p class="sb">Es privada: se borra de nuestra base y solo se comparte cuando hay match y ambas partes pagan.</p><div class="g2" style="margin-top:14px"><div class="bx"><h4>Tu búsqueda</h4><div class="kv"><span>Barrios</span><b>${st.b.join(', ')||'Todos'}</b></div><div class="kv"><span>Tipo</span><b>${st.t.join(', ')||'Todos'}</b></div><div class="kv"><span>Topes</span><b>USD ${n(st.m)}/m² · exp. $${st.e}k</b></div><h4>Imprescindibles</h4>${c(m)}<h4>Deseables</h4>${c(w)}</div>
+<div class="bx"><h4>Enviar a estos proyectos</h4>${P.map((p,i)=>`<label class="kv"><span><input type="checkbox" ${st.sel.includes(i)?'checked':''} onchange="sl(${i})"> ${p.n}</span><b>${sc(p).s}%</b></label>`).join('')}
+${st.paid?`<p class="ok" style="margin-top:10px">✔ Pagaste $10.000. Ficha enviada.</p>${L[0].dp?'<div class="bx" style="background:var(--okt)"><b>¡Match confirmado!</b><p class="sb">Contacto: comercial@grupocronos.com.ar · +54 11 4xxx-xxxx</p></div>':'<p class="sb">Esperando que la desarrolladora pague $50.000 para recibirla (cambiá a “Desarrolladora” para simularlo).</p>'}`:`<p class="sb" style="margin-top:10px">Comparar y filtrar es gratis. Compartir tu ficha cuesta <b>$10.000</b>.</p><button class="btn pri" onclick="st.paid=1;render()">Pagar y compartir (simulado)</button>`}</div></div>`};
+const leads=()=>`<h2>Leads compatibles con tus proyectos</h2><p class="sb">Recibís la ficha completa cuando pagás $50.000 y el comprador paga $10.000.</p><div class="grid">${L.map((l,i)=>{const bp=i==0?st.paid:l.bp;return`<div class="bx" style="margin:0"><div class="row"><div class="ring" style="--p:${l.c};width:64px;height:64px;margin:0"><i style="width:52px;height:52px;font-size:.85rem">${l.c}%</i></div><div><b>Comprador ${l.id}</b><p class="sb">${l.c>90?'Alta probabilidad de compra':'Buena coincidencia'}</p></div></div><div class="kv"><span>Presupuesto</span><b>${l.bud}</b></div><div class="kv"><span>Barrios</span><b>${l.bar}</b></div><div class="kv"><span>Imprescindibles</span><b>${l.must}</b></div><div class="kv"><span>Entrega buscada</span><b>${l.ent}</b></div>${!l.dp?`<button class="btn pri" onclick="L[${i}].dp=1;render()">Recibir ficha · $50.000</button>`:bp?'<div class="bx" style="background:var(--okt)"><b>Match confirmado</b><p class="sb">Valeria M. · v***@gmail.com · +54 9 11 5xxx-xxxx</p></div>':'<p class="sb" style="margin-top:10px">Pagaste. Esperando que el comprador confirme su pago de $10.000.</p>'}</div>`}).join('')}</div>`;
+const obra=()=>{const d=H.filter(x=>x[2]).length;return`<h2>Obra e hitos regulatorios</h2><p class="sb">Lo que tildás se publica en la ficha pública, con el documento descargable.</p><div class="bar" style="margin:12px 0"><i style="width:${d/H.length*100}%"></i></div><div class="bx">${H.map((x,i)=>`<label class="kv"><span><input type="checkbox" ${x[2]?'checked':''} onchange="H[${i}][2]^=1;render()"> ${x[0]}</span><b>${x[2]?'Cumplido':'Est. '+x[1]}</b></label>`).join('')}</div><h4>Fotos de avance</h4><p class="sb">Solo fotos reales; los renders se publican aparte y etiquetados.</p><div class="g2" style="margin-top:8px">${[0,1,2].map(i=>`<div class="ph" data-l="Foto simulada">${ph(i+4,'f')}</div>`).join('')}</div><button class="btn" onclick="dl()">Subir documento o foto</button>`};
 
-function go(id){
- document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('on');});
- document.getElementById('scr-'+id).classList.add('on');
- document.querySelectorAll('.scrtabs button').forEach(function(b){b.classList.toggle('on',b.dataset.scr===id);});
-}
-document.querySelectorAll('.scrtabs button').forEach(function(b){b.addEventListener('click',function(){go(b.dataset.scr);});});
-document.querySelectorAll('.roletoggle button').forEach(function(b){
- b.addEventListener('click',function(){
-  document.querySelectorAll('.roletoggle button').forEach(function(x){x.classList.remove('on');});
-  b.classList.add('on');
-  var isDev=b.dataset.role==='dev';
-  document.getElementById('tabs-comprador').style.display=isDev?'none':'flex';
-  document.getElementById('tabs-dev').style.display=isDev?'flex':'none';
-  go(isDev?'d1':'c1');
- });
-});
-function wstep(n){
- [1,2,3,4].forEach(function(i){document.getElementById('wpanel'+i).style.display=(i===n?'block':'none');});
- document.querySelectorAll('#wsteps span').forEach(function(s,i){s.classList.toggle('done',i<n-1||n===4);});
-}
-function openUnlock(){document.getElementById('unlockVeil').classList.add('show');}
-function closeUnlock(){document.getElementById('unlockVeil').classList.remove('show');}
-function payUnlock(){
- document.getElementById('d2-contact').innerHTML='<div class="lc-contact">✓ Contacto desbloqueado — comprador.04213@ladrillohub.com · +54 9 11 5555-0192</div>';
- closeUnlock();
-}
-</script>
-</body>
-</html>
+const inicio=()=>`<section style="text-align:center;padding:30px 0 10px"><h1 style="font-size:clamp(1.8rem,5vw,3rem);margin:0;letter-spacing:-.02em">Elegí tu desarrollo con datos, no con folletos</h1><p class="sb" style="max-width:640px;margin:12px auto 18px;font-size:1rem">Compará precio por m², expensas por rubro, sociedad, escribano y costo real de escriturar, con un índice de compatibilidad hecho a tu medida.</p><div style="max-width:280px;margin:auto"><button class="btn pri" onclick="go('buscar')">Empezar a buscar gratis</button></div></section><div class="g2" style="margin-top:20px">${[['🎯','Índice de compatibilidad','Marcás lo imprescindible y lo deseable; ordenamos los proyectos por cuánto te cierran.'],['🔎','Transparencia total','Socios con nombre, arquitecto, trayectoria, escribano e hitos con documentos.'],['🧾','Costo real','Proforma de escrituración y expensas por rubro, comparadas con otros desarrollos.'],['🤝','Match con garantía','Tu ficha es privada y solo se comparte cuando ambas partes pagan.']].map(x=>`<div class="bx"><div style="font-size:1.6rem">${x[0]}</div><b>${x[1]}</b><p class="sb">${x[2]}</p></div>`).join('')}</div><h2 style="margin-top:26px">Proyectos destacados</h2><div class="grid">${P.map((p,i)=>`<div class="card" onclick="op(${i})"><div class="ph" data-l="Foto simulada">${ph(i)}</div><div class="bd"><h3>${p.n}</h3><p class="sb">${p.b} · USD ${n(p.u)}/m²</p></div></div>`).join('')}</div>`;
+const mercado=()=>{const raw=P.map(p=>p.c*.35+p.r*6+(3500-p.u)/25+(240-p.e)/8),mx=Math.max(...raw),row=(t,g,m,f)=>`<h4>${t}</h4>`+P.map(p=>`<div class="ml"><span style="width:160px">${p.b} · ${p.t}</span><div class="bar" style="flex:1;margin:6px 10px"><i style="width:${g(p)/m*100}%;background:var(--rc)"></i></div><b>${f(p)}</b></div>`).join('');
+return`<h2>Mercado por barrio</h2><p class="sb">Cruce automático de todos los desarrollos cargados</p>${row('Valor USD/m²',p=>p.u,4000,p=>n(p.u))}${row('Expensas ($ miles)',p=>p.e,300,p=>p.e)}${row('Índice de confiabilidad',p=>p.c,100,p=>p.c)}<h4>Índice de valor (precio, expensas, confiabilidad y reseñas)</h4>${P.map((p,i)=>[Math.round(raw[i]/mx*100),i]).sort((a,b)=>b[0]-a[0]).map(x=>`<div class="kv"><span><a href="#" onclick="op(${x[1]});return false">${P[x[1]].n}</a></span><b>${x[0]}/100</b></div>`).join('')}`};
+const como=()=>`<h2>Cómo funciona</h2><div class="g2" style="margin-top:12px">${[['1','Filtrás gratis','Marcás tus prioridades y ves el índice de compatibilidad de cada proyecto.'],['2','Compartís tu ficha','Cuando algo te cierra, pagás $10.000 para enviarla.'],['3','La desarrolladora acepta','Paga $50.000 para recibir un prospecto con alta compatibilidad.'],['4','Contacto directo','Con ambos pagos se intercambian fichas y datos de contacto.']].map(x=>`<div class="bx"><h3>${x[0]}. ${x[1]}</h3><p class="sb">${x[2]}</p></div>`).join('')}</div><div class="bx"><h4>Privacidad</h4><p class="sb">Tu perfil se borra de nuestra base y solo se comparte cuando hay match. Las desarrolladoras publican datos abiertos.</p></div><div class="bx"><h4>Confianza</h4><p class="sb">Reseñas con Gmail (una por cuenta), fotos reales de obra (los renders van etiquetados) y documentos descargables de cada hito.</p></div><div class="g2"><div class="bx"><b>Comprador</b><p class="sb">Buscar y comparar: gratis · Compartir ficha: $10.000</p></div><div class="bx"><b>Desarrolladora</b><p class="sb">Perfil público gratis · Recibir ficha: $50.000</p></div></div>`;
+const perfil=()=>{const p=P[st.p];return`<p class="sb"><a href="#" onclick="op(st.p);return false">← Volver al proyecto</a></p><h2>${p.d}</h2><p class="sb">CUIT y matrícula verificados · sin juicios registrados</p><div class="g2" style="margin-top:12px">${[['9','obras entregadas'],['612','unidades vendidas'],['18 años','de trayectoria']].map(x=>`<div class="bx" style="text-align:center"><h2>${x[0]}</h2><p class="sb">${x[1]}</p></div>`).join('')}</div>${T[2](p)}${T[4](p)}`};
+const p0=(v,k)=>{P[0][k]=+v},tf=k=>{const f=P[0].f,i=f.indexOf(k);i<0?f.push(k):f.splice(i,1);render()};
+const proyecto=()=>{const p=P[0],t=Object.keys(lab),ok=t.filter(k=>p.f.includes(k)).length,pc=Math.round(ok/t.length*100);return`<h2>Mi proyecto: ${p.n}</h2><p class="sb">Lo que tildás se publica en tu ficha y alimenta el índice de compatibilidad de los compradores.</p><div class="bar" style="margin:12px 0"><i style="width:${pc}%"></i></div><p class="sb">Ficha completa al ${pc}%</p><div class="g2"><div><h4>USD por m²</h4><input class="st" type="number" value="${p.u}" oninput="p0(this.value,'u')"></div><div><h4>Expensas ($ miles)</h4><input class="st" type="number" value="${p.e}" oninput="p0(this.value,'e')"></div><div><h4>Año de entrega</h4><input class="st" type="number" value="${p.y}" oninput="p0(this.value,'y')"></div></div>${FL.map(g=>`<h4>${g[0]}</h4>`+g[1].map(x=>`<span class="c${p.f.includes(x[0])?' m':''}" onclick="tf('${x[0]}')">${x[1]}</span>`).join('')).join('')}<button class="btn" onclick="dl('Brochure subido (demo)')">Subir brochure y planos</button>`};
+const resenas=()=>{const a=(R.reduce((s,r)=>s+r[1],0)/R.length).toFixed(1).replace('.',',');return`<h2>Reseñas recibidas</h2><p class="sb">Solo usuarios con Gmail verificado, una reseña por cuenta.</p><div class="row"><h2>★ ${a}</h2><span class="sb">${R.length} reseñas</span></div>${[5,4,3,2,1].map(k=>`<div class="ml"><span>${k} ★</span><div class="bar" style="flex:1;margin:6px 10px"><i style="width:${R.filter(r=>r[1]==k).length/R.length*100}%"></i></div></div>`).join('')}<div class="bx">${R.map(r=>`<div class="kv"><span><b>${r[0]}</b> ${stars(r[1])}<br>${r[2]}</span><span class="c" onclick="dl('Respuesta enviada (demo)')">Responder</span></div>`).join('')}</div>`};
+const V={inicio,buscar,mercado,como,perfil,ficha,comparar,costos,compartir,leads,proyecto,obra,resenas};
+function render(){nav();M.innerHTML=V[st.v]();if(st.v=='buscar')res()}
+render();
+</script></body></html>
