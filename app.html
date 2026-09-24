@@ -143,9 +143,11 @@ async function boot() {
     return;
   }
 
+  // OJO: no llamar a sb.* directamente dentro de este callback (puede trabar el login).
+  // Por eso se difiere con setTimeout.
   sb.auth.onAuthStateChange((_event, session) => {
     st.session = session;
-    afterAuth();
+    setTimeout(afterAuth, 0);
   });
 
   const { data } = await sb.auth.getSession();
@@ -177,25 +179,29 @@ async function cargarProyectos() {
   st.proyectos = data || [];
 }
 
+let authRun = 0;
 async function afterAuth() {
+  const run = ++authRun;               // si llega otra corrida más nueva, esta se descarta
+  let perfil = null, des = null, ficha = null;
   if (st.session) {
-    const { data: perfil } = await sb.from("perfiles").select("*").eq("id", st.session.user.id).single();
-    st.perfil = perfil;
+    const r = await sb.from("perfiles").select("*").eq("id", st.session.user.id).maybeSingle();
+    if (r.error) { console.error("perfiles:", r.error); toast("Error leyendo tu perfil: " + r.error.message); }
+    perfil = r.data;
     if (perfil?.rol === "desarrolladora") {
-      const { data: des } = await sb.from("desarrolladoras").select("*").eq("perfil_id", perfil.id).maybeSingle();
-      st.desarrolladora = des;
+      const d = await sb.from("desarrolladoras").select("*").eq("perfil_id", perfil.id).maybeSingle();
+      des = d.data;
     }
     if (perfil?.rol === "comprador") {
-      const { data: ficha } = await sb.from("fichas_compradoras").select("*").eq("perfil_id", perfil.id).maybeSingle();
-      st.ficha = ficha;
-      await cargarLeadsComprador();
+      const f = await sb.from("fichas_compradoras").select("*").eq("perfil_id", perfil.id).maybeSingle();
+      ficha = f.data;
     }
-    if (perfil?.rol === "desarrolladora" && st.desarrolladora) {
-      await cargarLeadsDesarrolladora();
-    }
-  } else {
-    st.perfil = null; st.desarrolladora = null; st.ficha = null; st.leads = [];
   }
+  if (run !== authRun) return;
+  st.perfil = perfil; st.desarrolladora = des; st.ficha = ficha;
+  if (!st.session) st.leads = [];
+  else if (perfil?.rol === "comprador") await cargarLeadsComprador();
+  else if (perfil?.rol === "desarrolladora" && des) await cargarLeadsDesarrolladora();
+  if (run !== authRun) return;
   render();
 }
 
@@ -216,22 +222,35 @@ async function cargarLeadsDesarrolladora() {
 // AUTH
 // =====================================================================
 async function loginGoogle() {
-  await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.href } });
+  // URL limpia (sin ?query ni #hash) para que coincida con la lista de Redirect URLs de Supabase
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+  if (error) { console.error(error); toast("No se pudo iniciar sesión: " + error.message); }
 }
 async function logout() {
   await sb.auth.signOut();
+  st.session = null;
+  afterAuth();
 }
 async function elegirRol(rol) {
+  document.querySelectorAll(".modal-bx button").forEach(b => (b.disabled = true));
+  const u = st.session.user;
   const { error } = await sb.from("perfiles").upsert(
-    { id: st.session.user.id, rol, nombre: st.session.user.user_metadata?.full_name || st.session.user.email, email: st.session.user.email },
+    { id: u.id, rol, nombre: u.user_metadata?.full_name || u.email, email: u.email },
     { onConflict: "id" }
   );
-  if (error) { console.error(error); toast("No se pudo guardar tu perfil"); return; }
+  if (error) {
+    console.error("perfiles upsert:", error);
+    toast("No se pudo guardar tu perfil: " + error.message);
+    document.querySelectorAll(".modal-bx button").forEach(b => (b.disabled = false));
+    return;
+  }
   if (rol === "comprador") {
-    await sb.from("fichas_compradoras").upsert({ perfil_id: st.session.user.id }, { onConflict: "perfil_id" });
+    const r = await sb.from("fichas_compradoras").upsert({ perfil_id: u.id }, { onConflict: "perfil_id" });
+    if (r.error) console.error("fichas_compradoras upsert:", r.error);
   }
   await afterAuth();
-  go("buscar");
+  go(rol === "desarrolladora" ? "proyecto" : "buscar");
 }
 
 // =====================================================================
@@ -251,7 +270,7 @@ function nav() {
   if (!st.session) {
     rb.innerHTML = `<button class="on" onclick="loginGoogle()">Ingresar con Google</button>`;
   } else if (!st.perfil?.rol) {
-    rb.innerHTML = `<span class="sb">${st.perfil?.nombre||""}</span>`;
+    rb.innerHTML = `<span class="sb" style="margin-right:6px">${st.session.user.email||""}</span><button onclick="logout()">Salir</button>`;
   } else {
     rb.innerHTML = `<span class="sb" style="margin-right:6px">${st.perfil.nombre||""} · ${st.perfil.rol}</span><button onclick="logout()">Salir</button>`;
   }
@@ -272,13 +291,15 @@ async function render() {
 }
 
 function onboarding() {
-  return `<div class="modal-ov"><div class="modal-bx">
-    <h2>¿Qué perfil te identifica?</h2>
-    <p class="sb" style="margin:10px auto;max-width:420px">Elegí con qué perfil vas a usar Ladrillo Hub. Podés cambiarlo después desde tu perfil.</p>
+  const nombre = (st.session?.user?.user_metadata?.full_name || "").split(" ")[0];
+  return `<div class="modal-ov" role="dialog" aria-modal="true" aria-labelledby="rolTitulo"><div class="modal-bx">
+    <h2 id="rolTitulo">${nombre ? "¡Hola, " + nombre + "!" : "¡Bienvenido/a!"} ¿Qué perfil te identifica?</h2>
+    <p class="sb" style="margin:10px auto;max-width:420px">Elegí con qué perfil vas a usar Ladrillo Hub. Lo podés cambiar más adelante.</p>
     <div class="g2" style="margin:20px auto">
-      <div class="bx"><h3>Soy comprador/a</h3><p class="sb">Comparo proyectos y comparto mi ficha con las desarrolladoras que me cierran.</p><button class="btn pri" onclick="elegirRol('comprador')">Comprador</button></div>
-      <div class="bx"><h3>Soy desarrolladora</h3><p class="sb">Publico mi proyecto, recibo leads y respondo reseñas.</p><button class="btn pri" onclick="elegirRol('desarrolladora')">Desarrolladora</button></div>
+      <div class="bx"><h3>Soy comprador/a</h3><p class="sb">Comparo proyectos y comparto mi ficha con las desarrolladoras que me cierran.</p><button class="btn pri" onclick="elegirRol('comprador')">Soy comprador/a</button></div>
+      <div class="bx"><h3>Soy desarrolladora</h3><p class="sb">Publico mi proyecto, recibo leads y respondo reseñas.</p><button class="btn pri" onclick="elegirRol('desarrolladora')">Soy desarrolladora</button></div>
     </div>
+    <button class="btn" style="border:none;color:var(--gr);font-weight:600" onclick="logout()">Cancelar y salir</button>
   </div></div>`;
 }
 
