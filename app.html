@@ -27,6 +27,7 @@ main{max-width:1200px;margin:auto;padding:18px 16px 70px}
 .lay{display:grid;gap:22px}
 .fl{display:none;border:1px solid var(--ln);border-radius:16px;padding:14px}
 .fl.open{display:block}
+.fb{display:block;width:100%;margin-bottom:14px;padding:12px;border:1px solid var(--ink);border-radius:12px;background:none;font-weight:700;cursor:pointer;text-align:center}
 @media (min-width:900px){.lay{grid-template-columns:290px 1fr}.fl{display:block;position:sticky;top:76px;align-self:start;max-height:calc(100vh - 96px);overflow:auto}.fb{display:none!important}.fx{grid-template-columns:1fr 320px!important}.as{position:sticky;top:76px}}
 .c{display:inline-block;margin:0 6px 6px 0;padding:7px 12px;border:1px solid var(--ln);border-radius:99px;font-size:.78rem;cursor:pointer;background:var(--bg)}
 .c.w{border-color:var(--rc);background:var(--rt);color:var(--rc)}
@@ -71,6 +72,8 @@ input[type="range"]{width:100%;accent-color:var(--rc)}
 .load{text-align:center;padding:40px;color:var(--gr)}
 .setup{max-width:520px;margin:60px auto;border:1px solid var(--ln);border-radius:16px;padding:24px}
 .setup code{background:var(--soft);padding:2px 6px;border-radius:6px;font-size:.82rem}
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal-bx{background:var(--bg);border-radius:18px;max-width:520px;width:100%;padding:28px 24px;text-align:center;max-height:90vh;overflow:auto}
 </style>
 </head>
 <body>
@@ -82,6 +85,7 @@ input[type="range"]{width:100%;accent-color:var(--rc)}
   </div>
 </header>
 <main id="M"><div class="load">Cargando…</div></main>
+<div id="roleModal"></div>
 <div class="ts" id="ts"></div>
 
 <script>
@@ -118,6 +122,7 @@ const st = {
   leads: [],
   resenas: {},            // { proyecto_id: [reseñas] }
   b: [], t: [], m: 4000, e: 300, // filtros de búsqueda
+  filtrosOpen: false,     // muestra/oculta filtros en mobile
   q: {},                  // prioridades marcadas en "Buscar" (0/1/2)
 };
 
@@ -217,7 +222,11 @@ async function logout() {
   await sb.auth.signOut();
 }
 async function elegirRol(rol) {
-  await sb.from("perfiles").update({ rol }).eq("id", st.session.user.id);
+  const { error } = await sb.from("perfiles").upsert(
+    { id: st.session.user.id, rol, nombre: st.session.user.user_metadata?.full_name || st.session.user.email, email: st.session.user.email },
+    { onConflict: "id" }
+  );
+  if (error) { console.error(error); toast("No se pudo guardar tu perfil"); return; }
   if (rol === "comprador") {
     await sb.from("fichas_compradoras").upsert({ perfil_id: st.session.user.id }, { onConflict: "perfil_id" });
   }
@@ -251,20 +260,26 @@ function nav() {
 async function render() {
   nav();
   const M = document.getElementById("M");
-  if (st.session && !st.perfil?.rol) { M.innerHTML = await onboarding(); return; }
+  const rm = document.getElementById("roleModal");
+  if (st.session && !st.perfil?.rol) {
+    rm.innerHTML = onboarding();
+    M.innerHTML = "";
+    return;
+  }
+  rm.innerHTML = "";
   const views = { inicio, buscar, mercado, como, ficha, comparar, compartir, proyecto, leads: leadsView, obra, resenasD };
   M.innerHTML = await (views[st.v] || inicio)();
 }
 
-async function onboarding() {
-  return `<section style="text-align:center;padding:40px 0">
-    <h2>¡Bienvenido/a!</h2>
-    <p class="sb" style="margin:10px auto;max-width:420px">Contanos con qué perfil vas a usar Ladrillo Hub. Podés cambiarlo después desde tu perfil.</p>
-    <div class="g2" style="max-width:520px;margin:20px auto">
-      <div class="bx"><h3>Soy comprador/a</h3><p class="sb">Comparo proyectos y comparto mi ficha con las desarrolladoras que me cierran.</p><button class="btn pri" onclick="elegirRol('comprador')">Elegir comprador</button></div>
-      <div class="bx"><h3>Soy desarrolladora</h3><p class="sb">Publico mi proyecto, recibo leads y respondo reseñas.</p><button class="btn pri" onclick="elegirRol('desarrolladora')">Elegir desarrolladora</button></div>
+function onboarding() {
+  return `<div class="modal-ov"><div class="modal-bx">
+    <h2>¿Qué perfil te identifica?</h2>
+    <p class="sb" style="margin:10px auto;max-width:420px">Elegí con qué perfil vas a usar Ladrillo Hub. Podés cambiarlo después desde tu perfil.</p>
+    <div class="g2" style="margin:20px auto">
+      <div class="bx"><h3>Soy comprador/a</h3><p class="sb">Comparo proyectos y comparto mi ficha con las desarrolladoras que me cierran.</p><button class="btn pri" onclick="elegirRol('comprador')">Comprador</button></div>
+      <div class="bx"><h3>Soy desarrolladora</h3><p class="sb">Publico mi proyecto, recibo leads y respondo reseñas.</p><button class="btn pri" onclick="elegirRol('desarrolladora')">Desarrolladora</button></div>
     </div>
-  </section>`;
+  </div></div>`;
 }
 
 // =====================================================================
@@ -311,6 +326,7 @@ function filtros() {
   <p class="sb" style="margin-top:8px">Click: deseable (naranja) → imprescindible ★ (rojo) → quitar.</p>`;
 }
 function toggleArr(arr, v) { const i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); render(); }
+function toggleFiltros() { st.filtrosOpen = !st.filtrosOpen; render(); }
 function cicloPrioridad(k) { st.q[k] = st.q[k] === 2 ? undefined : (st.q[k] === 1 ? 2 : 1); if(!st.q[k]) delete st.q[k]; render(); }
 
 function buscar() {
@@ -321,7 +337,10 @@ function buscar() {
     (p.expensas_miles||9999) <= st.e
   ).map(p => ({ p, s: sc(p).s })).sort((a,b) => b.s - a.s);
 
-  return `<div class="lay"><div class="fl">${filtros()}</div><div>
+  return `<div class="lay">
+    <button class="fb" onclick="toggleFiltros()">🔎 Filtros${st.filtrosOpen?" (ocultar)":""}</button>
+    <div class="fl${st.filtrosOpen?" open":""}">${filtros()}</div>
+    <div>
     <h2>${res.length} proyectos encontrados</h2>
     <div class="grid">${res.map(({p,s},i)=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})">
       <div class="ph" data-l="${p.desarrolladoras?.verificado?"Verificada":"Sin verificar"}"><span class="cm">${s}% match</span>${p.nombre}</div>
