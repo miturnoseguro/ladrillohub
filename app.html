@@ -84,6 +84,7 @@ input[type="range"]{width:100%;accent-color:var(--rc)}
     <div class="role" id="roleBox"></div>
   </div>
 </header>
+<div id="authErr" style="display:none;max-width:1200px;margin:12px auto 0;padding:0 16px"></div>
 <main id="M"><div class="load">Cargando…</div></main>
 <div id="roleModal"></div>
 <div class="ts" id="ts"></div>
@@ -96,6 +97,16 @@ input[type="range"]{width:100%;accent-color:var(--rc)}
 const SUPABASE_URL = "https://bakizufgwpdmxfxdqglw.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJha2l6dWZnd3BkbXhmeGRxZ2x3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNjE0ODMsImV4cCI6MjEwNTgzNzQ4M30.zilP-A0HvChtG6SMNVP_kqKtg6P_-L2ppwyrGixWikw";
 // =====================================================================
+
+// Si Supabase devuelve un error al volver de Google, viene en la URL (#error_description=...).
+// Lo capturamos antes de crear el cliente para poder mostrarlo.
+const authErrorURL = (() => {
+  const h = new URLSearchParams(location.hash.replace(/^#/, ""));
+  const q = new URLSearchParams(location.search);
+  const desc = h.get("error_description") || q.get("error_description");
+  const code = h.get("error_code") || q.get("error_code") || h.get("error") || q.get("error");
+  return desc ? { desc: desc.replace(/\+/g, " "), code } : null;
+})();
 
 let sb = null;
 const configurado = !SUPABASE_URL.includes("TU-PROYECTO") && !SUPABASE_ANON_KEY.includes("TU-ANON-KEY");
@@ -132,6 +143,13 @@ const TN = ["Resumen", "Costos y escribano", "Sociedad", "Obra", "Reseñas", "Co
 // ARRANQUE
 // =====================================================================
 async function boot() {
+  if (authErrorURL) {
+    console.error("Error de autenticación:", authErrorURL);
+    const box = document.getElementById("authErr");
+    box.style.display = "block";
+    box.innerHTML = `<div class="bx" style="background:var(--wnt);border-color:var(--wn)"><b>No se pudo completar el ingreso con Google</b><p class="sb" style="margin-top:4px">${authErrorURL.desc}${authErrorURL.code ? " (" + authErrorURL.code + ")" : ""}</p></div>`;
+    history.replaceState({}, "", location.pathname);
+  }
   if (!configurado) {
     document.getElementById("M").innerHTML = `<div class="setup">
       <h2>Falta configurar Supabase</h2>
@@ -224,7 +242,7 @@ async function cargarLeadsDesarrolladora() {
 async function loginGoogle() {
   // URL limpia (sin ?query ni #hash) para que coincida con la lista de Redirect URLs de Supabase
   const redirectTo = window.location.origin + window.location.pathname;
-  const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo } });
+  const { error } = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo, queryParams: { prompt: "select_account" } } });
   if (error) { console.error(error); toast("No se pudo iniciar sesión: " + error.message); }
 }
 async function logout() {
@@ -236,7 +254,7 @@ async function elegirRol(rol) {
   document.querySelectorAll(".modal-bx button").forEach(b => (b.disabled = true));
   const u = st.session.user;
   const { error } = await sb.from("perfiles").upsert(
-    { id: u.id, rol, nombre: u.user_metadata?.full_name || u.email, email: u.email },
+    { id: u.id, rol, rol_confirmado: true, nombre: u.user_metadata?.full_name || u.email, email: u.email },
     { onConflict: "id" }
   );
   if (error) {
@@ -269,7 +287,7 @@ function nav() {
   const rb = document.getElementById("roleBox");
   if (!st.session) {
     rb.innerHTML = `<button class="on" onclick="loginGoogle()">Ingresar con Google</button>`;
-  } else if (!st.perfil?.rol) {
+  } else if (!st.perfil?.rol_confirmado) {
     rb.innerHTML = `<span class="sb" style="margin-right:6px">${st.session.user.email||""}</span><button onclick="logout()">Salir</button>`;
   } else {
     rb.innerHTML = `<span class="sb" style="margin-right:6px">${st.perfil.nombre||""} · ${st.perfil.rol}</span><button onclick="logout()">Salir</button>`;
@@ -280,7 +298,7 @@ async function render() {
   nav();
   const M = document.getElementById("M");
   const rm = document.getElementById("roleModal");
-  if (st.session && !st.perfil?.rol) {
+  if (st.session && !st.perfil?.rol_confirmado) {
     rm.innerHTML = onboarding();
     M.innerHTML = "";
     return;
