@@ -166,29 +166,73 @@ if (configurado) {
 const n = (x) => Math.round(x || 0).toLocaleString("es-AR");
 const toast = (m) => { const t = document.getElementById("ts"); t.textContent = m; t.style.opacity = 1; setTimeout(() => (t.style.opacity = 0), 2200); };
 
-// Texto resumido de Términos y Condiciones mostrado en el onboarding.
-// El documento completo debería vivir en una página aparte (reemplazá
-// TERMINOS_URL más abajo cuando la tengas online) — esto es un resumen
-// para que el usuario pueda leerlo antes de elegir su perfil.
-const TERMINOS_URL = "#"; // TODO: reemplazar por el link a los T&C completos
+// Texto de Términos y Condiciones mostrado en el onboarding, con scroll
+// propio (no linkeamos a ningún otro lado, todo el texto vive acá adentro).
 const TERMINOS_HTML = `
-  <p><b>Quiénes somos:</b> Ladrillo Hub conecta compradores interesados en
-  desarrollos inmobiliarios con las desarrolladoras de esos proyectos.</p>
-  <p><b>Fichas con datos públicos:</b> algunas fichas de proyectos se arman
-  solo con información pública (ubicación, unidades) hasta que la
-  desarrolladora las reclama y completa con fotos y material propio.
-  Cualquier desarrolladora puede pedir la baja de su ficha escribiéndonos.</p>
-  <p><b>Propiedad intelectual:</b> el contenido que subís (fotos, brochures,
-  textos) debe ser de tu autoría o contar con autorización para publicarse.</p>
-  <p><b>Pagos:</b> ciertas funciones (como revelar el contacto entre
-  comprador y desarrolladora) tienen un costo, procesado por Mercado Pago.
-  No almacenamos datos de tarjetas.</p>
-  <p><b>Rol de la plataforma:</b> somos un intermediario tecnológico; la
-  operación inmobiliaria en sí (boletos, escrituración, plazos de obra)
-  queda a cargo exclusivo de las partes.</p>
-  <p><b>Datos personales:</b> tratamos tus datos conforme a la Ley 25.326.
-  Podés pedir acceso, rectificación o baja escribiéndonos.</p>
-  <p>Este es un resumen. <a href="${TERMINOS_URL}" target="_blank" rel="noopener">Leé los Términos y Condiciones completos acá</a>.</p>
+  <h4 style="margin:0 0 4px">1. Quiénes somos y qué es Ladrillo Hub</h4>
+  <p>Ladrillo Hub conecta a personas interesadas en comprar unidades en
+  desarrollos inmobiliarios ("Compradores") con las empresas desarrolladoras
+  de esos proyectos ("Desarrolladoras"). El uso de la Plataforma implica la
+  aceptación plena de estos Términos y Condiciones.</p>
+
+  <h4 style="margin:14px 0 4px">2. Registro de cuenta</h4>
+  <p>Para usar la Plataforma es necesario registrarse con datos verdaderos,
+  exactos y actualizados. El usuario es responsable de la confidencialidad
+  de sus credenciales y de toda actividad realizada desde su cuenta.</p>
+
+  <h4 style="margin:14px 0 4px">3. Fichas con datos públicos y reclamo</h4>
+  <p>Algunas fichas de proyectos se publican con información de carácter
+  público (nombre, ubicación, unidades) hasta que la Desarrolladora
+  correspondiente las reclama y las completa con fotos, brochure y
+  material propio. Estas fichas no incluyen fotografías ni textos
+  originales tomados de sitios de terceros sin autorización. La
+  Desarrolladora puede pedir la baja de su ficha en cualquier momento
+  escribiéndonos, sin necesidad de que medie reclamo previo.</p>
+
+  <h4 style="margin:14px 0 4px">4. Propiedad intelectual</h4>
+  <p>Todo contenido que subís (fotos, brochures, renders, textos) debe ser
+  de tu autoría o contar con autorización para publicarse. Al subirlo, nos
+  das una licencia no exclusiva para exhibirlo dentro de la Plataforma. Si
+  un tercero considera que algún contenido infringe sus derechos, puede
+  notificarlo y lo revisamos a la brevedad.</p>
+
+  <h4 style="margin:14px 0 4px">5. Pagos</h4>
+  <p>Ciertas funciones (como revelar el contacto entre Comprador y
+  Desarrolladora) tienen un costo, procesado por Mercado Pago. No
+  almacenamos datos de tarjetas ni medios de pago.</p>
+
+  <h4 style="margin:14px 0 4px">6. Rol de Ladrillo Hub</h4>
+  <p>Actuamos como intermediario tecnológico que facilita el contacto
+  entre las partes. No participamos ni nos responsabilizamos por la
+  operación inmobiliaria en sí (boletos, escrituración, plazos de obra,
+  calidad de las unidades), que queda a cargo exclusivo de Comprador y
+  Desarrolladora.</p>
+
+  <h4 style="margin:14px 0 4px">7. Datos personales</h4>
+  <p>Tratamos tus datos personales conforme a la Ley 25.326 de Protección
+  de Datos Personales. Podés ejercer tus derechos de acceso, rectificación
+  y supresión escribiéndonos. La Agencia de Acceso a la Información
+  Pública es el Órgano de Control de esta ley.</p>
+
+  <h4 style="margin:14px 0 4px">8. Limitación de responsabilidad</h4>
+  <p>En la máxima medida permitida por la ley, no somos responsables por
+  daños indirectos derivados del uso de la Plataforma ni por contenido
+  cargado por otros usuarios, sin perjuicio de los mecanismos de reclamo
+  y baja descriptos más arriba.</p>
+
+  <h4 style="margin:14px 0 4px">9. Modificaciones</h4>
+  <p>Podemos modificar estos Términos en cualquier momento. Los cambios
+  relevantes se informan a través de la Plataforma; el uso continuado
+  luego de una modificación implica su aceptación.</p>
+
+  <h4 style="margin:14px 0 4px">10. Ley aplicable</h4>
+  <p>Estos Términos se rigen por las leyes de la República Argentina, sin
+  perjuicio de los derechos que asistan a los consumidores conforme a la
+  normativa de defensa del consumidor.</p>
+
+  <h4 style="margin:14px 0 4px">11. Contacto</h4>
+  <p>Ante cualquier consulta, reclamo o pedido de baja de contenido,
+  escribinos a [EMAIL DE CONTACTO].</p>
 `;
 
 // -------- estado global en memoria --------
@@ -558,15 +602,15 @@ function renderMercadoModal() {
 
 function onboarding() {
   const nombre = (st.session?.user?.user_metadata?.full_name || "").split(" ")[0];
-  return `<div class="modal-ov" role="dialog" aria-modal="true" aria-labelledby="rolTitulo"><div class="modal-bx">
+  return `<div class="modal-ov" role="dialog" aria-modal="true" aria-labelledby="rolTitulo"><div class="modal-bx" style="max-width:640px">
     <h2 id="rolTitulo">${nombre ? "¡Hola, " + nombre + "!" : "¡Bienvenido/a!"} ¿Qué perfil te identifica?</h2>
     <p class="sb" style="margin:10px auto;max-width:420px">Elegí con qué perfil vas a usar Ladrillo Hub. Lo podés cambiar más adelante.</p>
     <div class="g2" style="margin:20px auto">
       <div class="bx"><h3>Soy comprador/a</h3><p class="sb">Comparo proyectos y comparto mi ficha con las desarrolladoras que me cierran.</p><button class="btn pri" onclick="elegirRol('comprador')">Soy comprador/a</button></div>
       <div class="bx"><h3>Soy desarrolladora</h3><p class="sb">Publico mi proyecto, recibo leads y respondo reseñas.</p><button class="btn pri" onclick="elegirRol('desarrolladora')">Soy desarrolladora</button></div>
     </div>
-    <div style="max-width:420px;margin:0 auto 12px">
-      <div style="height:50px;overflow-y:auto;border:1px solid var(--ln);border-radius:8px;padding:8px 10px;text-align:left;font-size:.72rem;line-height:1.45;color:var(--gr)">
+    <div style="margin:0 auto 12px">
+      <div style="height:250px;overflow-y:auto;border:1px solid var(--ln);border-radius:8px;padding:8px 10px;text-align:left;font-size:.72rem;line-height:1.45;color:var(--gr)">
         ${TERMINOS_HTML}
       </div>
       <p class="sb" style="margin-top:8px;font-size:.75rem">Al elegir un perfil, aceptás automáticamente los Términos y Condiciones de Ladrillo Hub.</p>
