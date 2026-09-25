@@ -193,6 +193,9 @@ const st = {
     fondoReserva: false, fondoEquipamiento: false,
   },
   subiendo: false,
+  editProyectoId: null,   // id del proyecto (ya publicado) que se está editando, o null
+  editProyecto: null,      // fila completa del proyecto en edición
+  editFotos: [],           // filas de proyecto_fotos del proyecto en edición
 };
 
 // Catálogo de documentación de la desarrolladora.
@@ -330,12 +333,13 @@ async function cargarLeadsDesarrolladora() {
 }
 
 // =====================================================================
-// ARCHIVOS (bucket público "media" en Supabase Storage)
+// ARCHIVOS (bucket público "proyecto-archivos" en Supabase Storage)
 // =====================================================================
+const BUCKET = "proyecto-archivos";
 async function subirArchivo(path, file) {
-  const { error } = await sb.storage.from("media").upload(path, file, { upsert: true });
+  const { error } = await sb.storage.from(BUCKET).upload(path, file, { upsert: true });
   if (error) { toast("Error subiendo archivo: " + error.message); return null; }
-  const { data } = sb.storage.from("media").getPublicUrl(path);
+  const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
   return data.publicUrl;
 }
 
@@ -842,10 +846,119 @@ async function panelDesarrolladora() {
   <p class="sb" style="margin-top:10px">Tus reseñas de Google y de Ladrillo Hub están en la tab <a href="#" onclick="go('resenasD');return false">Reseñas</a>. Los hitos de obra se cargan por proyecto en la tab <a href="#" onclick="go('obra');return false">Obra</a>.</p>
 
   <h2 style="margin-top:26px">Mis proyectos</h2>
-  <div class="grid">${st.misProyectosDev.map(p=>`<div class="bx" style="margin:0"><div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div></div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}</div>
+  <div class="grid">${st.misProyectosDev.map(p=>`<div class="bx" style="margin:0"><div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div><button class="btn" style="margin-top:8px" onclick="abrirEdicionProyecto('${p.id}')">Cargar fotos y documentos</button></div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}</div>
 
+  ${st.editProyectoId ? edicionProyectoForm() : ""}
   ${nuevoProyectoForm()}
   ${st.hitoModalOpen ? modalHitoHTML() : ""}`;
+}
+
+// =====================================================================
+// EDICIÓN DE PROYECTO YA PUBLICADO (cargar fotos / docs / brochure / render)
+// =====================================================================
+async function abrirEdicionProyecto(id) {
+  st.subiendo = true; render();
+  const { data: p, error } = await sb.from("proyectos").select("*").eq("id", id).single();
+  if (error || !p) { toast("No se pudo cargar el proyecto"); st.subiendo = false; render(); return; }
+  const { data: fotos } = await sb.from("proyecto_fotos").select("*").eq("proyecto_id", id).order("orden");
+  st.editProyectoId = id;
+  st.editProyecto = p;
+  st.editFotos = fotos || [];
+  st.subiendo = false;
+  render();
+}
+function cerrarEdicionProyecto() {
+  st.editProyectoId = null; st.editProyecto = null; st.editFotos = [];
+  render();
+}
+
+async function subirFotosEdicion(files, tipo) {
+  if (!files || !files.length) return;
+  const id = st.editProyectoId; if (!id) return;
+  st.subiendo = true; render();
+  let orden = st.editFotos.reduce((mx, f) => Math.max(mx, f.orden || 0), 0);
+  for (const f of files) {
+    const url = await subirArchivo(`proyectos/${id}/fotos/${Date.now()}-${f.name}`, f);
+    if (!url) continue;
+    orden += 1;
+    const { data, error } = await sb.from("proyecto_fotos").insert({ proyecto_id: id, url, tipo, orden }).select().single();
+    if (error) { toast("Error guardando foto: " + error.message); continue; }
+    st.editFotos.push(data);
+  }
+  st.subiendo = false;
+  st.fotosProyecto = null; // fuerza recarga del carrusel de la ficha
+  render();
+}
+async function eliminarFotoEdicion(fotoId) {
+  const { error } = await sb.from("proyecto_fotos").delete().eq("id", fotoId);
+  if (error) { toast("Error borrando foto: " + error.message); return; }
+  st.editFotos = st.editFotos.filter(f => f.id !== fotoId);
+  st.fotosProyecto = null;
+  render();
+}
+
+async function subirDocumentoEdicion(key, file) {
+  if (!file) return;
+  const id = st.editProyectoId; if (!id) return;
+  st.subiendo = true; render();
+  const url = await subirArchivo(`proyectos/${id}/docs/${key}-${Date.now()}-${file.name}`, file);
+  if (url) {
+    const documentos = { ...(st.editProyecto.documentos || {}), [key]: url };
+    const documentos_activos = Array.from(new Set([...(st.editProyecto.documentos_activos || []), key]));
+    const { error } = await sb.from("proyectos").update({ documentos, documentos_activos }).eq("id", id);
+    if (error) toast("Error guardando documento: " + error.message);
+    else { st.editProyecto.documentos = documentos; st.editProyecto.documentos_activos = documentos_activos; }
+  }
+  st.subiendo = false; render();
+}
+async function subirBrochureEdicion(file) {
+  if (!file) return;
+  const id = st.editProyectoId; if (!id) return;
+  st.subiendo = true; render();
+  const url = await subirArchivo(`proyectos/${id}/brochure-${Date.now()}-${file.name}`, file);
+  if (url) {
+    const { error } = await sb.from("proyectos").update({ brochure_url: url }).eq("id", id);
+    if (error) toast("Error guardando brochure: " + error.message); else st.editProyecto.brochure_url = url;
+  }
+  st.subiendo = false; render();
+}
+async function subirRenderEdicion(file) {
+  if (!file) return;
+  const id = st.editProyectoId; if (!id) return;
+  st.subiendo = true; render();
+  const url = await subirArchivo(`proyectos/${id}/render-${Date.now()}.jpg`, file);
+  if (url) {
+    const { error } = await sb.from("proyectos").update({ render_url: url }).eq("id", id);
+    if (error) toast("Error guardando render: " + error.message); else st.editProyecto.render_url = url;
+  }
+  st.subiendo = false; render();
+}
+
+function edicionProyectoForm() {
+  const p = st.editProyecto;
+  return `<div class="bx" style="margin-top:22px;border:2px solid var(--rc)">
+  <div class="r1"><h4>Cargar fotos y documentos: ${p.nombre}</h4><button class="btn" style="width:auto;padding:4px 10px" onclick="cerrarEdicionProyecto()">Cerrar</button></div>
+
+  <h4>Fotos reales de la obra</h4>
+  <input class="st" type="file" accept="image/*" multiple ${st.subiendo?"disabled":""} onchange="subirFotosEdicion(this.files,'real')">
+  <div class="thumbs">${st.editFotos.filter(f=>f.tipo==="real").map(f=>`<div style="position:relative;display:inline-block"><img src="${f.url}"><button class="btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;padding:0;line-height:1;border-radius:50%" onclick="eliminarFotoEdicion('${f.id}')">×</button></div>`).join("") || '<p class="sb">Sin fotos reales todavía.</p>'}</div>
+
+  <h4 style="margin-top:14px">Renders</h4>
+  <input class="st" type="file" accept="image/*" multiple ${st.subiendo?"disabled":""} onchange="subirFotosEdicion(this.files,'render')">
+  <div class="thumbs">${st.editFotos.filter(f=>f.tipo==="render").map(f=>`<div style="position:relative;display:inline-block"><img src="${f.url}"><button class="btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;padding:0;line-height:1;border-radius:50%" onclick="eliminarFotoEdicion('${f.id}')">×</button></div>`).join("") || '<p class="sb">Sin renders todavía.</p>'}</div>
+
+  <h4 style="margin-top:14px">Brochure (PDF)</h4>
+  <input class="st" type="file" accept="application/pdf" ${st.subiendo?"disabled":""} onchange="subirBrochureEdicion(this.files[0])">
+  ${p.brochure_url?`<p class="sb" style="margin-top:6px">✓ Brochure cargado — <a href="${p.brochure_url}" target="_blank" rel="noopener">ver</a></p>`:""}
+
+  <h4 style="margin-top:14px">Documentación de la desarrolladora</h4>
+  ${DOCS.filter(d=>d.archivo).map(d=>`<div class="doc-row${(p.documentos_activos||[]).includes(d.key)?" on":""}">
+    <div><b>${d.label}</b>${p.documentos?.[d.key]?' <span class="ok" style="font-size:.76rem">✓ cargado</span>':' <span class="wn" style="font-size:.76rem">falta subir</span>'}
+      <input class="st" type="file" style="margin-top:6px" ${st.subiendo?"disabled":""} onchange="subirDocumentoEdicion('${d.key}',this.files[0])">
+      ${p.documentos?.[d.key]?`<p class="sb" style="margin-top:4px"><a href="${p.documentos[d.key]}" target="_blank" rel="noopener">Ver archivo actual</a></p>`:""}
+    </div>
+  </div>`).join("")}
+  </div>`;
 }
 
 function nuevoProyectoForm() {
