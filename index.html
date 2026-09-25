@@ -343,10 +343,44 @@ async function afterAuth() {
   }
   if (run !== authRun) return;
   st.perfil = perfil; st.desarrolladora = des; st.ficha = ficha;
-  if (!st.session) st.leads = [];
+  if (!st.session) { st.leads = []; st.misSolicitudesReclamo = []; }
   else if (perfil?.rol === "comprador") await cargarLeadsComprador();
-  else if (perfil?.rol === "desarrolladora" && des) await cargarLeadsDesarrolladora();
+  else if (perfil?.rol === "desarrolladora" && des) { await cargarLeadsDesarrolladora(); await cargarMisSolicitudesReclamo(); }
   if (run !== authRun) return;
+  render();
+}
+
+// Solicitudes de reclamo de ficha que ya mandó la desarrolladora logueada,
+// para no dejarla mandar la misma solicitud dos veces y para mostrarle el
+// estado (pendiente / aprobado / rechazado) en cada ficha.
+async function cargarMisSolicitudesReclamo() {
+  if (!st.desarrolladora) { st.misSolicitudesReclamo = []; return; }
+  const { data, error } = await sb
+    .from("solicitudes_reclamo")
+    .select("*")
+    .eq("desarrolladora_id", st.desarrolladora.id);
+  if (error) { console.error("solicitudes_reclamo:", error); st.misSolicitudesReclamo = []; return; }
+  st.misSolicitudesReclamo = data || [];
+}
+
+async function reclamarFicha(proyectoId) {
+  if (!st.session) return loginGoogle();
+  if (st.perfil?.rol !== "desarrolladora" || !st.desarrolladora) {
+    toast("Para reclamar una ficha necesitás una cuenta de desarrolladora.");
+    return;
+  }
+  const yaExiste = (st.misSolicitudesReclamo || []).some(s => s.proyecto_id === proyectoId);
+  if (yaExiste) { toast("Ya enviaste una solicitud para esta ficha."); return; }
+
+  const { data, error } = await sb
+    .from("solicitudes_reclamo")
+    .insert({ proyecto_id: proyectoId, desarrolladora_id: st.desarrolladora.id })
+    .select()
+    .single();
+  if (error) { toast("No se pudo enviar la solicitud: " + error.message); console.error(error); return; }
+
+  st.misSolicitudesReclamo = [...(st.misSolicitudesReclamo || []), data];
+  toast("Solicitud enviada. La vamos a revisar y te avisamos cuando quede activa.");
   render();
 }
 
@@ -617,10 +651,10 @@ function buscar() {
     <div id="resLista">
     <h2>${res.length} proyectos encontrados</h2>
     <div class="grid">${res.map(({p,s},i)=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})">
-      <div class="ph" data-l="${p.desarrolladoras?.verificado?"Verificada":"Sin verificar"}"><span class="cm">${s}% match</span>${p.nombre}</div>
+      <div class="ph" data-l="${p.reclamado ? (p.desarrolladoras?.verificado?"Verificada":"Sin verificar") : "Ficha sin reclamar"}"><span class="cm">${s}% match</span>${p.nombre}</div>
       <div class="bd"><div class="r1"><h3>${p.nombre}</h3><b>${p.rating||"–"} ★</b></div>
       <p class="sb">${p.barrio} · ${p.tipo} · USD ${n(p.precio_usd_m2)}/m²</p>
-      <p class="sb">${p.desarrolladoras?.nombre||""} · entrega ${p.trimestre_entrega||p.anio_entrega||"a confirmar"}</p></div></div>`).join("") || '<p class="sb" style="margin-top:14px">No hay proyectos que cumplan estos filtros todavía.</p>'}</div>
+      <p class="sb">${p.reclamado ? (p.desarrolladoras?.nombre||"") : (p.desarrolladora_nombre_provisorio||"Desarrolladora sin confirmar")} · entrega ${p.trimestre_entrega||p.anio_entrega||"a confirmar"}</p></div></div>`).join("") || '<p class="sb" style="margin-top:14px">No hay proyectos que cumplan estos filtros todavía.</p>'}</div>
   </div></div>`;
 }
 
@@ -686,7 +720,7 @@ async function ficha() {
   const yaEnLead = st.leads?.some(l => l.proyecto_id === p.id);
   return `<p class="sb"><a href="#" onclick="go('buscar');return false">← Volver a resultados</a></p>
   ${fichaCarousel()}
-  <div class="fx"><div><h2>${p.nombre}</h2><p class="sb">${p.barrio}${p.subzona?" · "+p.subzona:""} · ${p.tipo} · ${p.desarrolladoras?.nombre||""}</p>
+  <div class="fx"><div><h2>${p.nombre}</h2><p class="sb">${p.barrio}${p.subzona?" · "+p.subzona:""} · ${p.tipo} · ${p.reclamado ? (p.desarrolladoras?.nombre||"") : `${p.desarrolladora_nombre_provisorio||"Desarrolladora sin confirmar"} <span style="opacity:.7">(ficha sin reclamar)</span>`}</p>
   <div class="tb">${TN.map((t,i)=>`<button class="${i==st.tab?"on":""}" onclick="tab(${i})">${t}</button>`).join("")}</div>
   ${await tabsHTML[st.tab](p)}</div>
   <aside class="as"><div class="ring" style="--p:${x.s}"><i>${x.s}%</i></div><p style="text-align:center"><b>Compatibilidad con vos</b></p>
@@ -694,7 +728,30 @@ async function ficha() {
   <button class="btn" onclick="go('comparar')">Comparar con otros</button>
   ${st.perfil?.rol==="comprador" ? (yaEnLead ? '<p class="ok" style="margin-top:10px">✔ Ya compartiste tu ficha con este proyecto</p>' : `<button class="btn pri" onclick="compartirFicha('${p.id}')">Compartir mi ficha</button>`) : ""}
   ${!st.session ? `<button class="btn pri" onclick="loginGoogle()">Ingresar para comparar</button>` : ""}
+  ${reclamoBox(p)}
   </aside></div>`;
+}
+
+// Caja de "reclamar ficha", visible en el detalle del proyecto solo
+// cuando la ficha todavía no fue reclamada por ninguna desarrolladora.
+function reclamoBox(p) {
+  if (p.reclamado) return "";
+  const solicitud = (st.misSolicitudesReclamo || []).find(s => s.proyecto_id === p.id);
+  if (solicitud) {
+    const texto = solicitud.estado === "aprobado"
+      ? "✔ Reclamo aprobado"
+      : solicitud.estado === "rechazado"
+      ? "Tu solicitud fue rechazada. Escribinos si creés que es un error."
+      : "Tu solicitud está pendiente de revisión.";
+    return `<p class="sb" style="margin-top:10px">${texto}</p>`;
+  }
+  if (!st.session) {
+    return `<p class="sb" style="margin-top:10px">¿Sos esta desarrolladora? <a href="#" onclick="loginGoogle();return false">Ingresá</a> para reclamar esta ficha.</p>`;
+  }
+  if (st.perfil?.rol !== "desarrolladora") {
+    return "";
+  }
+  return `<button class="btn" style="margin-top:10px" onclick="reclamarFicha('${p.id}')">¿Sos esta desarrolladora? Reclamá esta ficha</button>`;
 }
 
 function precioPorPiso(p, piso) {
