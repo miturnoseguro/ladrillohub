@@ -6,6 +6,7 @@
 <title>Ladrillo Hub — Desarrollos comparables</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{--rc:#e7384f;--rt:#fde8ea;--ink:#222;--gr:#717171;--ln:#e4e4e4;--bg:#fff;--soft:#f7f7f7;--ok:#00895d;--okt:#e1f5ec;--wn:#b8860b;--wnt:#fff6de;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
@@ -85,12 +86,28 @@ footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:
 .thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .thumbs img{width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--ln)}
 .hist{font-size:1.7rem;font-weight:800}
+.badge{display:inline-flex;align-items:center;gap:5px;background:var(--wnt);color:var(--wn);font-weight:700;font-size:.72rem;padding:5px 11px;border-radius:99px;margin:0 6px 6px 0}
+.badge.gold{background:#fff2cc;color:#8a6d00}
+.avwrap{position:relative;width:100%}
+.avwrap .cover{margin-bottom:0}
+.profpic{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid var(--bg);background:var(--rt);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--rc);font-size:1.6rem}
+.profpic-dev{position:absolute;left:50%;bottom:-48px;transform:translateX(-50%);z-index:2;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.profpic-comp{margin:14px auto 4px;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+.dev-after-cover{margin-top:56px;text-align:center}
+.doc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--ln);border-radius:12px;padding:10px 12px;margin-top:8px}
+.doc-row.on{border-color:var(--rc)}
+.sw{position:relative;width:38px;height:22px;border-radius:99px;background:var(--ln);flex:none;cursor:pointer}
+.sw.on{background:var(--rc)}
+.sw i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s}
+.sw.on i{left:18px}
+.floorbox{display:flex;align-items:center;gap:8px;margin-top:6px}
+.pendbox{background:var(--wnt);border:1px solid var(--wn);border-radius:12px;padding:12px 14px;margin-top:10px}
 </style>
 </head>
 <body>
 <header>
   <div class="hd">
-    <div class="brand" style="cursor:pointer" onclick="go('inicio')">Ladrillo Hub</div>
+    <div style="cursor:pointer;line-height:1.1" onclick="go('inicio')"><div class="brand">Ladrillo Hub</div><div style="font-size:.6rem;color:var(--gr);font-weight:600">sponsoreado por Big Daat</div></div>
     <nav id="nav"></nav>
     <div class="role" id="roleBox"></div>
   </div>
@@ -145,19 +162,43 @@ const st = {
   featuresByGroup: {},
   labByKey: {},
   p: 0,                   // índice de proyecto abierto (dentro de st.proyectos)
+  pisoSel: null,           // piso elegido en la ficha (para precio por piso)
   tab: 0,
   leads: [],
   resenas: {},            // { proyecto_id: [reseñas] }
   b: [], t: [], m: 4000, e: 300, // filtros de búsqueda
+  docsFiltro: [],          // filtros de documentos/condiciones (planos, proforma_escritura, fondo_reserva, fondo_equipamiento)
   filtrosOpen: false,     // muestra/oculta filtros en mobile
   q: {},                  // prioridades marcadas en "Buscar" (0/1/2)
   mercadoOpen: false,
   hitoModalOpen: false,
   hitosDev: [],
   misProyectosDev: [],
-  nuevoProyecto: { features: [], fotos: [], brochureUrl: null, renderUrl: null },
+  obraProyectoSel: null,   // proyecto elegido dentro de la tab "Obra" para cargarle hitos
+  obraHitos: [],
+  nuevoProyecto: {
+    features: [], fotos: [], brochureUrl: null, renderUrl: null,
+    pisosTotal: null, incrementoPiso: 0,
+    documentosActivos: [], documentos: {},
+    fondoReserva: false, fondoEquipamiento: false,
+  },
   subiendo: false,
 };
+
+// Catálogo de documentación de la desarrolladora.
+// filtro:true => además de requerirse para publicar, aparece como filtro para el comprador.
+const DOCS = [
+  { key: "cuit_matricula",      label: "CUIT y matrícula",            filtro: false, archivo: true },
+  { key: "proforma_reglamento", label: "Proforma de reglamento",      filtro: false, archivo: true },
+  { key: "proforma_escritura",  label: "Proforma de escritura",       filtro: true,  archivo: true },
+  { key: "fotos_reales",        label: "Fotos reales de la obra",     filtro: false, archivo: true },
+  { key: "planos",              label: "Planos",                      filtro: true,  archivo: true },
+  { key: "datos_publicos",      label: "Datos públicos",              filtro: false, archivo: true },
+  { key: "escribano_datos",     label: "Datos del escribano",         filtro: false, archivo: true },
+  { key: "fondo_reserva",       label: "Fondo de reserva incluido",   filtro: true,  archivo: false },
+  { key: "fondo_equipamiento",  label: "Fondo de equipamiento incluido", filtro: true, archivo: false },
+];
+const docLabel = (k) => DOCS.find(d=>d.key===k)?.label || k;
 
 // -------- iconos sobrios (trazo negro, sin relleno) --------
 const ICONS = {
@@ -343,12 +384,12 @@ function go(v) {
   render(); window.scrollTo(0, 0);
 }
 function tab(i) { st.tab = i; render(); }
-function op(idx) { st.p = idx; go("ficha"); }
+function op(idx) { st.p = idx; st.pisoSel = null; go("ficha"); }
 
 function nav() {
   const items = st.perfil?.rol === "desarrolladora"
     ? [["inicio","Inicio"],["leads","Leads"],["resenasD","Reseñas"],["obra","Obra"]]
-    : [["inicio","Inicio"],["buscar","Buscar"],["compartir","Mi ficha"]];
+    : [["inicio","Inicio"],["buscar","Buscar"],["compartir","Mi ficha"],["resenas","Reseñas"]];
   document.getElementById("nav").innerHTML = items.map(([v,l]) => `<button class="${st.v===v?"on":""}" onclick="go('${v}')">${l}</button>`).join("");
 
   const rb = document.getElementById("roleBox");
@@ -371,7 +412,7 @@ async function render() {
     return;
   }
   rm.innerHTML = "";
-  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD };
+  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD, resenas: resenasComprador };
   M.innerHTML = await (views[st.v] || vistaInicio)();
   renderMercadoModal();
 }
@@ -470,8 +511,14 @@ function filtros() {
   <h4>Tipo</h4>${["Depto","PH","Casa"].map(t=>`<span class="c${st.t.includes(t)?" m":""}" onclick="toggleArr(st.t,'${t}')">${t}</span>`).join("")}
   <h4>Tope USD/m²: ${st.m}</h4><input type="range" min="2000" max="6000" step="50" value="${st.m}" oninput="st.m=+this.value;render()">
   <h4>Tope expensas ($ miles): ${st.e}</h4><input type="range" min="100" max="400" step="10" value="${st.e}" oninput="st.e=+this.value;render()">
+  <h4>Documentación / condiciones</h4>${DOCS.filter(d=>d.filtro).map(d=>`<span class="c${st.docsFiltro.includes(d.key)?" m":""}" onclick="toggleArr(st.docsFiltro,'${d.key}')">${d.label}</span>`).join("")}
   ${grupos.map(([g,items])=>`<h4>${g}</h4>${items.map(x=>`<span class="c${st.q[x.key]?" "+(st.q[x.key]===2?"m":"w"):""}" onclick="cicloPrioridad('${x.key}')">${x.label}${st.q[x.key]===2?" ★":""}</span>`).join("")}`).join("")}
   <p class="sb" style="margin-top:8px">Click: deseable (naranja) → imprescindible ★ (rojo) → quitar.</p>`;
+}
+function proyectoTieneDoc(p, key) {
+  if (key === "fondo_reserva") return !!p.fondo_reserva_incluido;
+  if (key === "fondo_equipamiento") return !!p.fondo_equipamiento_incluido;
+  return (p.documentos_activos || []).includes(key);
 }
 function toggleArr(arr, v) { const i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); render(); }
 function toggleFiltros() { st.filtrosOpen = !st.filtrosOpen; render(); }
@@ -482,7 +529,8 @@ function buscar() {
     (!st.b.length || st.b.includes(p.barrio)) &&
     (!st.t.length || st.t.includes(p.tipo)) &&
     (p.precio_usd_m2||0) <= st.m &&
-    (p.expensas_miles||9999) <= st.e
+    (p.expensas_miles||9999) <= st.e &&
+    (!st.docsFiltro.length || st.docsFiltro.every(k => proyectoTieneDoc(p, k)))
   ).map(p => ({ p, s: sc(p).s })).sort((a,b) => b.s - a.s);
 
   return `<div class="lay">
@@ -504,7 +552,7 @@ function mercado() {
     const vals = st.proyectos.map(get), mx = Math.max(...vals, 1);
     return `<h4>${t}</h4>` + st.proyectos.map(p=>`<div class="ml"><span style="width:170px">${p.barrio} · ${p.nombre}</span><div class="bar" style="flex:1;margin:6px 10px"><i style="width:${(get(p)/mx)*100}%;background:var(--rc)"></i></div><b>${fmt(get(p))}</b></div>`).join("");
   };
-  return `<h2>Mercado por barrio</h2><p class="sb">Cruce automático de los proyectos reales cargados en Palermo, Belgrano y Núñez</p>
+  return `<p class="sb">Cruce automático de los proyectos reales cargados en Palermo, Belgrano y Núñez</p>
   ${row("Valor USD/m²", p=>p.precio_usd_m2||0, v=>"USD "+n(v))}
   ${row("Índice de confiabilidad", p=>p.indice_confiabilidad||0, v=>v)}
   ${row("Reseñas", p=>p.rating||0, v=>v+" ★")}`;
@@ -532,7 +580,20 @@ async function ficha() {
   </aside></div>`;
 }
 
-const tabResumen = (p) => `<div class="bx"><h4>Resumen</h4><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Expensas</span><b>${p.expensas_miles?"$"+p.expensas_miles+"k":"a confirmar"}</b></div><div class="kv"><span>Entrega</span><b>${p.trimestre_entrega||p.anio_entrega||"a confirmar"}</b></div><div class="kv"><span>Confiabilidad</span><b>${p.indice_confiabilidad||"–"}/100</b></div><div class="kv"><span>Reseñas</span><b>${p.rating||"–"} ★</b></div></div><div class="bx"><h4>Descripción</h4><p class="sb">${p.descripcion||"—"}</p>${p.fuente_url?`<p class="sb" style="margin-top:8px">Fuente: <a href="${p.fuente_url}" target="_blank" rel="noopener">${p.fuente_url}</a></p>`:""}</div>`;
+function precioPorPiso(p, piso) {
+  const base = p.precio_usd_m2 || 0;
+  const inc = p.incremento_pct_piso || 0;
+  return Math.round(base * Math.pow(1 + inc/100, Math.max(0, piso - 1)));
+}
+function selPiso(v) { st.pisoSel = +v; render(); }
+const tabResumen = (p) => {
+  const tienePisos = p.pisos_totales && p.pisos_totales > 1;
+  if (tienePisos && !st.pisoSel) st.pisoSel = 1;
+  const precioMostrado = tienePisos ? precioPorPiso(p, st.pisoSel) : p.precio_usd_m2;
+  return `<div class="bx"><h4>Resumen</h4>
+  ${tienePisos ? `<div class="kv"><span>Piso</span><b><select onchange="selPiso(this.value)" style="border:1px solid var(--ln);border-radius:8px;padding:4px 8px">${Array.from({length:p.pisos_totales},(_,i)=>i+1).map(pi=>`<option value="${pi}" ${pi===st.pisoSel?"selected":""}>Piso ${pi}</option>`).join("")}</select></b></div>` : ""}
+  <div class="kv"><span>USD/m²${tienePisos?" (piso "+st.pisoSel+")":""}</span><b>${n(precioMostrado)}</b></div><div class="kv"><span>Expensas</span><b>${p.expensas_miles?"$"+p.expensas_miles+"k":"a confirmar"}</b></div><div class="kv"><span>Entrega</span><b>${p.trimestre_entrega||p.anio_entrega||"a confirmar"}</b></div><div class="kv"><span>Confiabilidad</span><b>${p.indice_confiabilidad||"–"}/100</b></div><div class="kv"><span>Reseñas</span><b>${p.rating||"–"} ★</b></div></div><div class="bx"><h4>Descripción</h4><p class="sb">${p.descripcion||"—"}</p>${p.fuente_url?`<p class="sb" style="margin-top:8px">Fuente: <a href="${p.fuente_url}" target="_blank" rel="noopener">${p.fuente_url}</a></p>`:""}</div>`;
+};
 
 const tabCostos = (p) => { const pr = (p.precio_usd_m2||0)*55; return `<h4>Escribano y cierre estimado</h4><div class="bx"><div class="kv"><span>Escribano designado</span><b>${p.escribano||"a informar"}</b></div><div class="kv"><span>Precio unidad tipo (55 m²)</span><b>USD ${n(pr)}</b></div><div class="kv"><span>Honorarios (1,5%–2,2% + IVA)</span><b>USD ${n(pr*0.015*1.21)} – ${n(pr*0.022*1.21)}</b></div><div class="kv"><span>Sellos (est. 1,5%)</span><b>USD ${n(pr*0.015)}</b></div></div>`; };
 
@@ -620,11 +681,68 @@ async function pagar(leadId, rol) {
   if (data?.init_point) window.location.href = data.init_point;
 }
 
+// Se llama cuando se detecta que un lead pasó a "match" (contacto revelado en ambos
+// sentidos). Reparte las insignias de gamificación una sola vez por cuenta.
+async function otorgarInsignias(lead) {
+  if (st.perfil?.rol === "comprador" && st.perfil && !(st.perfil.insignias||[]).includes("comprador_exitoso")) {
+    const insignias = [...(st.perfil.insignias||[]), "comprador_exitoso"];
+    const { error } = await sb.from("perfiles").update({ insignias }).eq("id", st.perfil.id);
+    if (!error) st.perfil.insignias = insignias;
+  }
+  if (st.desarrolladora && !(st.desarrolladora.insignias||[]).includes("vendedor")) {
+    const insignias = [...(st.desarrolladora.insignias||[]), "vendedor"];
+    const { error } = await sb.from("desarrolladoras").update({ insignias }).eq("id", st.desarrolladora.id);
+    if (!error) st.desarrolladora.insignias = insignias;
+  }
+}
+
+function bloqueMatch(l) {
+  if (!l.contacto_revelado) return "";
+  return `<div class="bx" style="background:var(--okt);margin-top:8px">
+    <b>Match confirmado</b>
+    <button class="btn pri" style="margin-top:8px" onclick="solicitarInhibicion('${l.id}')">Solicitud de certificado de inhibición y dominio</button>
+    <p class="sb" style="margin-top:4px">El costo de este trámite se acuerda directamente entre las partes.</p>
+    <button class="btn" style="margin-top:6px" onclick="generarPDFDocumentacion('${l.proyecto_id||l.proyectos?.id||''}')">Descargar PDF con toda la documentación</button>
+  </div>`;
+}
+// Arma un PDF con toda la documentación cargada del proyecto/desarrolladora
+// (se ofrece a ambas partes una vez que el match está confirmado).
+async function generarPDFDocumentacion(proyectoId) {
+  if (!proyectoId) { toast("No se encontró el proyecto"); return; }
+  const { data: p } = await sb.from("proyectos").select("*, desarrolladoras(*)").eq("id", proyectoId).maybeSingle();
+  if (!p) { toast("No se pudo cargar el proyecto"); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 18;
+  const linea = (t, bold) => { doc.setFont(undefined, bold ? "bold" : "normal"); doc.text(String(t), 14, y); y += 8; if (y > 280) { doc.addPage(); y = 18; } };
+  linea("Ladrillo Hub — Ficha completa del proyecto", true);
+  linea(p.nombre, true);
+  linea(`Desarrolladora: ${p.desarrolladoras?.nombre || ""}`);
+  linea(`Barrio: ${p.barrio || ""} · Tipo: ${p.tipo || ""}`);
+  linea(`USD/m²: ${n(p.precio_usd_m2)}${p.pisos_totales ? " (piso 1) — " + p.pisos_totales + " pisos" : ""}`);
+  y += 4;
+  linea("Documentación cargada por la desarrolladora:", true);
+  (p.documentos_activos || []).forEach(key => {
+    const url = p.documentos?.[key];
+    linea(`- ${docLabel(key)}: ${url ? url : "(condición activada, sin archivo)"}`);
+  });
+  if (p.fondo_reserva_incluido) linea("- Fondo de reserva incluido");
+  if (p.fondo_equipamiento_incluido) linea("- Fondo de equipamiento incluido");
+  if (p.brochure_url) linea(`- Brochure: ${p.brochure_url}`);
+  doc.save(`ficha-${(p.nombre||"proyecto").replace(/\s+/g,"-")}.pdf`);
+}
+async function solicitarInhibicion(leadId) {
+  const { error } = await sb.from("solicitudes_inhibicion").insert({ lead_id: leadId, solicitado_por: st.session.user.id });
+  if (error) { toast("Error: " + error.message); return; }
+  toast("Solicitud enviada. Coordinen el pago del trámite entre las partes.");
+}
+
 async function compartir() {
   if (!st.session) return `<h2>Mi ficha de comprador</h2><p class="sb">Ingresá con Google para armar y compartir tu ficha.</p><button class="btn pri" onclick="loginGoogle()">Ingresar con Google</button>`;
   const c = (arr) => arr.map(k=>`<span class="c">${st.labByKey[k]||k}</span>`).join("") || '<span class="sb">—</span>';
   const im = Object.keys(st.q).filter(k=>st.q[k]===2), de = Object.keys(st.q).filter(k=>st.q[k]===1);
   await cargarLeadsComprador();
+  for (const l of st.leads) if (l.estado === "match") await otorgarInsignias(l);
   return `<h2>Mi ficha de comprador</h2><p class="sb">Es privada: solo vos la ves hasta que hay match, y podés borrarla cuando quieras.</p>
   <div class="g2" style="margin-top:14px"><div class="bx"><h4>Tu búsqueda</h4>
   <div class="kv"><span>Barrios</span><b>${st.b.join(", ")||"Todos"}</b></div>
@@ -633,7 +751,9 @@ async function compartir() {
   <h4>Imprescindibles</h4>${c(im)}<h4>Deseables</h4>${c(de)}
   <button class="btn" onclick="guardarFicha()">Guardar ficha</button>
   <button class="btn" style="border-color:var(--wn);color:var(--wn)" onclick="borrarFicha()">Borrar mi ficha</button></div>
-  <div class="bx"><h4>Mis leads</h4>${st.leads.length ? st.leads.map(l=>`<div class="kv"><span>${l.proyectos?.nombre||""} · ${l.compatibilidad||""}%</span><b class="${l.estado==='match'?'ok':''}">${estadoLegible(l.estado)}</b></div>`).join("") : '<p class="sb">Todavía no compartiste tu ficha con ningún proyecto. Hacelo desde la ficha de cada proyecto.</p>'}</div></div>`;
+  <div class="bx"><h4>Mis leads</h4>${st.leads.length ? st.leads.map(l=>`<div><div class="kv"><span>${l.proyectos?.nombre||""} · ${l.compatibilidad||""}%</span><b class="${l.estado==='match'?'ok':''}">${estadoLegible(l.estado)}</b></div>
+  ${l.estado==="comprador_pago" ? `<div class="pendbox">Ya abonaste para compartir tu ficha con la desarrolladora. Aguardá a que la desarrolladora efectúe el pago para ver tu ficha y acercar la concreción de la operación.</div>` : ""}
+  ${bloqueMatch(l)}</div>`).join("") : '<p class="sb">Todavía no compartiste tu ficha con ningún proyecto. Hacelo desde la ficha de cada proyecto.</p>'}</div></div>`;
 }
 function estadoLegible(e) { return { nuevo:"Enviada, sin pago", comprador_pago:"Pagaste, esperando desarrolladora", desarrolladora_pago:"Desarrolladora pagó, esperando tu pago", match:"✔ Match — contacto revelado", descartado:"Descartado" }[e] || e; }
 
@@ -648,45 +768,29 @@ async function borrarFicha() {
 // -------- DESARROLLADORA: panel completo (suplanta el Inicio) --------
 async function panelDesarrolladora() {
   const d = st.desarrolladora;
-  const [proyR, idsR] = await Promise.all([
-    sb.from("proyectos").select("*").eq("desarrolladora_id", d.id).order("created_at",{ascending:false}),
-    sb.from("hitos_desarrolladora").select("*").eq("desarrolladora_id", d.id).order("created_at",{ascending:false}),
-  ]);
+  await verificarNegocioGoogle();
+  const proyR = await sb.from("proyectos").select("*").eq("desarrolladora_id", d.id).order("created_at",{ascending:false});
   st.misProyectosDev = proyR.data || [];
-  st.hitosDev = idsR.data || [];
-  const idsProy = st.misProyectosDev.map(p=>p.id);
-  let resenas = [];
-  if (idsProy.length) {
-    const rr = await sb.from("resenas").select("*, perfiles(nombre), proyectos(nombre)").in("proyecto_id", idsProy).order("created_at",{ascending:false});
-    resenas = rr.data || [];
-  }
+  const foto = d.foto_perfil || googleAvatar();
 
   return `
-  <div class="cover" style="${d.foto_portada?`background-image:url('${d.foto_portada}')`:""}"></div>
+  <div class="avwrap">
+    <div class="cover" style="${d.foto_portada?`background-image:url('${d.foto_portada}')`:""}"></div>
+    ${foto ? `<img class="profpic profpic-dev" src="${foto}">` : `<div class="profpic profpic-dev">${(d.nombre||"?")[0]}</div>`}
+  </div>
   <input type="file" accept="image/*" id="fPortadaDev" style="display:none" onchange="subirPortadaDev(this.files[0])">
-  <button class="btn" style="width:auto;display:inline-block;padding:6px 12px;margin-top:8px" ${st.subiendo?"disabled":""} onclick="document.getElementById('fPortadaDev').click()">Cambiar foto de portada</button>
+  <input type="file" accept="image/*" id="fPerfilDev" style="display:none" onchange="subirFotoPerfilDev(this.files[0])">
+  <div class="dev-after-cover">
+    <button class="btn" style="width:auto;display:inline-block;padding:6px 12px" ${st.subiendo?"disabled":""} onclick="document.getElementById('fPortadaDev').click()">Cambiar portada</button>
+    <button class="btn" style="width:auto;display:inline-block;padding:6px 12px" ${st.subiendo?"disabled":""} onclick="document.getElementById('fPerfilDev').click()">Cambiar foto de perfil</button>
+  </div>
 
-  <h2 style="margin-top:16px">${d.nombre||""}${d.verificado?` <span class="chk-v">✓ Verificada</span>`:""}</h2>
+  <h2 style="margin-top:16px;text-align:center">${d.nombre||""}${d.verificado?` <span class="chk-v">✓ Verificada</span>`:""}</h2>
+  <div style="text-align:center">${insigniasHTML(d.insignias)}</div>
   <input class="st" id="devNombre" value="${d.nombre||""}" placeholder="Nombre de la empresa">
   <input class="st" id="devSitio" value="${d.sitio_web||""}" placeholder="Sitio web (https://...)">
   <button class="btn" onclick="guardarDatosDev()">Guardar datos</button>
-
-  <div class="g2" style="margin-top:16px">
-    <div class="bx"><h4>${icGoogle()} Reseñas de Google</h4>
-      ${d.google_rating ? `<p style="margin-top:6px"><b>${d.google_rating} ★</b> · ${d.google_review_count||0} reseñas${d.google_reviews_url?` · <a href="${d.google_reviews_url}" target="_blank" rel="noopener">ver en Google</a>`:""}</p>` : `<p class="sb" style="margin-top:6px">Todavía no cargaste tus reseñas de Google.</p>`}
-      <input class="st" id="ggRating" type="number" step="0.1" min="1" max="5" placeholder="Rating (ej. 4.6)" value="${d.google_rating??""}">
-      <input class="st" id="ggCount" type="number" placeholder="Cantidad de reseñas" value="${d.google_review_count??""}">
-      <input class="st" id="ggUrl" placeholder="Link a tu perfil de Google" value="${d.google_reviews_url||""}">
-      <button class="btn" onclick="guardarGoogleDev()">Guardar</button>
-    </div>
-    <div class="bx"><h4>Reseñas en Ladrillo Hub</h4>
-      ${resenas.length ? resenas.map(r=>`<div class="kv"><span><b>${r.perfiles?.nombre||"Usuario"}</b> (${r.proyectos?.nombre}) ${"★".repeat(r.estrellas)}<br>${r.comentario||""}</span></div>`).join("") : '<p class="sb">Todavía no ha dejado nadie una reseña en este sitio.</p>'}
-    </div>
-  </div>
-
-  <h2 style="margin-top:26px">Obra e hitos regulatorios</h2>
-  <button class="btn pri" style="max-width:220px" onclick="toggleModalHito(true)">+ Agregar hito</button>
-  <div class="timeline">${st.hitosDev.map(h=>`<div class="tl-it"><b>${h.titulo}</b><p class="sb">${new Date(h.created_at).toLocaleString("es-AR",{dateStyle:"medium",timeStyle:"short"})}</p>${h.descripcion?`<p style="margin-top:4px">${h.descripcion}</p>`:""}${h.archivo_url?`<p style="margin-top:4px"><a href="${h.archivo_url}" target="_blank" rel="noopener">Ver archivo</a></p>`:""}</div>`).join("") || '<p class="sb" style="margin-top:10px">Todavía no cargaste hitos.</p>'}</div>
+  <p class="sb" style="margin-top:10px">Tus reseñas de Google y de Ladrillo Hub están en la tab <a href="#" onclick="go('resenasD');return false">Reseñas</a>. Los hitos de obra se cargan por proyecto en la tab <a href="#" onclick="go('obra');return false">Obra</a>.</p>
 
   <h2 style="margin-top:26px">Mis proyectos</h2>
   <div class="grid">${st.misProyectosDev.map(p=>`<div class="bx" style="margin:0"><div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div></div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}</div>
@@ -702,7 +806,12 @@ function nuevoProyectoForm() {
   <input class="st" id="pNombre" placeholder="Nombre del proyecto">
   <select class="st" id="pBarrio"><option>Palermo</option><option>Belgrano</option><option>Núñez</option><option>Otro</option></select>
   <select class="st" id="pTipo"><option>Depto</option><option>PH</option><option>Casa</option></select>
-  <input class="st" id="pPrecio" type="number" placeholder="USD por m²">
+  <input class="st" id="pPrecio" type="number" placeholder="USD por m² (planta baja / piso 1)">
+  <div class="floorbox">
+    <input class="st" id="pPisos" type="number" min="1" placeholder="Pisos totales del edificio" style="margin-top:0">
+    <input class="st" id="pIncremento" type="number" step="0.1" placeholder="% de aumento por piso" style="margin-top:0" value="${np.incrementoPiso||0}">
+  </div>
+  <p class="sb" style="margin-top:4px">Si el edificio tiene varios pisos, el comprador va a poder elegir el piso y ver cómo sube el USD/m² a medida que sube el edificio.</p>
   <input class="st" id="pExpensas" type="number" placeholder="Expensas estimadas ($ miles)">
   <input class="st" id="pEntrega" type="number" placeholder="Año de entrega">
   <textarea class="st" id="pDescripcion" rows="3" placeholder="Descripción del proyecto"></textarea>
@@ -722,10 +831,51 @@ function nuevoProyectoForm() {
   <input class="st" type="file" accept="image/*" ${st.subiendo?"disabled":""} onchange="subirRender(this.files[0])">
   ${np.renderUrl?`<img src="${np.renderUrl}" style="width:100%;border-radius:12px;margin-top:8px">`:""}
 
-  <button class="btn pri" style="margin-top:14px" ${st.subiendo?"disabled":""} onclick="crearProyecto()">${st.subiendo?"Subiendo…":"Publicar proyecto"}</button>
+  <h4>Documentación de la desarrolladora</h4>
+  <p class="sb">Activá lo que corresponda a tu proyecto. Lo que actives con documento queda como requisito para poder publicar, y lo marcado como filtro además lo va a poder filtrar el comprador.</p>
+  ${DOCS.map(d=>docRowHTML(d)).join("")}
+
+  <button class="btn pri" style="margin-top:14px" ${st.subiendo||!puedePublicar(np)?"disabled":""} onclick="crearProyecto()">${st.subiendo?"Subiendo…":"Publicar proyecto"}</button>
+  ${!puedePublicar(np) ? '<p class="wn" style="margin-top:6px">Para publicar, subí el documento de cada ítem que activaste arriba.</p>' : ""}
   </div>`;
 }
 function toggleFeatureNuevo(k) { const np=st.nuevoProyecto; const i=np.features.indexOf(k); i<0?np.features.push(k):np.features.splice(i,1); render(); }
+
+function docRowHTML(d) {
+  const np = st.nuevoProyecto;
+  const activo = np.documentosActivos.includes(d.key);
+  const cargado = d.archivo ? !!np.documentos[d.key] : (d.key==="fondo_reserva" ? np.fondoReserva : d.key==="fondo_equipamiento" ? np.fondoEquipamiento : false);
+  return `<div class="doc-row${activo?" on":""}">
+    <div><b>${d.label}</b>${d.filtro?'<span class="sb"> · filtro para el comprador</span>':""}${activo && d.archivo ? (cargado?' <span class="ok" style="font-size:.76rem">✓ cargado</span>':'<span class="wn" style="font-size:.76rem"> falta subir</span>') : ""}
+      ${activo && d.archivo ? `<input class="st" type="file" style="margin-top:6px" ${st.subiendo?"disabled":""} onchange="subirDocumentoProyecto('${d.key}',this.files[0])">` : ""}
+    </div>
+    <div class="sw${activo?" on":""}" onclick="toggleDocActivo('${d.key}')"><i></i></div>
+  </div>`;
+}
+function toggleDocActivo(key) {
+  const np = st.nuevoProyecto;
+  const i = np.documentosActivos.indexOf(key);
+  if (i < 0) { np.documentosActivos.push(key); } else { np.documentosActivos.splice(i,1); delete np.documentos[key]; }
+  if (key === "fondo_reserva") np.fondoReserva = i < 0;
+  if (key === "fondo_equipamiento") np.fondoEquipamiento = i < 0;
+  render();
+}
+async function subirDocumentoProyecto(key, file) {
+  if (!file) return;
+  st.subiendo = true; render();
+  const url = await subirArchivo(`proyectos/tmp/docs/${key}-${Date.now()}-${file.name}`, file);
+  if (url) st.nuevoProyecto.documentos[key] = url;
+  st.subiendo = false; render();
+}
+// El botón "Publicar proyecto" queda deshabilitado hasta que todos los documentos
+// activados (los que requieren archivo) estén efectivamente cargados.
+function puedePublicar(np) {
+  return np.documentosActivos.every(key => {
+    const d = DOCS.find(x=>x.key===key);
+    if (!d || !d.archivo) return true;
+    return !!np.documentos[key];
+  });
+}
 
 async function subirFotosProyecto(files) {
   st.subiendo = true; render();
@@ -756,19 +906,25 @@ async function crearProyecto() {
   const barrio = document.getElementById("pBarrio").value;
   const tipo = document.getElementById("pTipo").value;
   const precio = +document.getElementById("pPrecio").value || null;
+  const pisos_totales = +document.getElementById("pPisos").value || null;
+  const incremento_pct_piso = +document.getElementById("pIncremento").value || 0;
   const expensas = +document.getElementById("pExpensas").value || null;
   const entrega = +document.getElementById("pEntrega").value || null;
   const descripcion = document.getElementById("pDescripcion").value.trim() || null;
   const np = st.nuevoProyecto;
+  if (!puedePublicar(np)) { toast("Te falta cargar la documentación que activaste para poder publicar"); return; }
   const { error } = await sb.from("proyectos").insert({
-    nombre, barrio, tipo, precio_usd_m2: precio, expensas_miles: expensas, anio_entrega: entrega,
+    nombre, barrio, tipo, precio_usd_m2: precio, pisos_totales, incremento_pct_piso,
+    expensas_miles: expensas, anio_entrega: entrega,
     descripcion, features: np.features, fotos: np.fotos,
     brochure_url: np.brochureUrl || null, render_url: np.renderUrl || null,
+    documentos: np.documentos, documentos_activos: np.documentosActivos,
+    fondo_reserva_incluido: np.fondoReserva, fondo_equipamiento_incluido: np.fondoEquipamiento,
     desarrolladora_id: st.desarrolladora.id,
   });
   if (error) { toast("Error: " + error.message); return; }
   toast("Proyecto publicado");
-  st.nuevoProyecto = { features: [], fotos: [], brochureUrl: null, renderUrl: null };
+  st.nuevoProyecto = { features: [], fotos: [], brochureUrl: null, renderUrl: null, pisosTotal: null, incrementoPiso: 0, documentosActivos: [], documentos: {}, fondoReserva: false, fondoEquipamiento: false };
   await cargarProyectos();
   render();
 }
@@ -780,6 +936,16 @@ async function subirPortadaDev(file) {
   if (url) {
     const { error } = await sb.from("desarrolladoras").update({ foto_portada: url }).eq("id", st.desarrolladora.id);
     if (error) toast("Error guardando portada: " + error.message); else st.desarrolladora.foto_portada = url;
+  }
+  st.subiendo = false; render();
+}
+async function subirFotoPerfilDev(file) {
+  if (!file) return;
+  st.subiendo = true; render();
+  const url = await subirArchivo(`perfiles/dev-${st.desarrolladora.id}-${Date.now()}.jpg`, file);
+  if (url) {
+    const { error } = await sb.from("desarrolladoras").update({ foto_perfil: url }).eq("id", st.desarrolladora.id);
+    if (error) toast("Error: " + error.message); else st.desarrolladora.foto_perfil = url;
   }
   st.subiendo = false; render();
 }
@@ -805,23 +971,27 @@ async function guardarGoogleDev() {
 function modalHitoHTML() {
   return `<div class="modal-ov" onclick="if(event.target===this)toggleModalHito(false)"><div class="modal-bx" style="text-align:left">
     <h2>Agregar hito</h2>
-    <input class="st" id="hTitulo" placeholder="Título (ej: Aprobación de planos)">
-    <textarea class="st" id="hDesc" rows="3" placeholder="Descripción"></textarea>
-    <input class="st" id="hArchivo" type="file">
+    <input class="st" id="hTitulo" placeholder="Nombre del hito (ej: Aprobación de planos)">
+    <input class="st" id="hFecha" placeholder="Fecha estimada (si aún no está cumplido)">
+    <label class="sb" style="display:block;margin-top:6px"><input type="checkbox" id="hCumplido"> Ya está cumplido</label>
+    <input class="st" id="hArchivo" type="file" placeholder="Documento (opcional)">
     <button class="btn pri" ${st.subiendo?"disabled":""} onclick="guardarHito()">${st.subiendo?"Guardando…":"Guardar hito"}</button>
     <button class="btn" onclick="toggleModalHito(false)">Cancelar</button>
   </div></div>`;
 }
 function toggleModalHito(open) { st.hitoModalOpen = open; render(); }
 async function guardarHito() {
-  const titulo = document.getElementById("hTitulo").value.trim();
-  if (!titulo) { toast("Falta el título"); return; }
-  const descripcion = document.getElementById("hDesc").value.trim() || null;
+  const nombre = document.getElementById("hTitulo").value.trim();
+  if (!nombre) { toast("Falta el nombre del hito"); return; }
+  if (!st.obraProyectoSel) { toast("Elegí primero un proyecto"); return; }
+  const fecha_estimada = document.getElementById("hFecha").value.trim() || null;
+  const cumplido = document.getElementById("hCumplido").checked;
   const file = document.getElementById("hArchivo").files[0];
   st.subiendo = true; render();
-  let archivo_url = null;
-  if (file) archivo_url = await subirArchivo(`hitos/${st.desarrolladora.id}/${Date.now()}-${file.name}`, file);
-  const { error } = await sb.from("hitos_desarrolladora").insert({ desarrolladora_id: st.desarrolladora.id, titulo, descripcion, archivo_url });
+  let documento_url = null;
+  if (file) documento_url = await subirArchivo(`hitos/${st.obraProyectoSel}/${Date.now()}-${file.name}`, file);
+  const orden = (st.obraHitos?.length || 0) + 1;
+  const { error } = await sb.from("hitos_obra").insert({ proyecto_id: st.obraProyectoSel, nombre, fecha_estimada, cumplido, documento_url, orden });
   st.subiendo = false;
   if (error) { toast("Error: " + error.message); render(); return; }
   st.hitoModalOpen = false;
@@ -832,39 +1002,73 @@ async function guardarHito() {
 // -------- COMPRADOR: panel completo (suplanta el Inicio) --------
 async function panelComprador() {
   const p = st.perfil;
+  await verificarNegocioGoogle();
   await cargarLeadsComprador();
-  const { data: resenasData } = await sb.from("resenas_usuario").select("*").eq("perfil_id", p.id).order("created_at",{ascending:false});
-  const resenas = resenasData || [];
   const pagados = (st.leads||[]).filter(l => ["comprador_pago","desarrolladora_pago","match"].includes(l.estado)).length;
+  const matches = (st.leads||[]).filter(l => l.estado === "match").length;
+  const foto = p.foto_perfil || googleAvatar();
 
   return `
-  <div class="cover" style="${p.foto_portada?`background-image:url('${p.foto_portada}')`:""}"></div>
-  <input type="file" accept="image/*" id="fPortadaComp" style="display:none" onchange="subirPortadaComprador(this.files[0])">
-  <button class="btn" style="width:auto;display:inline-block;padding:6px 12px;margin-top:8px" ${st.subiendo?"disabled":""} onclick="document.getElementById('fPortadaComp').click()">Cambiar foto de portada</button>
+  <div style="text-align:center">
+    ${foto ? `<img class="profpic profpic-comp" src="${foto}">` : `<div class="profpic profpic-comp" style="margin:14px auto 4px">${(p.nombre||"?")[0]}</div>`}
+    <input type="file" accept="image/*" id="fPerfilComp" style="display:none" onchange="subirFotoPerfil(this.files[0])">
+    <div><button class="btn" style="width:auto;display:inline-block;padding:5px 12px;margin-top:2px" ${st.subiendo?"disabled":""} onclick="document.getElementById('fPerfilComp').click()">Cambiar foto de perfil</button></div>
+  </div>
 
-  <h2 style="margin-top:16px">${p.nombre||""}${p.gmail_verificado?` <span class="chk-v">✓ Verificado</span>`:""}</h2>
+  <h2 style="margin-top:14px;text-align:center">${p.nombre||""}${p.gmail_verificado?` <span class="chk-v">✓ Verificado</span>`:""}</h2>
+  ${insigniasHTML(p.insignias)}
   <input class="st" id="compSitio" value="${p.sitio_web||""}" placeholder="Sitio web (opcional)">
   <button class="btn" onclick="guardarSitioComprador()">Guardar</button>
-
-  <h4 style="margin-top:16px">Reseñas en Ladrillo Hub</h4>
-  <div class="bx">${resenas.length ? resenas.map(r=>`<div class="kv"><span>${"★".repeat(r.estrellas)}<br>${r.comentario||""}</span></div>`).join("") : '<p class="sb">Todavía nadie ha dejado una reseña en este sitio para este usuario.</p>'}</div>
 
   <h2 style="margin-top:26px">Tu historial</h2>
   <div class="g2">
     <div class="bx"><h4>Ingresos</h4><p class="hist">${p.veces_ingreso||0}</p><p class="sb">Veces que entraste con tu cuenta</p></div>
     <div class="bx"><h4>Búsquedas</h4><p class="hist">${p.busquedas_realizadas||0}</p><p class="sb">Veces que buscaste proyectos con filtros</p></div>
     <div class="bx"><h4>Pagos como prospecto</h4><p class="hist">${pagados}</p><p class="sb">Veces que pagaste para compartir tu ficha</p></div>
-  </div>`;
+    <div class="bx"><h4>Operaciones concretadas</h4><p class="hist">${matches}</p><p class="sb">Matches confirmados con desarrolladoras</p></div>
+  </div>
+  <p class="sb" style="margin-top:10px">Tus reseñas ahora están en la tab <a href="#" onclick="go('resenas');return false">Reseñas</a> del menú.</p>`;
 }
-async function subirPortadaComprador(file) {
+async function subirFotoPerfil(file) {
   if (!file) return;
   st.subiendo = true; render();
-  const url = await subirArchivo(`portadas/${st.session.user.id}-${Date.now()}.jpg`, file);
+  const url = await subirArchivo(`perfiles/${st.session.user.id}-${Date.now()}.jpg`, file);
   if (url) {
-    const { error } = await sb.from("perfiles").update({ foto_portada: url }).eq("id", st.session.user.id);
-    if (error) toast("Error: " + error.message); else st.perfil.foto_portada = url;
+    const { error } = await sb.from("perfiles").update({ foto_perfil: url }).eq("id", st.session.user.id);
+    if (error) toast("Error: " + error.message); else st.perfil.foto_perfil = url;
   }
   st.subiendo = false; render();
+}
+function googleAvatar() {
+  const m = st.session?.user?.user_metadata || {};
+  return m.avatar_url || m.picture || null;
+}
+function insigniasHTML(arr) {
+  arr = arr || [];
+  if (!arr.length) return "";
+  const nombres = { vendedor: "🏆 Vendedor Ladrillo Hub", comprador_exitoso: "🏅 Compra concretada", verificado_google: "✓ Negocio verificado" };
+  return `<div style="text-align:center;margin:8px 0">${arr.map(k=>`<span class="badge gold">${nombres[k]||k}</span>`).join("")}</div>`;
+}
+// Verifica si el gmail del usuario coincide con el de un negocio dado de alta en
+// Google Maps / Perfil de Empresa (tabla negocios_google, sincronizada externamente
+// con la Google Business Profile API). Si coincide, se auto-verifica y se traen
+// sus reseñas de Google automáticamente.
+async function verificarNegocioGoogle() {
+  if (!st.session?.user?.email) return;
+  const { data } = await sb.from("negocios_google").select("*").eq("email", st.session.user.email).maybeSingle();
+  if (!data) return;
+  const patch = { gmail_verificado: true };
+  if (st.perfil && !st.perfil.gmail_verificado) {
+    await sb.from("perfiles").update(patch).eq("id", st.session.user.id);
+    st.perfil.gmail_verificado = true;
+  }
+  if (st.desarrolladora && (data.google_rating || data.google_review_count)) {
+    await sb.from("desarrolladoras").update({
+      google_rating: data.google_rating, google_review_count: data.google_review_count,
+      google_reviews_url: data.google_reviews_url, verificado: true,
+    }).eq("id", st.desarrolladora.id);
+    Object.assign(st.desarrolladora, { google_rating: data.google_rating, google_review_count: data.google_review_count, google_reviews_url: data.google_reviews_url, verificado: true });
+  }
 }
 async function guardarSitioComprador() {
   const sitio_web = document.getElementById("compSitio").value.trim() || null;
@@ -876,27 +1080,87 @@ async function guardarSitioComprador() {
 async function leadsView() {
   if (!st.desarrolladora) return `<h2>Leads</h2><p class="sb">Primero creá tu cuenta de desarrolladora en "Mi proyecto".</p>`;
   await cargarLeadsDesarrolladora();
+  for (const l of st.leads) if (l.estado === "match") await otorgarInsignias(l);
   return `<h2>Leads compatibles con tus proyectos</h2><p class="sb">Recibís la ficha completa cuando pagás $50.000 y el comprador paga $10.000.</p>
   <div class="grid">${st.leads.map(l=>`<div class="bx" style="margin:0"><div class="row"><div class="ring" style="--p:${l.compatibilidad||0};width:64px;height:64px;margin:0"><i style="width:52px;height:52px;font-size:.85rem">${l.compatibilidad||0}%</i></div><div><b>${l.proyectos?.nombre||""}</b><p class="sb">${(l.compatibilidad||0)>90?"Alta probabilidad de compra":"Buena coincidencia"}</p></div></div>
   <div class="kv"><span>Estado</span><b>${estadoLegible(l.estado)}</b></div>
-  ${l.contacto_revelado ? `<div class="bx" style="background:var(--okt)"><b>Match confirmado</b><p class="sb">${l.perfiles?.nombre||""} · ${l.perfiles?.email||""}</p></div>` : `<button class="btn pri" onclick="pagar('${l.id}','desarrolladora')">Recibir ficha · $50.000</button>`}
-  </div>`).join("") || '<p class="sb">Todavía no tenés leads.</p>'}</div>`;
+  ${l.estado==="comprador_pago" ? `<div class="pendbox">Un comprador solicitó compartir su ficha con vos (ya abonó $10.000). Para ver la conexión y sus datos, aboná los $50.000.</div>` : ""}
+  ${l.contacto_revelado ? `<div class="bx" style="background:var(--okt)"><b>Match confirmado</b><p class="sb">${l.perfiles?.nombre||""} · ${l.perfiles?.email||""}</p></div>${bloqueMatch(l)}` : `<button class="btn pri" onclick="pagar('${l.id}','desarrolladora')">Recibir ficha · $50.000</button>`}
+  </div>`).join("") || '<p class="sb">Todavía no tenés leads.</p>'}
+  <p class="sb" style="margin-top:14px">Cuando un comprador paga, también te llega un email: <i>"Un comprador solicitó compartir su ficha con vos, para poder ver la conexión aboná los $50.000"</i> (lo envía la Edge Function <code>notify-developer-lead</code> — ver <code>supabase/functions/notify-developer-lead</code>).</p>`;
 }
 
 async function resenasD() {
   if (!st.desarrolladora) return `<h2>Reseñas</h2><p class="sb">Primero creá tu cuenta de desarrolladora.</p>`;
-  const { data: misProyectos } = await sb.from("proyectos").select("id,nombre").eq("desarrolladora_id", st.desarrolladora.id);
+  const d = st.desarrolladora;
+  const { data: misProyectos } = await sb.from("proyectos").select("id,nombre").eq("desarrolladora_id", d.id);
   const ids = (misProyectos||[]).map(p=>p.id);
-  if (!ids.length) return `<h2>Reseñas</h2><p class="sb">Todavía no tenés proyectos publicados.</p>`;
-  const { data: R } = await sb.from("resenas").select("*, perfiles(nombre), proyectos(nombre)").in("proyecto_id", ids).order("created_at",{ascending:false});
-  return `<h2>Reseñas recibidas</h2><div class="bx">${(R||[]).map(r=>`<div class="kv"><span><b>${r.perfiles?.nombre||"Usuario"}</b> (${r.proyectos?.nombre}) ${"★".repeat(r.estrellas)}<br>${r.comentario||""}</span></div>`).join("") || '<p class="sb">Sin reseñas todavía.</p>'}</div>`;
+  let R = [];
+  if (ids.length) {
+    const rr = await sb.from("resenas").select("*, perfiles(nombre), proyectos(nombre)").in("proyecto_id", ids).order("created_at",{ascending:false});
+    R = rr.data || [];
+  }
+  return `<h2>Reseñas</h2>
+  <div class="g2">
+    <div class="bx"><h4>${icGoogle()} Reseñas de Google</h4>
+      <p class="sb" style="margin-top:4px">Si tu Gmail coincide con el de tu Perfil de Empresa de Google Maps, se cargan solas.</p>
+      ${d.google_rating ? `<p style="margin-top:6px"><b>${d.google_rating} ★</b> · ${d.google_review_count||0} reseñas${d.google_reviews_url?` · <a href="${d.google_reviews_url}" target="_blank" rel="noopener">ver en Google</a>`:""}</p>` : `<p class="sb" style="margin-top:6px">Todavía no se detectaron reseñas de Google.</p>`}
+      <input class="st" id="ggRating" type="number" step="0.1" min="1" max="5" placeholder="Rating (ej. 4.6)" value="${d.google_rating??""}">
+      <input class="st" id="ggCount" type="number" placeholder="Cantidad de reseñas" value="${d.google_review_count??""}">
+      <input class="st" id="ggUrl" placeholder="Link a tu perfil de Google" value="${d.google_reviews_url||""}">
+      <button class="btn" onclick="guardarGoogleDev()">Guardar</button>
+    </div>
+    <div class="bx"><h4>Reseñas en Ladrillo Hub</h4>
+      ${R.length ? R.map(r=>`<div class="kv"><span><b>${r.perfiles?.nombre||"Usuario"}</b> (${r.proyectos?.nombre}) ${"★".repeat(r.estrellas)}<br>${r.comentario||""}</span></div>`).join("") : '<p class="sb">Todavía no ha dejado nadie una reseña.</p>'}
+    </div>
+  </div>`;
 }
 
+async function resenasComprador() {
+  if (!st.session) return `<h2>Reseñas</h2><p class="sb">Ingresá con Google para ver tus reseñas.</p>`;
+  const p = st.perfil;
+  const { data: resenasData } = await sb.from("resenas_usuario").select("*, desarrolladoras(nombre)").eq("perfil_id", p.id).order("created_at",{ascending:false});
+  const resenas = resenasData || [];
+  return `<h2>Reseñas</h2>
+  <div class="bx"><h4>${icGoogle()} Verificación con Google</h4>
+    <p class="sb" style="margin-top:4px">${p.gmail_verificado ? "Tu Gmail coincide con un negocio dado de alta en Google Maps · Perfil de Empresa, así que tus reseñas se cargan de forma automática." : "Tu Gmail todavía no coincide con ningún negocio verificado en Google Maps."}</p>
+  </div>
+  <h4 style="margin-top:16px">Reseñas que dejaron sobre vos las desarrolladoras</h4>
+  <div class="bx">${resenas.length ? resenas.map(r=>`<div class="kv"><span><b>${r.desarrolladoras?.nombre||"Desarrolladora"}</b> ${"★".repeat(r.estrellas)}<br>${r.comentario||""}</span></div>`).join("") : '<p class="sb">Todavía nadie dejó una reseña sobre vos.</p>'}</div>`;
+}
+
+// -------- DESARROLLADORA: Obra e hitos (por proyecto) --------
 async function obra() {
   if (!st.desarrolladora) return `<h2>Obra e hitos regulatorios</h2><p class="sb">Primero creá tu cuenta de desarrolladora.</p>`;
-  const { data: misProyectos } = await sb.from("proyectos").select("id,nombre").eq("desarrolladora_id", st.desarrolladora.id);
-  return `<h2>Obra e hitos regulatorios</h2><p class="sb">Los hitos se cargan por proyecto directamente en la tabla <code>hitos_obra</code> desde el panel de Supabase o vía API; lo que tildes se publica en la ficha pública del proyecto.</p>
-  ${(misProyectos||[]).map(p=>`<div class="bx"><b>${p.nombre}</b><p class="sb">Ver / editar hitos en Supabase → tabla hitos_obra, filtrando por proyecto_id = ${p.id}</p></div>`).join("") || '<p class="sb">Todavía no tenés proyectos.</p>'}`;
+  const { data: misProyectos } = await sb.from("proyectos").select("id,nombre,barrio,publicado").eq("desarrolladora_id", st.desarrolladora.id).order("created_at",{ascending:false});
+  st.misProyectosDev = misProyectos || [];
+  if (!st.misProyectosDev.length) {
+    return `<h2>Obra e hitos regulatorios</h2><p class="sb">Todavía no cargaste ningún proyecto. Cuando publiques uno desde "Inicio", va a aparecer acá para que le vayas agregando los hitos de obra.</p>`;
+  }
+  if (st.obraProyectoSel && !st.misProyectosDev.some(p=>p.id===st.obraProyectoSel)) st.obraProyectoSel = null;
+  if (!st.obraProyectoSel) st.obraProyectoSel = st.misProyectosDev[0].id;
+  const { data: H } = await sb.from("hitos_obra").select("*").eq("proyecto_id", st.obraProyectoSel).order("orden");
+  st.obraHitos = H || [];
+  const proyActual = st.misProyectosDev.find(p=>p.id===st.obraProyectoSel);
+
+  return `<h2>Obra e hitos regulatorios</h2>
+  <p class="sb">Elegí el proyecto y andá cargando sus hitos. Lo que marques como cumplido se publica automáticamente en la ficha pública, tab "Obra".</p>
+  <h4>Tu proyecto</h4>
+  ${st.misProyectosDev.map(p=>`<span class="c${p.id===st.obraProyectoSel?" m":""}" onclick="seleccionarProyectoObra('${p.id}')">${p.nombre}${p.publicado?"":" (borrador)"}</span>`).join("")}
+
+  <div class="bx" style="margin-top:14px">
+    <div class="r1"><b>${proyActual?.nombre||""}</b><button class="btn pri" style="width:auto;padding:8px 14px;margin:0" onclick="toggleModalHito(true)">+ Agregar hito</button></div>
+    <div class="timeline">${st.obraHitos.map(h=>`<div class="tl-it"><div class="r1"><b>${h.nombre}</b><button class="btn" style="width:auto;padding:4px 10px;margin:0;font-size:.72rem" onclick="marcarHito('${h.id}',${!h.cumplido})">${h.cumplido?"✅ Cumplido":"Marcar cumplido"}</button></div>
+    <p class="sb">${h.cumplido ? "Cumplido" : "Estimado: " + (h.fecha_estimada||"a definir")}</p>
+    ${h.documento_url?`<p style="margin-top:4px"><a href="${h.documento_url}" target="_blank" rel="noopener">Ver documento</a></p>`:""}</div>`).join("") || '<p class="sb" style="margin-top:10px">Todavía no cargaste hitos para este proyecto.</p>'}</div>
+  </div>`;
+}
+function seleccionarProyectoObra(id) { st.obraProyectoSel = id; render(); }
+async function marcarHito(id, cumplido) {
+  const { error } = await sb.from("hitos_obra").update({ cumplido }).eq("id", id);
+  if (error) { toast("Error: " + error.message); return; }
+  const h = st.obraHitos.find(x=>x.id===id); if (h) h.cumplido = cumplido;
+  render();
 }
 
 // =====================================================================
