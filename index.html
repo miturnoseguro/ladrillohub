@@ -469,6 +469,7 @@ function nav() {
   const items = st.perfil?.rol === "desarrolladora"
     ? [["inicio","Inicio"],["leads","Leads"],["resenasD","Reseñas"],["obra","Obra"]]
     : [["inicio","Inicio"],["buscar","Buscar"],["compartir","Mi ficha"],["resenas","Reseñas"]];
+  if (st.perfil?.es_admin) items.push(["admin","Admin"]);
   document.getElementById("nav").innerHTML = items.map(([v,l]) => `<button class="${st.v===v?"on":""}" onclick="go('${v}')">${l}</button>`).join("");
 
   const rb = document.getElementById("roleBox");
@@ -524,7 +525,7 @@ async function render() {
     return;
   }
   rm.innerHTML = "";
-  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD, resenas: resenasComprador };
+  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD, resenas: resenasComprador, admin: adminReclamos };
   M.innerHTML = await (views[st.v] || vistaInicio)();
   renderMercadoModal();
 }
@@ -730,6 +731,65 @@ async function ficha() {
   ${!st.session ? `<button class="btn pri" onclick="loginGoogle()">Ingresar para comparar</button>` : ""}
   ${reclamoBox(p)}
   </aside></div>`;
+}
+
+// =====================================================================
+// PANEL ADMIN — aprobar/rechazar reclamos de ficha
+// (solo visible y funcional para perfiles.es_admin = true, protegido
+// además por RLS en la base, no solo en el front)
+// =====================================================================
+async function adminReclamos() {
+  if (!st.perfil?.es_admin) return `<h2>Admin</h2><p class="sb">No tenés acceso a esta sección.</p>`;
+
+  const { data, error } = await sb
+    .from("solicitudes_reclamo")
+    .select("*, proyectos(nombre,barrio), desarrolladoras(nombre,sitio_web)")
+    .eq("estado", "pendiente")
+    .order("creado_en", { ascending: true });
+
+  if (error) { console.error(error); return `<h2>Admin</h2><p class="sb">Error cargando solicitudes: ${error.message}</p>`; }
+
+  const pendientes = data || [];
+  return `<h2>Reclamos de ficha pendientes</h2>
+  <p class="sb" style="margin-bottom:16px">${pendientes.length} solicitud${pendientes.length===1?"":"es"} esperando revisión.</p>
+  <div class="grid">${pendientes.map(s => `
+    <div class="bx">
+      <h3>${s.proyectos?.nombre || "(proyecto eliminado)"}</h3>
+      <p class="sb">${s.proyectos?.barrio || ""}</p>
+      <div class="kv"><span>Desarrolladora que reclama</span><b>${s.desarrolladoras?.nombre || ""}</b></div>
+      ${s.desarrolladoras?.sitio_web ? `<div class="kv"><span>Sitio web</span><b><a href="${s.desarrolladoras.sitio_web}" target="_blank">Visitar</a></b></div>` : ""}
+      <div class="kv"><span>Solicitado</span><b>${new Date(s.creado_en).toLocaleDateString("es-AR")}</b></div>
+      <div class="row" style="margin-top:12px;gap:8px">
+        <button class="btn pri" onclick="adminAprobarReclamo('${s.id}','${s.proyecto_id}','${s.desarrolladora_id}')">Aprobar</button>
+        <button class="btn" onclick="adminRechazarReclamo('${s.id}')">Rechazar</button>
+      </div>
+    </div>`).join("") || '<p class="sb">No hay solicitudes pendientes por ahora.</p>'}
+  </div>`;
+}
+
+async function adminAprobarReclamo(solicitudId, proyectoId, desarrolladoraId) {
+  const { error: e1 } = await sb.from("proyectos")
+    .update({ desarrolladora_id: desarrolladoraId, reclamado: true })
+    .eq("id", proyectoId);
+  if (e1) { toast("Error vinculando el proyecto: " + e1.message); console.error(e1); return; }
+
+  const { error: e2 } = await sb.from("solicitudes_reclamo")
+    .update({ estado: "aprobado", revisado_en: new Date().toISOString() })
+    .eq("id", solicitudId);
+  if (e2) { toast("El proyecto se vinculó pero no se pudo marcar la solicitud: " + e2.message); console.error(e2); return; }
+
+  toast("Reclamo aprobado.");
+  await cargarProyectos();
+  render();
+}
+
+async function adminRechazarReclamo(solicitudId) {
+  const { error } = await sb.from("solicitudes_reclamo")
+    .update({ estado: "rechazado", revisado_en: new Date().toISOString() })
+    .eq("id", solicitudId);
+  if (error) { toast("Error: " + error.message); console.error(error); return; }
+  toast("Solicitud rechazada.");
+  render();
 }
 
 // Caja de "reclamar ficha", visible en el detalle del proyecto solo
