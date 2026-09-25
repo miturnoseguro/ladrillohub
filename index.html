@@ -10,20 +10,25 @@
 <style>
 :root{--rc:#e7384f;--rt:#fde8ea;--ink:#222;--gr:#717171;--ln:#e4e4e4;--bg:#fff;--soft:#f7f7f7;--ok:#00895d;--okt:#e1f5ec;--wn:#b8860b;--wnt:#fff6de;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
-html,body{height:auto;background:#fff}
+html,body{height:auto;background:#fff;overflow-x:hidden;max-width:100vw}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Plus Jakarta Sans",system-ui,sans-serif}
 h2,h3,h4,p{margin:0}h2{font-size:1.4rem}h3{font-size:.98rem}h4{font-size:.86rem;margin:14px 0 6px}
 a{color:var(--rc)}button,input,select,textarea{font:inherit;color:inherit}
 .sb{color:var(--gr);font-size:.82rem}
-header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--ln)}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--ln);max-width:100vw}
 .hd{max-width:1200px;margin:auto;display:flex;align-items:center;gap:14px;padding:10px 16px}
-.brand{font-weight:800;color:var(--rc);font-size:1.1rem;white-space:nowrap}
-nav{display:flex;gap:6px;overflow-x:auto;flex:1}
-.role{display:flex;gap:6px;align-items:center}
-nav button,.tb button,.role button{border:1px solid var(--ln);background:var(--bg);color:var(--gr);border-radius:99px;padding:7px 14px;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.brand{font-weight:800;color:var(--rc);font-size:1.1rem;white-space:nowrap;flex-shrink:0}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0}
+.role{display:flex;gap:6px;align-items:center;flex-shrink:0;min-width:0;margin-left:auto}
+.role .sb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38vw}
+nav button,.tb button,.role button{border:1px solid var(--ln);background:var(--bg);color:var(--gr);border-radius:99px;padding:7px 14px;font-weight:600;font-size:.8rem;cursor:pointer;white-space:nowrap;flex-shrink:0}
 nav button.on,.tb button.on{background:var(--rc);color:#fff;border-color:var(--rc)}
 .role button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 @media (max-width:700px){.hd{flex-wrap:wrap}nav{order:3;flex-basis:100%}}
+@media (max-width:480px){.hd{gap:8px;padding:9px 12px}.brand{font-size:.98rem}.role .sb{max-width:120px;margin-right:4px}nav button,.role button{padding:6px 11px;font-size:.76rem}}
+#resbar{display:none}
+#resbar.show{display:flex;justify-content:center;align-items:center;gap:6px;padding:9px 14px;background:var(--ink);color:#fff;font-weight:700;font-size:.8rem;text-align:center;cursor:pointer}
+#resbar.show.hit{background:var(--rc)}
 main{max-width:1200px;margin:auto;padding:18px 16px 70px}
 .lay{display:grid;gap:22px}
 .fl{display:none;border:1px solid var(--ln);border-radius:16px;padding:14px}
@@ -46,8 +51,8 @@ main{max-width:1200px;margin:auto;padding:18px 16px 70px}
 .wn{color:var(--wn);font-size:.78rem;font-weight:700;margin-top:4px}
 .ok{color:var(--ok);font-weight:700}
 .best{color:var(--ok);font-weight:800}
-.fx{display:grid;gap:22px;margin-top:8px}
-.as,.bx{border:1px solid var(--ln);border-radius:16px;padding:16px}
+.fx{display:grid;gap:22px;margin-top:8px;min-width:0}
+.as,.bx{border:1px solid var(--ln);border-radius:16px;padding:16px;min-width:0}
 .as{align-self:start}
 .bx{margin-top:12px;border-radius:14px;padding:12px 14px}
 .tb{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
@@ -121,6 +126,7 @@ footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:
     <nav id="nav"></nav>
     <div class="role" id="roleBox"></div>
   </div>
+  <div id="resbar"></div>
 </header>
 <div id="authErr" style="display:none;max-width:1200px;margin:12px auto 0;padding:0 16px"></div>
 <main id="M"><div class="load">Cargando…</div></main>
@@ -414,6 +420,39 @@ function nav() {
   } else {
     rb.innerHTML = `<span class="sb" style="margin-right:6px">${st.perfil.nombre||""} · ${st.perfil.rol}</span><button onclick="logout()">Salir</button>`;
   }
+  pintarResBar();
+}
+
+// =====================================================================
+// BARRA FLOTANTE DE RESULTADOS (vista "Buscar")
+// =====================================================================
+function filtrarProyectos() {
+  return st.proyectos.filter(p =>
+    (!st.b.length || st.b.includes(p.barrio)) &&
+    (!st.t.length || st.t.includes(p.tipo)) &&
+    (p.precio_usd_m2||0) <= st.m &&
+    (p.expensas_miles||9999) <= st.e &&
+    (!st.docsFiltro.length || st.docsFiltro.every(k => proyectoTieneDoc(p, k)))
+  );
+}
+function filtrosActivos() {
+  return st.b.length > 0 || st.t.length > 0 || st.docsFiltro.length > 0 ||
+    Object.keys(st.q).length > 0 || st.m !== 4000 || st.e !== 300;
+}
+function pintarResBar() {
+  const rb = document.getElementById("resbar");
+  if (!rb) return;
+  if (st.v !== "buscar") { rb.className = ""; rb.innerHTML = ""; rb.onclick = null; return; }
+  if (!filtrosActivos()) {
+    rb.className = "show";
+    rb.innerHTML = "Empezá a filtrar y te diremos cuántos resultados encontramos";
+    rb.onclick = null;
+  } else {
+    const total = filtrarProyectos().length;
+    rb.className = "show hit";
+    rb.innerHTML = `${total} ${total===1?"resultado":"resultados"} encontrado${total===1?"":"s"} · ver abajo ↓`;
+    rb.onclick = () => document.getElementById("resLista")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 async function render() {
@@ -539,18 +578,12 @@ function toggleFiltros() { st.filtrosOpen = !st.filtrosOpen; render(); }
 function cicloPrioridad(k) { st.q[k] = st.q[k] === 2 ? undefined : (st.q[k] === 1 ? 2 : 1); if(!st.q[k]) delete st.q[k]; render(); }
 
 function buscar() {
-  const res = st.proyectos.filter(p =>
-    (!st.b.length || st.b.includes(p.barrio)) &&
-    (!st.t.length || st.t.includes(p.tipo)) &&
-    (p.precio_usd_m2||0) <= st.m &&
-    (p.expensas_miles||9999) <= st.e &&
-    (!st.docsFiltro.length || st.docsFiltro.every(k => proyectoTieneDoc(p, k)))
-  ).map(p => ({ p, s: sc(p).s })).sort((a,b) => b.s - a.s);
+  const res = filtrarProyectos().map(p => ({ p, s: sc(p).s })).sort((a,b) => b.s - a.s);
 
   return `<div class="lay">
     <button class="fb" onclick="toggleFiltros()">🔎 Filtros${st.filtrosOpen?" (ocultar)":""}</button>
     <div class="fl${st.filtrosOpen?" open":""}">${filtros()}</div>
-    <div>
+    <div id="resLista">
     <h2>${res.length} proyectos encontrados</h2>
     <div class="grid">${res.map(({p,s},i)=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})">
       <div class="ph" data-l="${p.desarrolladoras?.verificado?"Verificada":"Sin verificar"}"><span class="cm">${s}% match</span>${p.nombre}</div>
