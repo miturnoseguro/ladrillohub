@@ -347,7 +347,7 @@ function op(idx) { st.p = idx; go("ficha"); }
 
 function nav() {
   const items = st.perfil?.rol === "desarrolladora"
-    ? [["inicio","Inicio"],["buscar","Explorar"],["leads","Leads"],["resenasD","Reseñas"],["obra","Obra"]]
+    ? [["inicio","Inicio"],["leads","Leads"],["resenasD","Reseñas"],["obra","Obra"]]
     : [["inicio","Inicio"],["buscar","Buscar"],["compartir","Mi ficha"]];
   document.getElementById("nav").innerHTML = items.map(([v,l]) => `<button class="${st.v===v?"on":""}" onclick="go('${v}')">${l}</button>`).join("");
 
