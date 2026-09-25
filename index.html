@@ -271,6 +271,8 @@ const st = {
   editProyectoId: null,   // id del proyecto (ya publicado) que se está editando, o null
   editProyecto: null,      // fila completa del proyecto en edición
   editFotos: [],           // filas de proyecto_fotos del proyecto en edición
+  desarrolladorasSinReclamar: [], // para el selector manual cuando no hubo match por email
+  eligiendoDesarrolladora: false, // controla si se muestra ese selector
 };
 
 // Catálogo de documentación de la desarrolladora.
@@ -485,11 +487,69 @@ async function elegirRol(rol) {
     if (r.error) console.error("fichas_compradoras upsert:", r.error);
   }
   if (rol === "desarrolladora") {
-    // Se crea la cuenta de desarrolladora al toque, así la página de inicio
-    // ya puede mostrarse "suplantada" por sus datos sin pasos intermedios.
-    const r = await sb.from("desarrolladoras").upsert({ perfil_id: u.id, nombre }, { onConflict: "perfil_id" });
-    if (r.error) console.error("desarrolladoras upsert:", r.error);
+    await vincularOCrearDesarrolladora(u, nombre);
+    if (st.eligiendoDesarrolladora) { document.querySelectorAll(".modal-bx button").forEach(b => (b.disabled = false)); return; }
   }
+  await afterAuth();
+  go("inicio");
+}
+
+// Intenta reconocer a la desarrolladora por el Gmail con el que se logueó
+// (evita crear una cuenta duplicada de una que ya sembramos por su cuenta).
+// Si no hay match, le muestra una lista para que elija manualmente a cuál
+// pertenece, en vez de crearle una cuenta nueva sin querer.
+async function vincularOCrearDesarrolladora(u, nombre) {
+  const emailLower = (u.email || "").toLowerCase();
+
+  // 1) Match automático por email_provisorio, entre las que todavía
+  //    no tienen cuenta vinculada.
+  const match = await sb.from("desarrolladoras")
+    .select("id,nombre")
+    .is("perfil_id", null)
+    .ilike("email_provisorio", emailLower)
+    .maybeSingle();
+  if (match.error) console.error("match desarrolladora por email:", match.error);
+  if (match.data) {
+    const up = await sb.from("desarrolladoras").update({ perfil_id: u.id }).eq("id", match.data.id);
+    if (up.error) { console.error("vincular desarrolladora:", up.error); toast("No se pudo vincular tu cuenta: " + up.error.message); }
+    else toast(`Reconocimos tu cuenta como ${match.data.nombre}.`);
+    st.eligiendoDesarrolladora = false;
+    return;
+  }
+
+  // 2) Sin match: le mostramos las desarrolladoras sin reclamar para
+  //    que elija manualmente a cuál pertenece (con confirmación).
+  const { data: sinReclamar, error } = await sb.from("desarrolladoras")
+    .select("id,nombre,sitio_web")
+    .is("perfil_id", null)
+    .order("nombre");
+  if (error) console.error("desarrolladoras sin reclamar:", error);
+  st.desarrolladorasSinReclamar = sinReclamar || [];
+  st.eligiendoDesarrolladora = true;
+  render();
+}
+
+// Se llama al elegir una desarrolladora de la lista manual.
+async function confirmarVinculoDesarrolladora(desarrolladoraId) {
+  const u = st.session.user;
+  const { error } = await sb.from("desarrolladoras")
+    .update({ perfil_id: u.id, verificado: false }) // manual => admin la revisa después
+    .eq("id", desarrolladoraId)
+    .is("perfil_id", null); // por las dudas, que no pise una que se vinculó en el medio
+  if (error) { toast("No se pudo vincular: " + error.message); console.error(error); return; }
+  toast("Listo, vinculamos tu cuenta. La vamos a verificar en breve.");
+  st.eligiendoDesarrolladora = false;
+  await afterAuth();
+  go("inicio");
+}
+
+// "Ninguna de estas es mi empresa" => se crea una cuenta nueva, como antes.
+async function crearDesarrolladoraNueva() {
+  const u = st.session.user;
+  const nombre = u.user_metadata?.full_name || u.email;
+  const r = await sb.from("desarrolladoras").upsert({ perfil_id: u.id, nombre }, { onConflict: "perfil_id" });
+  if (r.error) { toast("No se pudo crear tu cuenta: " + r.error.message); console.error(r.error); return; }
+  st.eligiendoDesarrolladora = false;
   await afterAuth();
   go("inicio");
 }
@@ -563,6 +623,11 @@ async function render() {
   nav();
   const M = document.getElementById("M");
   const rm = document.getElementById("roleModal");
+  if (st.eligiendoDesarrolladora) {
+    rm.innerHTML = seleccionarDesarrolladoraModal();
+    M.innerHTML = "";
+    return;
+  }
   if (st.session && !st.perfil?.rol_confirmado) {
     rm.innerHTML = onboarding();
     M.innerHTML = "";
@@ -598,6 +663,25 @@ function renderMercadoModal() {
     <div class="r1" style="align-items:center"><h2 style="margin:0">Mercado por barrio</h2><button class="btn" style="width:auto;margin:0;padding:6px 14px" onclick="toggleMercado()">Cerrar ✕</button></div>
     ${mercado()}
   </div></div>` : "";
+}
+
+// Se muestra cuando el Gmail con el que se logueó no matcheó ninguna
+// desarrolladora sembrada por email: elige manualmente a cuál pertenece,
+// o crea una cuenta nueva si no está en la lista.
+function seleccionarDesarrolladoraModal() {
+  const lista = st.desarrolladorasSinReclamar || [];
+  return `<div class="modal-ov" role="dialog" aria-modal="true" aria-labelledby="devTitulo"><div class="modal-bx" style="max-width:640px;text-align:left">
+    <h2 id="devTitulo" style="text-align:center">¿A cuál de estas desarrolladoras pertenecés?</h2>
+    <p class="sb" style="margin:10px 0;text-align:center">No pudimos reconocer tu cuenta por email automáticamente. Elegí tu empresa de la lista, o creá una cuenta nueva si no está.</p>
+    <div style="max-height:340px;overflow:auto;margin:14px 0">
+      ${lista.length ? lista.map(d => `
+        <div class="row" style="justify-content:space-between;border:1px solid var(--ln);border-radius:12px;padding:10px 12px;margin-bottom:8px">
+          <div><b>${d.nombre}</b>${d.sitio_web?`<p class="sb">${d.sitio_web}</p>`:""}</div>
+          <button class="btn pri" style="width:auto;padding:8px 14px;margin:0" onclick="confirmarVinculoDesarrolladora('${d.id}')">Es esta</button>
+        </div>`).join("") : '<p class="sb">No hay desarrolladoras sin reclamar por ahora.</p>'}
+    </div>
+    <button class="btn" onclick="crearDesarrolladoraNueva()">Ninguna de estas — crear cuenta nueva</button>
+  </div></div>`;
 }
 
 function onboarding() {
