@@ -79,6 +79,16 @@ footer{border-top:1px solid var(--ln);margin-top:44px;padding:26px 16px calc(90p
 footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
 .icon{stroke:var(--ink);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .cover{position:relative;width:100%;aspect-ratio:3/1;border-radius:16px;background:var(--soft) center/cover no-repeat;overflow:hidden}
+.fcar{position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:var(--soft);margin-bottom:16px}
+.fcar-track{display:flex;height:100%;transition:transform .35s ease}
+.fcar-track img{width:100%;height:100%;object-fit:cover;flex:none;background:var(--soft)}
+.fcar-arrow{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.5);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.fcar-arrow.prev{left:10px}.fcar-arrow.next{right:10px}
+.fcar-dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;z-index:2}
+.fcar-dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55);cursor:pointer}
+.fcar-dots span.on{background:#fff}
+.fcar-tag{position:absolute;left:10px;top:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.65rem;padding:3px 9px;border-radius:99px;z-index:2}
+.fcar-empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--gr);font-size:.82rem}
 .chk-v{display:inline-flex;align-items:center;gap:4px;background:var(--okt);color:var(--ok);font-weight:700;font-size:.72rem;padding:3px 10px;border-radius:99px;vertical-align:middle}
 .timeline{border-left:2px solid var(--ln);margin:14px 0 0 8px;padding-left:18px}
 .tl-it{position:relative;padding-bottom:18px}
@@ -558,6 +568,37 @@ function mercado() {
   ${row("Reseñas", p=>p.rating||0, v=>v+" ★")}`;
 }
 
+function fichaCarousel() {
+  const st_ = st.fotosProyecto;
+  if (!st_ || !st_.items.length) {
+    return `<div class="fcar"><div class="fcar-empty">Todavía no hay fotos cargadas de este proyecto</div></div>`;
+  }
+  const items = st_.items.slice(0, 5);
+  const idx = Math.min(st_.idx, items.length - 1);
+  const activo = items[idx];
+  return `<div class="fcar">
+    <div class="fcar-track" style="transform:translateX(-${idx*100}%)">
+      ${items.map(f=>`<img src="${f.url}" alt="Foto del proyecto">`).join("")}
+    </div>
+    ${activo.tipo ? `<span class="fcar-tag">${activo.tipo==="real"?"Foto real":"Render"}</span>` : ""}
+    ${items.length>1 ? `
+      <button class="fcar-arrow prev" onclick="carouselNav(-1)" aria-label="Anterior">‹</button>
+      <button class="fcar-arrow next" onclick="carouselNav(1)" aria-label="Siguiente">›</button>
+      <div class="fcar-dots">${items.map((_,i)=>`<span class="${i===idx?"on":""}" onclick="carouselGoto(${i})"></span>`).join("")}</div>
+    ` : ""}
+  </div>`;
+}
+function carouselNav(dir) {
+  const st_ = st.fotosProyecto; if (!st_) return;
+  const len = Math.min(st_.items.length, 5);
+  st_.idx = (st_.idx + dir + len) % len;
+  render();
+}
+function carouselGoto(i) {
+  const st_ = st.fotosProyecto; if (!st_) return;
+  st_.idx = i; render();
+}
+
 async function ficha() {
   const p = st.proyectos[st.p];
   if (!p) return `<p class="sb">Proyecto no encontrado. <a href="#" onclick="go('buscar');return false">Volver</a></p>`;
@@ -565,10 +606,18 @@ async function ficha() {
     const { data } = await sb.from("resenas").select("*, perfiles(nombre)").eq("proyecto_id", p.id).order("created_at",{ascending:false});
     st.resenas[p.id] = data || [];
   }
+  if (!st.fotosProyecto || st.fotosProyecto.id !== p.id) {
+    const { data } = await sb.from("proyecto_fotos").select("*").eq("proyecto_id", p.id).order("orden");
+    const items = (data && data.length)
+      ? data.map(f => ({ url: f.url, tipo: f.tipo }))
+      : (Array.isArray(p.fotos) ? p.fotos.map(u => ({ url: u, tipo: null })) : []);
+    st.fotosProyecto = { id: p.id, items, idx: 0 };
+  }
   const x = sc(p), K = Object.keys(st.q);
   const tabsHTML = [tabResumen, tabCostos, tabSociedad, tabObraP, tabResenasP, tabConvivencia];
   const yaEnLead = st.leads?.some(l => l.proyecto_id === p.id);
   return `<p class="sb"><a href="#" onclick="go('buscar');return false">← Volver a resultados</a></p>
+  ${fichaCarousel()}
   <div class="fx"><div><h2>${p.nombre}</h2><p class="sb">${p.barrio}${p.subzona?" · "+p.subzona:""} · ${p.tipo} · ${p.desarrolladoras?.nombre||""}</p>
   <div class="tb">${TN.map((t,i)=>`<button class="${i==st.tab?"on":""}" onclick="tab(${i})">${t}</button>`).join("")}</div>
   ${await tabsHTML[st.tab](p)}</div>
