@@ -166,6 +166,31 @@ if (configurado) {
 const n = (x) => Math.round(x || 0).toLocaleString("es-AR");
 const toast = (m) => { const t = document.getElementById("ts"); t.textContent = m; t.style.opacity = 1; setTimeout(() => (t.style.opacity = 0), 2200); };
 
+// Texto resumido de Términos y Condiciones mostrado en el onboarding.
+// El documento completo debería vivir en una página aparte (reemplazá
+// TERMINOS_URL más abajo cuando la tengas online) — esto es un resumen
+// para que el usuario pueda leerlo antes de elegir su perfil.
+const TERMINOS_URL = "#"; // TODO: reemplazar por el link a los T&C completos
+const TERMINOS_HTML = `
+  <p><b>Quiénes somos:</b> Ladrillo Hub conecta compradores interesados en
+  desarrollos inmobiliarios con las desarrolladoras de esos proyectos.</p>
+  <p><b>Fichas con datos públicos:</b> algunas fichas de proyectos se arman
+  solo con información pública (ubicación, unidades) hasta que la
+  desarrolladora las reclama y completa con fotos y material propio.
+  Cualquier desarrolladora puede pedir la baja de su ficha escribiéndonos.</p>
+  <p><b>Propiedad intelectual:</b> el contenido que subís (fotos, brochures,
+  textos) debe ser de tu autoría o contar con autorización para publicarse.</p>
+  <p><b>Pagos:</b> ciertas funciones (como revelar el contacto entre
+  comprador y desarrolladora) tienen un costo, procesado por Mercado Pago.
+  No almacenamos datos de tarjetas.</p>
+  <p><b>Rol de la plataforma:</b> somos un intermediario tecnológico; la
+  operación inmobiliaria en sí (boletos, escrituración, plazos de obra)
+  queda a cargo exclusivo de las partes.</p>
+  <p><b>Datos personales:</b> tratamos tus datos conforme a la Ley 25.326.
+  Podés pedir acceso, rectificación o baja escribiéndonos.</p>
+  <p>Este es un resumen. <a href="${TERMINOS_URL}" target="_blank" rel="noopener">Leé los Términos y Condiciones completos acá</a>.</p>
+`;
+
 // -------- estado global en memoria --------
 const st = {
   v: "inicio",          // vista actual
@@ -504,6 +529,12 @@ function onboarding() {
     <div class="g2" style="margin:20px auto">
       <div class="bx"><h3>Soy comprador/a</h3><p class="sb">Comparo proyectos y comparto mi ficha con las desarrolladoras que me cierran.</p><button class="btn pri" onclick="elegirRol('comprador')">Soy comprador/a</button></div>
       <div class="bx"><h3>Soy desarrolladora</h3><p class="sb">Publico mi proyecto, recibo leads y respondo reseñas.</p><button class="btn pri" onclick="elegirRol('desarrolladora')">Soy desarrolladora</button></div>
+    </div>
+    <div style="max-width:420px;margin:0 auto 12px">
+      <div style="height:50px;overflow-y:auto;border:1px solid var(--ln);border-radius:8px;padding:8px 10px;text-align:left;font-size:.72rem;line-height:1.45;color:var(--gr)">
+        ${TERMINOS_HTML}
+      </div>
+      <p class="sb" style="margin-top:8px;font-size:.75rem">Al elegir un perfil, aceptás automáticamente los Términos y Condiciones de Ladrillo Hub.</p>
     </div>
     <button class="btn" style="border:none;color:var(--gr);font-weight:600" onclick="logout()">Cancelar y salir</button>
   </div></div>`;
