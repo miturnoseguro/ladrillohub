@@ -1657,7 +1657,8 @@ async function obra() {
     <div class="timeline">${st.obraHitos.map(h=>`<div class="tl-it"><div class="r1"><b>${h.nombre}</b><button class="btn" style="width:auto;padding:4px 10px;margin:0;font-size:.72rem" onclick="marcarHito('${h.id}',${!h.cumplido})">${h.cumplido?"✅ Cumplido":"Marcar cumplido"}</button></div>
     <p class="sb">${h.cumplido ? "Cumplido" : "Estimado: " + (h.fecha_estimada||"a definir")}</p>
     ${h.documento_url?`<p style="margin-top:4px"><a href="${h.documento_url}" target="_blank" rel="noopener">Ver documento</a></p>`:""}</div>`).join("") || '<p class="sb" style="margin-top:10px">Todavía no cargaste hitos para este proyecto.</p>'}</div>
-  </div>`;
+  </div>
+  ${st.hitoModalOpen ? modalHitoHTML() : ""}`;
 }
 function seleccionarProyectoObra(id) { st.obraProyectoSel = id; render(); }
 async function marcarHito(id, cumplido) {
