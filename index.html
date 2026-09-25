@@ -512,7 +512,18 @@ async function vincularOCrearDesarrolladora(u, nombre) {
   if (match.data) {
     const up = await sb.from("desarrolladoras").update({ perfil_id: u.id }).eq("id", match.data.id);
     if (up.error) { console.error("vincular desarrolladora:", up.error); toast("No se pudo vincular tu cuenta: " + up.error.message); }
-    else toast(`Reconocimos tu cuenta como ${match.data.nombre}.`);
+    else {
+      toast(`Reconocimos tu cuenta como ${match.data.nombre}.`);
+      // Match por email = confianza alta: los proyectos que ya le habíamos
+      // pre-vinculado dejan de figurar como "sin reclamar" para todo el
+      // mundo. La vinculación manual (más abajo) NO hace esto —
+      // queda pendiente de revisión.
+      const upP = await sb.from("proyectos")
+        .update({ reclamado: true })
+        .eq("desarrolladora_id", match.data.id)
+        .eq("reclamado", false);
+      if (upP.error) console.error("marcar proyectos reclamados:", upP.error);
+    }
     st.eligiendoDesarrolladora = false;
     return;
   }
@@ -571,7 +582,7 @@ function op(idx) { st.p = idx; st.pisoSel = null; go("ficha"); }
 
 function nav() {
   const items = st.perfil?.rol === "desarrolladora"
-    ? [["inicio","Inicio"],["leads","Leads"],["resenasD","Reseñas"],["obra","Obra"]]
+    ? [["inicio","Inicio"],["reclamar","Proyectos a reclamar"],["leads","Leads"],["resenasD","Reseñas"],["obra","Obra"]]
     : [["inicio","Inicio"],["buscar","Buscar"],["compartir","Mi ficha"],["resenas","Reseñas"]];
   if (st.perfil?.es_admin) items.push(["admin","Admin"]);
   document.getElementById("nav").innerHTML = items.map(([v,l]) => `<button class="${st.v===v?"on":""}" onclick="go('${v}')">${l}</button>`).join("");
@@ -634,7 +645,7 @@ async function render() {
     return;
   }
   rm.innerHTML = "";
-  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD, resenas: resenasComprador, admin: adminReclamos };
+  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD, resenas: resenasComprador, admin: adminReclamos, reclamar: proyectosAReclamar };
   M.innerHTML = await (views[st.v] || vistaInicio)();
   renderMercadoModal();
 }
@@ -940,6 +951,28 @@ function reclamoBox(p) {
     return "";
   }
   return `<button class="btn" style="margin-top:10px" onclick="reclamarFicha('${p.id}')">¿Sos esta desarrolladora? Reclamá esta ficha</button>`;
+}
+
+// Tab "Proyectos a reclamar": fichas que todavía no tienen ninguna
+// desarrolladora vinculada (desarrolladora_id null), para las que no
+// hubo match automático por email al loguearse. Reutiliza el mismo
+// reclamarFicha() + solicitudes_reclamo + aprobación admin de siempre.
+async function proyectosAReclamar() {
+  if (!st.desarrolladora) return `<h2>Proyectos a reclamar</h2><p class="sb">Primero creá tu cuenta de desarrolladora.</p>`;
+  const { data, error } = await sb.from("proyectos")
+    .select("id,nombre,barrio,subzona,desarrolladora_nombre_provisorio")
+    .is("desarrolladora_id", null)
+    .eq("reclamado", false)
+    .order("barrio");
+  if (error) { console.error("proyectos a reclamar:", error); return `<h2>Proyectos a reclamar</h2><p class="sb">No se pudo cargar la lista.</p>`; }
+  const lista = data || [];
+  return `<h2>Proyectos a reclamar</h2>
+  <p class="sb">Fichas que cargamos con datos públicos y todavía no tienen ninguna desarrolladora vinculada. Si alguna es tuya, reclamala — la revisamos y te avisamos.</p>
+  <div class="grid">${lista.map(p => `<div class="bx" style="margin:0">
+    <div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}${p.subzona?" · "+p.subzona:""}</span></div>
+    ${p.desarrolladora_nombre_provisorio ? `<p class="sb" style="margin-top:4px">Desarrolladora provisoria: ${p.desarrolladora_nombre_provisorio}</p>` : ""}
+    ${reclamoBox(p)}
+  </div>`).join("") || '<p class="sb">No quedan fichas sin reclamar por ahora.</p>'}</div>`;
 }
 
 function precioPorPiso(p, piso) {
