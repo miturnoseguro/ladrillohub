@@ -1000,7 +1000,7 @@ async function tabObraP(p) {
   const { data } = await sb.from("hitos_obra").select("*").eq("proyecto_id", p.id).order("orden");
   const H = data || [];
   const d = H.filter(h=>h.cumplido).length;
-  return `<h4>Avance de trámites y obra: ${d} de ${H.length||1} hitos</h4><div class="bar"><i style="width:${H.length?(d/H.length)*100:0}%"></i></div><div class="bx">${H.map(h=>`<div class="kv"><span>${h.cumplido?"✅":"⬜"} ${h.nombre}</span><b>${h.cumplido?"Cumplido"+(h.documento_url?` · <a href="${h.documento_url}" target="_blank">Descargar</a>`:""):"Estimado "+(h.fecha_estimada||"a definir")}</b></div>`).join("") || '<p class="sb">Todavía no hay hitos cargados.</p>'}</div>`;
+  return `<h4>Avance de trámites y obra: ${d} de ${H.length||1} hitos</h4><div class="bar"><i style="width:${H.length?(d/H.length)*100:0}%"></i></div><div class="bx">${H.map(h=>`<div class="kv"><span>${h.cumplido?"✅":"⬜"} ${h.nombre}</span><b>${h.cumplido?"Cumplido"+(h.documento_url?` · <a href="${h.documento_url}" target="_blank">Descargar</a>`:""):"Estimado "+(h.fecha_estimada||"a definir")}</b></div>${h.descripcion?`<p class="sb" style="margin:2px 0 8px">${h.descripcion}</p>`:""}`).join("") || '<p class="sb">Todavía no hay hitos cargados.</p>'}</div>`;
 }
 
 async function tabResenasP(p) {
@@ -1476,6 +1476,7 @@ function modalHitoHTML() {
   return `<div class="modal-ov" onclick="if(event.target===this)toggleModalHito(false)"><div class="modal-bx" style="text-align:left">
     <h2>Agregar hito</h2>
     <input class="st" id="hTitulo" placeholder="Nombre del hito (ej: Aprobación de planos)">
+    <textarea class="st" id="hDescripcion" placeholder="Descripción (opcional)" rows="3" style="resize:vertical"></textarea>
     <input class="st" id="hFecha" placeholder="Fecha estimada (si aún no está cumplido)">
     <label class="sb" style="display:block;margin-top:6px"><input type="checkbox" id="hCumplido"> Ya está cumplido</label>
     <input class="st" id="hArchivo" type="file" placeholder="Documento (opcional)">
@@ -1488,6 +1489,7 @@ async function guardarHito() {
   const nombre = document.getElementById("hTitulo").value.trim();
   if (!nombre) { toast("Falta el nombre del hito"); return; }
   if (!st.obraProyectoSel) { toast("Elegí primero un proyecto"); return; }
+  const descripcion = document.getElementById("hDescripcion").value.trim() || null;
   const fecha_estimada = document.getElementById("hFecha").value.trim() || null;
   const cumplido = document.getElementById("hCumplido").checked;
   const file = document.getElementById("hArchivo").files[0];
@@ -1495,7 +1497,7 @@ async function guardarHito() {
   let documento_url = null;
   if (file) documento_url = await subirArchivo(`hitos/${st.obraProyectoSel}/${Date.now()}-${file.name}`, file);
   const orden = (st.obraHitos?.length || 0) + 1;
-  const { error } = await sb.from("hitos_obra").insert({ proyecto_id: st.obraProyectoSel, nombre, fecha_estimada, cumplido, documento_url, orden });
+  const { error } = await sb.from("hitos_obra").insert({ proyecto_id: st.obraProyectoSel, nombre, descripcion, fecha_estimada, cumplido, documento_url, orden });
   st.subiendo = false;
   if (error) { toast("Error: " + error.message); render(); return; }
   st.hitoModalOpen = false;
@@ -1656,6 +1658,7 @@ async function obra() {
     <div class="r1"><b>${proyActual?.nombre||""}</b><button class="btn pri" style="width:auto;padding:8px 14px;margin:0" onclick="toggleModalHito(true)">+ Agregar hito</button></div>
     <div class="timeline">${st.obraHitos.map(h=>`<div class="tl-it"><div class="r1"><b>${h.nombre}</b><button class="btn" style="width:auto;padding:4px 10px;margin:0;font-size:.72rem" onclick="marcarHito('${h.id}',${!h.cumplido})">${h.cumplido?"✅ Cumplido":"Marcar cumplido"}</button></div>
     <p class="sb">${h.cumplido ? "Cumplido" : "Estimado: " + (h.fecha_estimada||"a definir")}</p>
+    ${h.descripcion?`<p class="sb" style="margin-top:4px">${h.descripcion}</p>`:""}
     ${h.documento_url?`<p style="margin-top:4px"><a href="${h.documento_url}" target="_blank" rel="noopener">Ver documento</a></p>`:""}</div>`).join("") || '<p class="sb" style="margin-top:10px">Todavía no cargaste hitos para este proyecto.</p>'}</div>
   </div>
   ${st.hitoModalOpen ? modalHitoHTML() : ""}`;
