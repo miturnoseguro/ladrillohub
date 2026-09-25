@@ -1,4 +1,3 @@
-
 // supabase/functions/mp-webhook/index.ts
 //
 // Webhook PÚBLICO de Mercado Pago. Mercado Pago llama a esta URL cada vez
@@ -115,16 +114,33 @@ Deno.serve(async (req) => {
           .from("leads")
           .update({ desarrolladora_pago: true, desarrolladora_pago_at: new Date().toISOString() })
           .eq("id", pago.lead_id);
+      }
 
-        // Si ambos ya pagaron, revelamos el contacto
-        const { data: leadActualizado } = await admin
-          .from("leads")
-          .select("comprador_pago, desarrolladora_pago")
-          .eq("id", pago.lead_id)
-          .maybeSingle();
+      // Recalculamos "estado" (el campo general del pipeline del lead) en
+      // base a los booleanos, sin pisar un lead ya "descartado".
+      const { data: leadActualizado } = await admin
+        .from("leads")
+        .select("estado, comprador_pago, desarrolladora_pago")
+        .eq("id", pago.lead_id)
+        .maybeSingle();
 
-        if (leadActualizado?.comprador_pago && leadActualizado?.desarrolladora_pago) {
-          await admin.from("leads").update({ contacto_revelado: true }).eq("id", pago.lead_id);
+      if (leadActualizado && leadActualizado.estado !== "descartado") {
+        let nuevoEstado = leadActualizado.estado;
+        const updates: Record<string, unknown> = {};
+
+        if (leadActualizado.comprador_pago && leadActualizado.desarrolladora_pago) {
+          nuevoEstado = "match";
+          updates.contacto_revelado = true;
+        } else if (leadActualizado.comprador_pago) {
+          nuevoEstado = "comprador_pago";
+        } else if (leadActualizado.desarrolladora_pago) {
+          nuevoEstado = "desarrolladora_pago";
+        }
+
+        if (nuevoEstado !== leadActualizado.estado) updates.estado = nuevoEstado;
+
+        if (Object.keys(updates).length > 0) {
+          await admin.from("leads").update(updates).eq("id", pago.lead_id);
         }
       }
     } else if (status === "rejected") {
