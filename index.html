@@ -117,6 +117,21 @@ footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:
 .sw.on i{left:18px}
 .floorbox{display:flex;align-items:center;gap:8px;margin-top:6px}
 .pendbox{background:var(--wnt);border:1px solid var(--wn);border-radius:12px;padding:12px 14px;margin-top:10px}
+.rbox{background:var(--rt);border:1px solid var(--rc);border-radius:12px;padding:12px 14px;margin-top:14px}
+.okbox{background:var(--okt);border:1px solid var(--ok);border-radius:12px;padding:12px 14px;margin-top:14px}
+.frow{display:flex;gap:12px;align-items:flex-start;margin:16px 0}
+.frow .fi{flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.frow b{display:block;margin-bottom:2px}
+.pricehero{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin:16px 0;padding:16px 0;border-top:1px solid var(--ln);border-bottom:1px solid var(--ln)}
+.pricehero .amt{font-size:2.1rem;font-weight:800;color:var(--rc);white-space:nowrap}
+.steps4{display:flex;gap:6px;overflow-x:auto;margin:16px 0 4px;padding-bottom:4px}
+.step4{flex:1;min-width:120px;text-align:center}
+.step4 .si{width:44px;height:44px;border-radius:50%;border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;margin:0 auto 6px}
+.step4-arrow{align-self:center;color:var(--gr);flex:none}
+.previewgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:10px}
+.previewgrid .pi{border:1px solid var(--ln);border-radius:12px;padding:10px 12px}
+.previewgrid .pi span{display:block;color:var(--gr);font-size:.72rem}
+.previewgrid .pi b{font-size:.92rem}
 </style>
 </head>
 <body>
@@ -135,6 +150,7 @@ footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:
   <button class="flink" onclick="toggleMercado()">Mercado por barrio</button>
 </footer>
 <div id="mercadoModal"></div>
+<div id="condicionesModal"></div>
 <div id="roleModal"></div>
 <div class="ts" id="ts"></div>
 
@@ -273,6 +289,8 @@ const st = {
   editFotos: [],           // filas de proyecto_fotos del proyecto en edición
   desarrolladorasSinReclamar: [], // para el selector manual cuando no hubo match por email
   eligiendoDesarrolladora: false, // controla si se muestra ese selector
+  pagoLeadId: null,       // lead elegido para ver la pantalla "Acceso a comprador verificado"
+  condicionesOpen: false, // modal de condiciones de la postulación/desbloqueo
 };
 
 // Catálogo de documentación de la desarrolladora.
@@ -298,6 +316,18 @@ const ICONS = {
   shield: '<path d="M12 3l7 3v6c0 5-3 8.5-7 9-4-.5-7-4-7-9V6z"/><path d="m9 12 2 2 4-4"/>',
   card: '<rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>',
   lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  sliders: '<line x1="4" y1="6" x2="20" y2="6"/><circle cx="9" cy="6" r="2"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="15" cy="12" r="2"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="7" cy="18" r="2"/>',
+  star: '<path d="M12 3l2.6 5.8 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20l1.4-6.3-4.8-4.3 6.4-.6L12 3Z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  refresh: '<path d="M20 11A8 8 0 0 0 6.3 6.3L4 8.6"/><path d="M4 4v4.6h4.6"/><path d="M4 13a8 8 0 0 0 13.7 4.7L20 15.4"/><path d="M20 20v-4.6h-4.6"/>',
+  person: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+  coins: '<circle cx="9" cy="9" r="5"/><path d="M13.5 12.5A5 5 0 1 0 9 18"/><circle cx="15" cy="15" r="5"/>',
+  ruler: '<rect x="3" y="9" width="18" height="6" rx="1"/><path d="M7 9v3M11 9v3M15 9v3M19 9v3"/>',
+  percent: '<line x1="5" y1="19" x2="19" y2="5"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/>',
+  phone: '<path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.6 21 3 12.4 3 2c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8Z"/>',
+  eye: '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/>',
+  link: '<path d="M9 15l6-6"/><path d="M13 5l1.5-1.5a3.5 3.5 0 1 1 5 5L18 10"/><path d="M11 19l-1.5 1.5a3.5 3.5 0 1 1-5-5L6 14"/>',
+  building: '<rect x="4" y="3" width="10" height="18" rx="1"/><path d="M14 21V9h6v12"/><path d="M7 7h1M10 7h1M7 11h1M10 11h1M7 15h1M10 15h1"/>',
 };
 const ic = (k, sz) => `<svg class="icon" width="${sz||30}" height="${sz||30}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${ICONS[k]||""}</svg>`;
 const icGoogle = (sz) => `<svg width="${sz||18}" height="${sz||18}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-3px">
@@ -439,7 +469,7 @@ async function cargarLeadsDesarrolladora() {
   const { data: proys } = await sb.from("proyectos").select("id").eq("desarrolladora_id", st.desarrolladora.id);
   const ids = (proys || []).map((p) => p.id);
   if (!ids.length) { st.leads = []; return; }
-  const { data } = await sb.from("leads").select("*, perfiles(nombre,email), proyectos(nombre)").in("proyecto_id", ids);
+  const { data } = await sb.from("leads").select("*, perfiles(nombre,email,fichas_compradoras(*)), proyectos(nombre)").in("proyecto_id", ids);
   st.leads = data || [];
 }
 
@@ -645,9 +675,10 @@ async function render() {
     return;
   }
   rm.innerHTML = "";
-  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD, resenas: resenasComprador, admin: adminReclamos, reclamar: proyectosAReclamar };
+  const views = { inicio: vistaInicio, buscar, ficha, comparar, compartir, leads: leadsView, obra, resenasD, resenas: resenasComprador, admin: adminReclamos, reclamar: proyectosAReclamar, postulacion: pantallaPostulacion, "acceso-comprador": pantallaAccesoComprador };
   M.innerHTML = await (views[st.v] || vistaInicio)();
   renderMercadoModal();
+  renderCondicionesModal();
 }
 
 // "Inicio" se suplanta por el panel del rol logueado; sin sesión, o sin rol
@@ -673,6 +704,18 @@ function renderMercadoModal() {
   mm.innerHTML = st.mercadoOpen ? `<div class="modal-ov" onclick="if(event.target===this)toggleMercado()"><div class="modal-bx" style="text-align:left">
     <div class="r1" style="align-items:center"><h2 style="margin:0">Mercado por barrio</h2><button class="btn" style="width:auto;margin:0;padding:6px 14px" onclick="toggleMercado()">Cerrar ✕</button></div>
     ${mercado()}
+  </div></div>` : "";
+}
+
+// Modal reutilizable de "condiciones" — se abre desde el link al pie de las
+// pantallas de pago (postulación del comprador / desbloqueo de la desarrolladora).
+function toggleCondiciones() { st.condicionesOpen = !st.condicionesOpen; renderCondicionesModal(); }
+function renderCondicionesModal() {
+  const cm = document.getElementById("condicionesModal");
+  if (!cm) return;
+  cm.innerHTML = st.condicionesOpen ? `<div class="modal-ov" onclick="if(event.target===this)toggleCondiciones()"><div class="modal-bx" style="text-align:left">
+    <div class="r1" style="align-items:center"><h2 style="margin:0">Condiciones del pago y tratamiento de datos</h2><button class="btn" style="width:auto;margin:0;padding:6px 14px" onclick="toggleCondiciones()">Cerrar ✕</button></div>
+    <div style="height:340px;overflow-y:auto;border:1px solid var(--ln);border-radius:8px;padding:8px 10px;margin-top:14px;font-size:.82rem;line-height:1.5;color:var(--gr)">${TERMINOS_HTML}</div>
   </div></div>` : "";
 }
 
@@ -866,10 +909,57 @@ async function ficha() {
   <aside class="as"><div class="ring" style="--p:${x.s}"><i>${x.s}%</i></div><p style="text-align:center"><b>Compatibilidad con vos</b></p>
   <div style="margin:10px 0">${K.map(k=>{const h=(p.features||[]).includes(k);return `<div class="ml"><span>${st.labByKey[k]||k}${st.q[k]==2?" ★":""}</span><span class="${h?"ok":"wn"}">${h?"Cumple":"No tiene"}</span></div>`}).join("") || '<p class="sb">Marcá tus prioridades en Buscar.</p>'}</div>
   <button class="btn" onclick="go('comparar')">Comparar con otros</button>
-  ${st.perfil?.rol==="comprador" ? (yaEnLead ? '<p class="ok" style="margin-top:10px">✔ Ya compartiste tu ficha con este proyecto</p>' : `<button class="btn pri" onclick="compartirFicha('${p.id}')">Compartir mi ficha</button>`) : ""}
+  ${st.perfil?.rol==="comprador" ? (yaEnLead ? '<p class="ok" style="margin-top:10px">✔ Ya compartiste tu ficha con este proyecto</p>' : `<button class="btn pri" onclick="verPostulacion('${p.id}')">Compartir mi ficha</button>`) : ""}
   ${!st.session ? `<button class="btn pri" onclick="loginGoogle()">Ingresar para comparar</button>` : ""}
   ${reclamoBox(p)}
   </aside></div>`;
+}
+
+// Abre la pantalla de confirmación de postulación (previa al pago de $10.000)
+// para el proyecto con mayor compatibilidad que el comprador eligió compartir.
+function verPostulacion(proyectoId) {
+  const idx = st.proyectos.findIndex(x => x.id === proyectoId);
+  if (idx < 0) { toast("No se encontró el proyecto"); return; }
+  st.p = idx;
+  go("postulacion");
+}
+
+// Pantalla "Postulación verificada" — se muestra cuando el comprador ya filtró
+// y encontró un proyecto con alta compatibilidad, antes de pagar los $10.000.
+function pantallaPostulacion() {
+  const p = st.proyectos[st.p];
+  if (!p) return `<p class="sb">Proyecto no encontrado. <a href="#" onclick="go('buscar');return false">Volver</a></p>`;
+  const x = sc(p);
+  const desarrolladoraNombre = p.reclamado ? (p.desarrolladoras?.nombre || "la desarrolladora") : (p.desarrollo_nombre_provisorio || "la desarrolladora");
+  return `<p class="sb"><a href="#" onclick="go('ficha');return false">← Volver a ${p.nombre}</a></p>
+  <div class="row"><div class="av">${ic("person", 26)}</div><div><h2 style="margin:0">Postulación verificada</h2><span class="tg v">${x.s}% compatibilidad</span></div></div>
+  <p class="sb" style="margin-top:10px">Encontraste un proyecto que coincide con lo que estás buscando. Al abonar $10.000, tu perfil pasa a ser una postulación real y habilitás a Ladrillo Hub a presentarlo a ${desarrolladoraNombre}.</p>
+
+  <div class="pricehero"><span class="amt">$10.000</span><div><b>Postulación verificada</b><p class="sb">100% reintegrable si no hay match</p></div></div>
+
+  <h4>¿Qué incluye tu postulación?</h4>
+  <div class="frow"><div class="fi">${ic("target")}</div><div><b>Postulación prioritaria</b><p class="sb">Tu perfil será presentado como un comprador con interés concreto en este proyecto.</p></div></div>
+  <div class="frow"><div class="fi">${ic("sliders")}</div><div><b>Match con el proyecto</b><p class="sb">Se evalúan tus criterios: presupuesto, anticipo, m², tipología, zona, altura, condiciones de pago, gastos, etc.</p></div></div>
+  <div class="frow"><div class="fi">${ic("doc")}</div><div><b>Información del proyecto</b><p class="sb">Basado en la información cargada por la desarrolladora: planos, fotos, renders, proforma de escrituración, gastos, documentación del fideicomiso, etc.</p></div></div>
+  <div class="frow"><div class="fi">${ic("lock")}</div><div><b>Perfil privado</b><p class="sb">Tus datos personales permanecen protegidos hasta que la desarrolladora acceda a tu postulación.</p></div></div>
+  <div class="frow"><div class="fi">${ic("shield")}</div><div><b>Postulación verificada</b><p class="sb">El pago de $10.000 acredita tu intención real de avanzar.</p></div></div>
+  <div class="frow"><div class="fi">${ic("star")}</div><div><b>Reputación en Ladrillo Hub</b><p class="sb">Tus operaciones y postulaciones correctamente realizadas te ayudarán a construir una reputación como comprador.</p></div></div>
+  <div class="frow"><div class="fi">${ic("sun")}</div><div><b>Beneficios futuros</b><p class="sb">A futuro podrás acceder a beneficios y procesos simplificados, según las condiciones vigentes.</p></div></div>
+
+  <div class="rbox">${ic("refresh", 22)}<b style="display:block;margin-top:6px">¿Cómo funciona el reintegro?</b><p class="sb" style="margin-top:2px">Si ${desarrolladoraNombre} NO abona los $50.000 correspondientes al acceso a tu perfil, te devolvemos el 100% de los $10.000.</p><p style="color:var(--rc);font-weight:700;margin-top:4px">Si no hay match, no hay costo.</p></div>
+
+  <h4 style="margin-top:22px">El proceso es simple</h4>
+  <div class="steps4">
+    <div class="step4"><div class="si">${ic("person", 20)}</div><b style="font-size:.8rem">1. Te postulás</b><p class="sb" style="font-size:.74rem">Pagás $10.000</p></div>
+    <div class="step4"><div class="si">${ic("search", 20)}</div><b style="font-size:.8rem">2. Ladrillo Hub</b><p class="sb" style="font-size:.74rem">Analiza y presenta el match</p></div>
+    <div class="step4"><div class="si">${ic("building", 20)}</div><b style="font-size:.8rem">3. La desarrolladora</b><p class="sb" style="font-size:.74rem">Decide si accede y paga $50.000</p></div>
+    <div class="step4"><div class="si">${ic("shield", 20)}</div><b style="font-size:.8rem">4. Match confirmado</b><p class="sb" style="font-size:.74rem">Se habilita el contacto</p></div>
+  </div>
+
+  <p class="sb" style="margin-top:14px">Importante: el pago de $10.000 no garantiza la compra del inmueble ni obliga a ninguna de las partes a concretar una operación.</p>
+
+  <button class="btn pri" onclick="compartirFicha('${p.id}')">Postularme por $10.000</button>
+  <p class="sb" style="text-align:center;margin-top:8px"><a href="#" onclick="toggleCondiciones();return false">Ver condiciones de la postulación, reintegro y tratamiento de datos</a></p>`;
 }
 
 // =====================================================================
@@ -1591,9 +1681,65 @@ async function leadsView() {
   <div class="grid">${st.leads.map(l=>`<div class="bx" style="margin:0"><div class="row"><div class="ring" style="--p:${l.compatibilidad||0};width:64px;height:64px;margin:0"><i style="width:52px;height:52px;font-size:.85rem">${l.compatibilidad||0}%</i></div><div><b>${l.proyectos?.nombre||""}</b><p class="sb">${(l.compatibilidad||0)>90?"Alta probabilidad de compra":"Buena coincidencia"}</p></div></div>
   <div class="kv"><span>Estado</span><b>${estadoLegible(l.estado)}</b></div>
   ${l.estado==="comprador_pago" ? `<div class="pendbox">Un comprador solicitó compartir su ficha con vos (ya abonó $10.000). Para ver la conexión y sus datos, aboná los $50.000.</div>` : ""}
-  ${l.contacto_revelado ? `<div class="bx" style="background:var(--okt)"><b>Match confirmado</b><p class="sb">${l.perfiles?.nombre||""} · ${l.perfiles?.email||""}</p></div>${bloqueMatch(l)}` : `<button class="btn pri" onclick="pagar('${l.id}','desarrolladora')">Recibir ficha · $50.000</button>`}
+  ${l.contacto_revelado ? `<div class="bx" style="background:var(--okt)"><b>Match confirmado</b><p class="sb">${l.perfiles?.nombre||""} · ${l.perfiles?.email||""}</p></div>${bloqueMatch(l)}` : `<button class="btn pri" onclick="verAccesoComprador('${l.id}')">Ver comprador verificado</button>`}
   </div>`).join("") || '<p class="sb">Todavía no tenés leads.</p>'}
   <p class="sb" style="margin-top:14px">Cuando un comprador paga, también te llega un email: <i>"Un comprador solicitó compartir su ficha con vos, para poder ver la conexión aboná los $50.000"</i> (lo envía la Edge Function <code>notify-developer-lead</code> — ver <code>supabase/functions/notify-developer-lead</code>).</p>`;
+}
+
+// Abre la pantalla de confirmación "Acceso a comprador verificado" (previa al
+// pago de $50.000) para el lead elegido desde la grilla de Leads.
+function verAccesoComprador(leadId) {
+  st.pagoLeadId = leadId;
+  go("acceso-comprador");
+}
+
+// Pantalla "Acceso a comprador verificado" — se muestra cuando el comprador ya
+// se postuló (pagó $10.000) y hay alta compatibilidad con el proyecto, antes
+// de que la desarrolladora pague los $50.000 para desbloquear el contacto.
+function pantallaAccesoComprador() {
+  const l = (st.leads || []).find(x => x.id === st.pagoLeadId);
+  if (!l) return `<p class="sb">No se encontró el lead. <a href="#" onclick="go('leads');return false">Volver a Leads</a></p>`;
+  const f = l.perfiles?.fichas_compradoras;
+  const ficha = Array.isArray(f) ? f[0] : f; // el embed puede volver objeto o array según la FK
+  const zona = ficha?.barrios?.length ? ficha.barrios.join(", ") : "Sin especificar";
+  const tipologia = ficha?.tipos?.length ? ficha.tipos.join(", ") : "Sin especificar";
+  const presupuesto = ficha?.presupuesto_max_usd_m2 ? `hasta USD ${n(ficha.presupuesto_max_usd_m2)}/m²` : "Sin especificar";
+  const expensas = ficha?.expensas_max_miles ? `hasta $${ficha.expensas_max_miles}k` : "Sin especificar";
+  const prioridades = (ficha?.imprescindibles || []).map(k => st.labByKey[k] || k);
+
+  return `<p class="sb"><a href="#" onclick="go('leads');return false">← Volver a Leads</a></p>
+  <div class="row"><div class="av">${ic("building", 26)}</div><div><h2 style="margin:0">Acceso a comprador verificado</h2><span class="tg v">${l.compatibilidad || 0}% compatibilidad</span></div></div>
+  <p class="sb" style="margin-top:10px">Este comprador no solamente consultó tu proyecto: se postuló y ya abonó $10.000. Al abonar $50.000, accedés a su perfil completo y habilitás el contacto directo.</p>
+
+  <div class="pricehero"><span class="amt">$50.000</span><div><b>Acceso a perfil completo</b><p class="sb">No es una base de datos. Es un lead calificado.</p></div></div>
+
+  <h4>¿Qué estás recibiendo?</h4>
+  <div class="frow"><div class="fi">${ic("person")}</div><div><b>Un comprador con intención demostrada</b><p class="sb">Realizó una postulación económica específica para tu proyecto.</p></div></div>
+  <div class="frow"><div class="fi">${ic("target")}</div><div><b>Match basado en datos</b><p class="sb">Su búsqueda fue comparada con las características de tu desarrollo.</p></div></div>
+  <div class="frow"><div class="fi">${ic("doc")}</div><div><b>Perfil de búsqueda completo</b><p class="sb">Conocés sus necesidades, preferencias y parámetros de compra.</p></div></div>
+  <div class="frow"><div class="fi">${ic("coins")}</div><div><b>Presupuesto</b><p class="sb">Tope declarado durante su postulación: ${presupuesto}.</p></div></div>
+  <div class="frow"><div class="fi">${ic("ruler")}</div><div><b>Tipología buscada</b><p class="sb">Qué tipo de unidad está buscando: ${tipologia}.</p></div></div>
+  <div class="frow"><div class="fi">${ic("sliders")}</div><div><b>Condiciones que prioriza</b><p class="sb">Zona, expensas y demás criterios${prioridades.length ? `: ${prioridades.join(", ")}` : ""}.</p></div></div>
+  <div class="frow"><div class="fi">${ic("percent")}</div><div><b>Índice de compatibilidad</b><p class="sb">Ladrillo Hub analiza la coincidencia con tu proyecto: ${l.compatibilidad || 0}%.</p></div></div>
+  <div class="frow"><div class="fi">${ic("star")}</div><div><b>Proyecto seleccionado específicamente</b><p class="sb">No es un usuario aleatorio. Lo eligió dentro de Ladrillo Hub.</p></div></div>
+  <div class="frow"><div class="fi">${ic("phone")}</div><div><b>Contacto directo</b><p class="sb">Al desbloquear el perfil se habilitan los datos necesarios.</p></div></div>
+
+  <h4>Vista previa del comprador <span class="sb" style="font-weight:400">(anonimizada)</span></h4>
+  <div class="previewgrid">
+    <div class="pi"><span>Tipología</span><b>${tipologia}</b></div>
+    <div class="pi"><span>Zona</span><b>${zona}</b></div>
+    <div class="pi"><span>Presupuesto</span><b>${presupuesto}</b></div>
+    <div class="pi"><span>Expensas</span><b>${expensas}</b></div>
+    <div class="pi"><span>Compatibilidad</span><b class="ok">${l.compatibilidad || 0}%</b></div>
+    <div class="pi"><span>Datos personales</span><b>${ic("lock", 14)} Protegidos</b></div>
+  </div>
+
+  <div class="okbox">${ic("link", 20)}<b style="display:block;margin-top:6px">Si no hay match, no hay costo</b><p class="sb" style="margin-top:2px">El modelo funciona solo cuando ambas partes manifiestan interés real.</p></div>
+
+  <p class="sb" style="margin-top:14px"><b>¿Qué pagás?</b> $50.000 por acceder al perfil completo de este comprador y habilitar el contacto. No estás pagando por una base de datos ni por un contacto sin contexto: estás accediendo a una postulación verificada, seleccionada específicamente para tu proyecto y filtrada según tus propias condiciones.</p>
+
+  <button class="btn pri" onclick="pagar('${l.id}','desarrolladora')">Desbloquear comprador — $50.000</button>
+  <p class="sb" style="text-align:center;margin-top:8px"><a href="#" onclick="toggleCondiciones();return false">Ver condiciones de acceso y uso de datos</a></p>`;
 }
 
 async function resenasD() {
