@@ -958,6 +958,14 @@ function pantallaPostulacion() {
 
   <p class="sb" style="margin-top:14px">Importante: el pago de $10.000 no garantiza la compra del inmueble ni obliga a ninguna de las partes a concretar una operación.</p>
 
+  <h4 style="margin-top:22px">Sumá el detalle de tu búsqueda</h4>
+  <p class="sb">Estos datos se muestran a la desarrolladora junto a tu postulación y mejoran tu compatibilidad. Son opcionales.</p>
+  <div class="g2" style="margin-top:8px">
+    <div><label class="sb">Superficie buscada — mín. (m²)</label><input id="supMin" type="number" min="0" class="st" placeholder="Ej: 45" value="${st.ficha?.superficie_min_m2 ?? ''}"></div>
+    <div><label class="sb">Superficie buscada — máx. (m²)</label><input id="supMax" type="number" min="0" class="st" placeholder="Ej: 65" value="${st.ficha?.superficie_max_m2 ?? ''}"></div>
+  </div>
+  <label class="sb">Anticipo disponible (USD)</label><input id="anticipoUsd" type="number" min="0" class="st" placeholder="Ej: 70000" value="${st.ficha?.anticipo_usd ?? ''}">
+
   <button class="btn pri" onclick="compartirFicha('${p.id}')">Postularme por $10.000</button>
   <p class="sb" style="text-align:center;margin-top:8px"><a href="#" onclick="toggleCondiciones();return false">Ver condiciones de la postulación, reintegro y tratamiento de datos</a></p>`;
 }
@@ -1133,7 +1141,7 @@ function comparar() {
 }
 
 // -------- COMPRADOR: mi ficha / compartir --------
-async function guardarFicha() {
+async function guardarFicha(extra = {}) {
   if (!st.ficha) st.ficha = {};
   const patch = {
     perfil_id: st.session.user.id,
@@ -1141,6 +1149,7 @@ async function guardarFicha() {
     presupuesto_max_usd_m2: st.m, expensas_max_miles: st.e,
     imprescindibles: Object.keys(st.q).filter(k=>st.q[k]===2),
     deseables: Object.keys(st.q).filter(k=>st.q[k]===1),
+    ...extra,
   };
   const { data, error } = await sb.from("fichas_compradoras").upsert(patch, { onConflict: "perfil_id" }).select().single();
   if (error) { toast("Error guardando ficha: " + error.message); return; }
@@ -1150,7 +1159,16 @@ async function guardarFicha() {
 
 async function compartirFicha(proyectoId) {
   if (!st.session) { loginGoogle(); return; }
-  await guardarFicha();
+  // Si venimos de la pantalla de postulación, estos campos están en el DOM;
+  // si no existen (p. ej. se llama desde otro lado), los ignoramos.
+  const supMin = document.getElementById("supMin")?.value;
+  const supMax = document.getElementById("supMax")?.value;
+  const anticipo = document.getElementById("anticipoUsd")?.value;
+  const extra = {};
+  if (supMin) extra.superficie_min_m2 = +supMin;
+  if (supMax) extra.superficie_max_m2 = +supMax;
+  if (anticipo) extra.anticipo_usd = +anticipo;
+  await guardarFicha(extra);
   const p = st.proyectos.find(x=>x.id===proyectoId);
   const { data: lead, error } = await sb.from("leads")
     .upsert({ proyecto_id: proyectoId, comprador_id: st.session.user.id, compatibilidad: sc(p).s }, { onConflict: "proyecto_id,comprador_id" })
@@ -1705,6 +1723,10 @@ function pantallaAccesoComprador() {
   const tipologia = ficha?.tipos?.length ? ficha.tipos.join(", ") : "Sin especificar";
   const presupuesto = ficha?.presupuesto_max_usd_m2 ? `hasta USD ${n(ficha.presupuesto_max_usd_m2)}/m²` : "Sin especificar";
   const expensas = ficha?.expensas_max_miles ? `hasta $${ficha.expensas_max_miles}k` : "Sin especificar";
+  const superficie = (ficha?.superficie_min_m2 || ficha?.superficie_max_m2)
+    ? `${ficha?.superficie_min_m2 ? n(ficha.superficie_min_m2) : "–"} a ${ficha?.superficie_max_m2 ? n(ficha.superficie_max_m2) : "–"} m²`
+    : "Sin especificar";
+  const anticipo = ficha?.anticipo_usd ? `USD ${n(ficha.anticipo_usd)}` : "Sin especificar";
   const prioridades = (ficha?.imprescindibles || []).map(k => st.labByKey[k] || k);
 
   return `<p class="sb"><a href="#" onclick="go('leads');return false">← Volver a Leads</a></p>
@@ -1717,8 +1739,8 @@ function pantallaAccesoComprador() {
   <div class="frow"><div class="fi">${ic("person")}</div><div><b>Un comprador con intención demostrada</b><p class="sb">Realizó una postulación económica específica para tu proyecto.</p></div></div>
   <div class="frow"><div class="fi">${ic("target")}</div><div><b>Match basado en datos</b><p class="sb">Su búsqueda fue comparada con las características de tu desarrollo.</p></div></div>
   <div class="frow"><div class="fi">${ic("doc")}</div><div><b>Perfil de búsqueda completo</b><p class="sb">Conocés sus necesidades, preferencias y parámetros de compra.</p></div></div>
-  <div class="frow"><div class="fi">${ic("coins")}</div><div><b>Presupuesto</b><p class="sb">Tope declarado durante su postulación: ${presupuesto}.</p></div></div>
-  <div class="frow"><div class="fi">${ic("ruler")}</div><div><b>Tipología buscada</b><p class="sb">Qué tipo de unidad está buscando: ${tipologia}.</p></div></div>
+  <div class="frow"><div class="fi">${ic("coins")}</div><div><b>Presupuesto y anticipo</b><p class="sb">Información declarada durante su postulación: ${presupuesto}, anticipo disponible ${anticipo}.</p></div></div>
+  <div class="frow"><div class="fi">${ic("ruler")}</div><div><b>Superficie y tipología buscadas</b><p class="sb">Qué tipo de unidad está buscando: ${tipologia}, ${superficie}.</p></div></div>
   <div class="frow"><div class="fi">${ic("sliders")}</div><div><b>Condiciones que prioriza</b><p class="sb">Zona, expensas y demás criterios${prioridades.length ? `: ${prioridades.join(", ")}` : ""}.</p></div></div>
   <div class="frow"><div class="fi">${ic("percent")}</div><div><b>Índice de compatibilidad</b><p class="sb">Ladrillo Hub analiza la coincidencia con tu proyecto: ${l.compatibilidad || 0}%.</p></div></div>
   <div class="frow"><div class="fi">${ic("star")}</div><div><b>Proyecto seleccionado específicamente</b><p class="sb">No es un usuario aleatorio. Lo eligió dentro de Ladrillo Hub.</p></div></div>
@@ -1727,6 +1749,8 @@ function pantallaAccesoComprador() {
   <h4>Vista previa del comprador <span class="sb" style="font-weight:400">(anonimizada)</span></h4>
   <div class="previewgrid">
     <div class="pi"><span>Tipología</span><b>${tipologia}</b></div>
+    <div class="pi"><span>Superficie</span><b>${superficie}</b></div>
+    <div class="pi"><span>Anticipo</span><b>${anticipo}</b></div>
     <div class="pi"><span>Zona</span><b>${zona}</b></div>
     <div class="pi"><span>Presupuesto</span><b>${presupuesto}</b></div>
     <div class="pi"><span>Expensas</span><b>${expensas}</b></div>
