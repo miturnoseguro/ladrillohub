@@ -132,6 +132,78 @@ footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:
 .previewgrid .pi{border:1px solid var(--ln);border-radius:12px;padding:10px 12px}
 .previewgrid .pi span{display:block;color:var(--gr);font-size:.72rem}
 .previewgrid .pi b{font-size:.92rem}
+
+/* ===== Landing pública (tab Inicio, sin sesión) ===== */
+.lh-hero{padding:8px 0 4px}
+.lh-hero h1{font-size:clamp(1.5rem,4.2vw,2.5rem);line-height:1.14;letter-spacing:-.01em;font-weight:800}
+.lh-hero-grid{display:grid;gap:26px;grid-template-columns:1.1fr .9fr;align-items:center;margin-top:6px}
+@media (max-width:900px){.lh-hero-grid{grid-template-columns:1fr}}
+.lh-cta-row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.lh-match{border:1px solid var(--ln);border-radius:16px;padding:18px;background:var(--soft)}
+.lh-match-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.lh-match-side{background:var(--bg);border:1px solid var(--ln);border-radius:12px;padding:14px}
+.lh-match-side h4{font-size:.72rem;color:var(--gr);font-weight:600;margin-bottom:4px}
+.lh-match-side .big{font-size:1.05rem;font-weight:800}
+.lh-match-pct{width:54px;height:54px;border-radius:50%;background:var(--rc);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.84rem;margin:0 auto}
+.lh-match-foot{margin-top:12px;font-size:.76rem;color:var(--gr);border-top:1px dashed var(--ln);padding-top:12px}
+.lh-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0;border-top:1px solid var(--ln);border-bottom:1px solid var(--ln);padding:18px 0}
+@media (max-width:700px){.lh-stats{grid-template-columns:repeat(2,1fr)}}
+.lh-stat b{display:block;font-weight:800;font-size:1.25rem}
+.lh-stat span{font-size:.74rem;color:var(--gr)}
+.lh-sec{margin-top:42px}
+.lh-eyebrow{color:var(--rc);font-weight:700;font-size:.78rem;margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em}
+.lh-sides{display:grid;gap:18px;grid-template-columns:1fr 1fr;margin-top:18px}
+@media (max-width:800px){.lh-sides{grid-template-columns:1fr}}
+.lh-side{border:1px solid var(--ln);border-radius:16px;padding:20px;background:var(--bg)}
+.lh-side.comprador{border-top:4px solid var(--rc)}
+.lh-side.desarrolladora{border-top:4px solid var(--ink)}
+.lh-tag{display:inline-block;font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;border-radius:20px;margin-bottom:10px}
+.lh-tag.comprador{background:var(--rt);color:var(--rc)}
+.lh-tag.desarrolladora{background:var(--soft);color:var(--ink)}
+.lh-side h3{font-size:1.1rem;margin-bottom:8px}
+.lh-steps{list-style:none;margin:12px 0 0;padding:0;counter-reset:lh-step}
+.lh-steps li{counter-increment:lh-step;display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--ln)}
+.lh-steps li:first-child{border-top:none}
+.lh-steps li::before{content:counter(lh-step);flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--soft);border:1px solid var(--ln);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700}
+.lh-steps b{display:block;font-size:.85rem}
+.lh-steps small{color:var(--gr);font-size:.74rem}
+.lh-price{margin-top:14px;padding-top:14px;border-top:1px solid var(--ln);display:flex;align-items:baseline;gap:8px}
+.lh-price .amt{font-weight:800;font-size:1.45rem}
+.lh-price .note{font-size:.74rem;color:var(--gr)}
+.lh-refund{margin-top:10px;background:var(--soft);border-radius:10px;padding:10px 12px;font-size:.74rem;color:var(--gr)}
+.lh-refund b{color:var(--ok)}
+.lh-filters{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);margin-top:16px}
+@media (max-width:760px){.lh-filters{grid-template-columns:1fr}}
+.lh-fgroup{border:1px solid var(--ln);border-radius:14px;padding:14px 16px}
+.lh-fgroup h4{font-size:.8rem;margin-bottom:8px;color:var(--rc)}
+.lh-chips{display:flex;flex-wrap:wrap;gap:6px}
+.lh-chip{border:1px solid var(--ln);border-radius:20px;padding:5px 11px;font-size:.72rem;color:var(--gr)}
+.lh-trust{display:grid;gap:14px;grid-template-columns:repeat(3,1fr);margin-top:16px}
+@media (max-width:820px){.lh-trust{grid-template-columns:1fr}}
+.lh-trust-card{border:1px solid var(--ln);border-radius:14px;padding:16px;background:var(--soft)}
+.lh-trust-card h4{font-size:.9rem;margin:8px 0 6px}
+.lh-trust-card p{font-size:.8rem;color:var(--gr)}
+.lh-claim{background:var(--ink);color:#f3efe9;border-radius:18px;padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center;margin-top:16px}
+@media (max-width:800px){.lh-claim{grid-template-columns:1fr}}
+.lh-claim h2{color:#fff;font-size:1.3rem}
+.lh-claim p{color:#c9c2b6;margin-top:10px;font-size:.85rem}
+.lh-claim-card{background:rgba(255,255,255,.08);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,.15)}
+.lh-claim-card h5{font-size:.85rem;margin-bottom:3px;font-weight:800}
+.lh-claim-card span{font-size:.74rem;color:#b3aa9e}
+.lh-claim-status{font-size:.7rem;font-weight:700;margin-top:6px;display:inline-block}
+.lh-claim-status.pending{color:#e0a836}
+.lh-claim-status.rejected{color:#c96a5c}
+.lh-claim-status.open{color:#8fbf9f}
+.lh-details{border-top:1px solid var(--ln);padding:12px 0}
+.lh-details:last-child{border-bottom:1px solid var(--ln)}
+.lh-details summary{cursor:pointer;font-weight:700;font-size:.88rem;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lh-details summary::-webkit-details-marker{display:none}
+.lh-details summary::after{content:"+";font-size:1.1rem;color:var(--rc);font-weight:400;flex:none}
+.lh-details[open] summary::after{content:"–"}
+.lh-details p{margin-top:8px;color:var(--gr);font-size:.82rem}
+.lh-final{text-align:center;padding:34px 0 6px}
+.lh-final h2{font-size:1.4rem;max-width:22ch;margin:0 auto}
+.lh-final .lh-cta-row{justify-content:center}
 </style>
 </head>
 <body>
@@ -775,22 +847,153 @@ function sc(p) {
 // =====================================================================
 // VISTAS
 // =====================================================================
+const FAQ_PUBLICA = [
+  ["¿El pago de $10.000 garantiza la compra?", "No. El pago acredita que tu postulación es real y habilita a Ladrillo Hub a presentarla a la desarrolladora. No garantiza la compra del inmueble ni obliga a ninguna de las partes a concretar una operación."],
+  ["¿Qué pasa si la desarrolladora nunca accede a mi perfil?", "Te devolvemos el 100% de los $10.000. Si no hay match, no hay costo."],
+  ["¿Qué recibe la desarrolladora al pagar $50.000?", "No es una base de datos ni un contacto al azar: es el perfil completo de un comprador que se postuló específicamente a ese proyecto, con su presupuesto, tipología buscada, condiciones y datos de contacto habilitados."],
+  ["Tengo un desarrollo que aparece con datos públicos y no es mío. ¿Cómo lo reclamo?", 'Ingresá con Google, entrá a "Proyectos a reclamar" y enviá la solicitud. La revisamos y, una vez aprobada, podés seguir cargando toda la información del proyecto.'],
+  ["¿Mis datos personales quedan expuestos?", "No. Tu perfil permanece privado y anonimizado hasta que la otra parte paga para acceder a él. Recién ahí se habilita el contacto directo."],
+];
+
 const inicioPublico = () => `
-<section style="text-align:center;padding:30px 0 10px">
-  <h1 style="font-size:clamp(1.8rem,5vw,3rem);margin:0;letter-spacing:-.02em">Elegí tu desarrollo con datos, no con folletos</h1>
-  <p class="sb" style="max-width:640px;margin:12px auto 18px;font-size:1rem">Datos reales de desarrolladoras en Palermo, Belgrano y Núñez: precio por m², expensas, confiabilidad y compatibilidad hecha a tu medida.</p>
-  <div style="max-width:280px;margin:auto"><button class="btn pri" onclick="go('buscar')">Empezar a buscar</button></div>
+<section class="lh-hero">
+  <div class="lh-hero-grid">
+    <div>
+      <h1>Encontrá el desarrollo que coincide con vos. O al comprador que ya te está buscando.</h1>
+      <p class="sb" style="margin-top:14px;font-size:1rem;max-width:56ch">Ladrillo Hub cruza lo que un comprador busca con lo que cada desarrolladora está construyendo, usando más de 50 filtros reales: documentación, amenities, financiación, unidad y entorno. Nadie paga hasta que hay un match verificado.</p>
+      <div class="lh-cta-row">
+        <button class="btn pri" style="width:auto;padding:12px 22px;margin:0" onclick="go('buscar')">Soy comprador/a</button>
+        <button class="btn" style="width:auto;padding:12px 22px;margin:0;border-color:var(--rc);color:var(--rc)" onclick="loginGoogle()">Soy desarrolladora</button>
+      </div>
+    </div>
+    <div class="lh-match">
+      <div class="lh-match-row">
+        <div class="lh-match-side"><h4>Comprador busca</h4><div class="big">2 amb · Núñez</div><p class="sb" style="margin-top:4px">USD 70.000 de anticipo</p></div>
+        <div class="lh-match-pct">92%</div>
+        <div class="lh-match-side"><h4>Desarrollo</h4><div class="big">Altos de Vidal</div><p class="sb" style="margin-top:4px">Fideicomiso al costo</p></div>
+      </div>
+      <div class="lh-match-foot">Compatibilidad calculada por zona, presupuesto, tipología y condiciones de pago. Datos personales protegidos hasta que ambas partes confirman interés.</div>
+    </div>
+  </div>
 </section>
-<div class="g2" style="margin-top:20px">
-  ${[["🎯","Índice de compatibilidad","Marcás lo imprescindible y lo deseable; ordenamos los proyectos por cuánto te cierran."],
-     ["🔎","Transparencia total","Desarrolladora, arquitecta, trayectoria e hitos con documentos."],
-     ["🧾","Datos reales","Proyectos relevados de Palermo, Belgrano y Núñez con fuente verificable."],
-     ["🤝","Match con garantía","Tu ficha es privada y solo se comparte cuando ambas partes pagan por Mercado Pago."]]
-    .map(x=>`<div class="bx"><div style="font-size:1.6rem">${x[0]}</div><b>${x[1]}</b><p class="sb">${x[2]}</p></div>`).join("")}
+
+<div class="lh-stats">
+  <div class="lh-stat"><b>+50</b><span>filtros de búsqueda</span></div>
+  <div class="lh-stat"><b>CABA + GBA</b><span>barrios cubiertos</span></div>
+  <div class="lh-stat"><b>$10.000 / $50.000</b><span>comprador / desarrolladora</span></div>
+  <div class="lh-stat"><b>0</b><span>costo si no hay match</span></div>
 </div>
-<h2 style="margin-top:26px">Proyectos destacados</h2>
-<div class="grid">${st.proyectos.slice(0,6).map((p,i)=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})"><div class="ph" data-l="${p.barrio}">${p.nombre}</div><div class="bd"><h3>${p.nombre}</h3><p class="sb">${p.barrio} · USD ${n(p.precio_usd_m2)}/m²</p></div></div>`).join("")}</div>
-${comoBloque()}`;
+
+<section class="lh-sec" id="como-funciona">
+  <div class="lh-eyebrow">Cómo funciona</div>
+  <h2>Un match de verdad, no una base de datos.</h2>
+  <div class="lh-sides">
+    <div class="lh-side comprador">
+      <span class="lh-tag comprador">Comprador</span>
+      <h3>Postulación verificada</h3>
+      <p class="sb">Encontraste un proyecto que coincide con lo que buscás. Al pagar, tu perfil pasa a ser una postulación real ante la desarrolladora.</p>
+      <ul class="lh-steps">
+        <li><div><b>Filtrás y aparece el match</b><small>Presupuesto, zona, tipología, financiación y más.</small></div></li>
+        <li><div><b>Te postulás</b><small>Pagás $10.000 para habilitar tu postulación.</small></div></li>
+        <li><div><b>Ladrillo Hub presenta tu perfil</b><small>Anonimizado, con tu índice de compatibilidad.</small></div></li>
+        <li><div><b>La desarrolladora decide</b><small>Si accede, paga $50.000 y se habilita el contacto directo.</small></div></li>
+      </ul>
+      <div class="lh-price"><span class="amt">$10.000</span><span class="note">postulación verificada</span></div>
+      <div class="lh-refund"><b>100% reintegrable</b> si la desarrolladora nunca accede a tu perfil. Si no hay match, no hay costo.</div>
+    </div>
+    <div class="lh-side desarrolladora">
+      <span class="lh-tag desarrolladora">Desarrolladora</span>
+      <h3>Acceso a comprador verificado</h3>
+      <p class="sb">No es un contacto frío: es alguien que se postuló específicamente a tu proyecto, con intención de compra demostrada.</p>
+      <ul class="lh-steps">
+        <li><div><b>Cargás tu proyecto</b><small>Planos, renders, fideicomiso, gastos, documentación completa.</small></div></li>
+        <li><div><b>Llega un lead calificado</b><small>Un comprador se postuló y coincide con tus condiciones.</small></div></li>
+        <li><div><b>Vista previa anonimizada</b><small>Tipología, zona, presupuesto y % de compatibilidad, sin datos personales.</small></div></li>
+        <li><div><b>Desbloqueás el contacto</b><small>Pagás $50.000 y accedés al perfil completo del comprador.</small></div></li>
+      </ul>
+      <div class="lh-price"><span class="amt">$50.000</span><span class="note">por lead calificado desbloqueado</span></div>
+      <div class="lh-refund">No es una base de datos genérica. <b>Cada acceso es un comprador</b> que ya eligió tu proyecto puntualmente.</div>
+    </div>
+  </div>
+</section>
+
+${st.proyectos.length ? `<section class="lh-sec">
+  <h2>Proyectos destacados</h2>
+  <div class="grid">${st.proyectos.slice(0,6).map(p=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})"><div class="ph" data-l="${p.barrio}">${p.nombre}</div><div class="bd"><h3>${p.nombre}</h3><p class="sb">${p.barrio} · USD ${n(p.precio_usd_m2)}/m²</p></div></div>`).join("")}</div>
+</section>` : ""}
+
+<section class="lh-sec" id="filtros">
+  <div class="lh-eyebrow">Filtros reales, no genéricos</div>
+  <h2>La desarrolladora carga todo el dato duro de la obra. El comprador filtra por lo que de verdad le importa.</h2>
+  <div class="lh-filters">
+    <div class="lh-fgroup"><h4>Documentación y confianza</h4><div class="lh-chips">${["Proforma de escritura","Fideicomiso al costo","Datos públicos verificables","Escribano informado","≥5 obras entregadas","Reseñas ≥4,5★"].map(c=>`<span class="lh-chip">${c}</span>`).join("")}</div></div>
+    <div class="lh-fgroup"><h4>Amenities</h4><div class="lh-chips">${["SUM","Gimnasio","Piscina","Cochera","Seguridad 24hs","Domótica"].map(c=>`<span class="lh-chip">${c}</span>`).join("")}</div></div>
+    <div class="lh-fgroup"><h4>Ubicación y entorno</h4><div class="lh-chips">${["Cerca de subte/tren","Plaza cerca","Colegios cerca","Calle tranquila"].map(c=>`<span class="lh-chip">${c}</span>`).join("")}</div></div>
+    <div class="lh-fgroup"><h4>Financiación y legales</h4><div class="lh-chips">${["Anticipo bajo (≤30%)","Cuotas en pesos","Apto crédito hipotecario","Sin juicios registrados","Seguro de caución"].map(c=>`<span class="lh-chip">${c}</span>`).join("")}</div></div>
+  </div>
+</section>
+
+<section class="lh-sec">
+  <div class="lh-eyebrow">Confianza</div>
+  <h2>Reputación de los dos lados del mostrador.</h2>
+  <div class="lh-trust">
+    <div class="lh-trust-card">${icGoogle(24)}<h4>Reseñas verificadas con Google</h4><p>Si tu Gmail coincide con un negocio dado de alta en Google Maps, tus reseñas se cargan automáticamente. Nada de reseñas truchas.</p></div>
+    <div class="lh-trust-card">${ic("person",24)}<h4>Reputación de comprador</h4><p>Cada postulación y operación bien realizada construye tu historial. Compradores serios acceden a mejores condiciones a futuro.</p></div>
+    <div class="lh-trust-card">${ic("lock",24)}<h4>Datos protegidos hasta el match</h4><p>Ni el comprador ni la desarrolladora ven datos personales hasta que ambas partes pagan y confirman interés real.</p></div>
+  </div>
+</section>
+
+<section class="lh-sec" id="desarrolladoras">
+  <div class="lh-claim">
+    <div>
+      <div class="lh-eyebrow" style="color:#e08a78">Para desarrolladoras</div>
+      <h2>¿Tu proyecto ya está en Ladrillo Hub y todavía no lo reclamaste?</h2>
+      <p>Cargamos fichas con datos públicos de los desarrollos actuales de CABA y GBA para que los compradores empiecen a filtrar desde el día uno. Si una ficha es tuya, la reclamás, la revisamos y en cuanto la aprobamos vos seguís cargando el resto: planos, fotos reales, fideicomiso, gastos y todo el detalle que hace subir tu compatibilidad.</p>
+      <button class="btn pri" style="width:auto;padding:12px 22px;margin-top:18px" onclick="loginGoogle()">Reclamar mi proyecto</button>
+    </div>
+    <div>
+      <div class="lh-claim-card"><h5>Key Residences – Belgrano R</h5><span>Belgrano</span><br><span class="lh-claim-status pending">Pendiente de revisión</span></div>
+      <div class="lh-claim-card" style="margin-top:10px"><h5>Altos de Vidal</h5><span>Núñez</span><br><span class="lh-claim-status open">Sin reclamar — ¿es tuyo?</span></div>
+      <div class="lh-claim-card" style="margin-top:10px"><h5>Sky Roof</h5><span>Nordelta</span><br><span class="lh-claim-status rejected">Solicitud rechazada</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="lh-sec" id="precios">
+  <div class="lh-eyebrow">Precios</div>
+  <h2>Simple: se paga solo cuando hay interés real de las dos partes.</h2>
+  <div class="lh-sides" style="margin-top:16px">
+    <div class="lh-side comprador">
+      <span class="lh-tag comprador">Comprador</span>
+      <div class="lh-price" style="margin-top:0;border-top:none;padding-top:0"><span class="amt">$10.000</span><span class="note">por postulación verificada</span></div>
+      <p class="sb" style="margin-top:12px">Se cobra cuando tu búsqueda matchea con un proyecto y decidís postularte. Reintegro del 100% si la desarrolladora no accede a tu perfil.</p>
+      <button class="btn pri" style="margin-top:16px" onclick="go('buscar')">Empezar a buscar</button>
+    </div>
+    <div class="lh-side desarrolladora">
+      <span class="lh-tag desarrolladora">Desarrolladora</span>
+      <div class="lh-price" style="margin-top:0;border-top:none;padding-top:0"><span class="amt">$50.000</span><span class="note">por lead calificado</span></div>
+      <p class="sb" style="margin-top:12px">Se cobra solo cuando un comprador se postuló a tu proyecto y querés desbloquear su perfil completo y sus datos de contacto.</p>
+      <button class="btn" style="margin-top:16px;border-color:var(--rc);color:var(--rc)" onclick="loginGoogle()">Cargar mi proyecto</button>
+    </div>
+  </div>
+</section>
+
+<section class="lh-sec" id="faq" style="max-width:760px">
+  <div class="lh-eyebrow">Preguntas frecuentes</div>
+  <h2>¿Dudas? Las resolvemos.</h2>
+  <div style="margin-top:14px">
+    ${FAQ_PUBLICA.map((f,i)=>`<details class="lh-details"${i===0?" open":""}><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join("")}
+  </div>
+</section>
+
+<section class="lh-final">
+  <h2>Dejá de buscar a ciegas. Empezá a matchear.</h2>
+  <div class="lh-cta-row">
+    <button class="btn pri" style="width:auto;padding:12px 22px;margin:0" onclick="go('buscar')">Soy comprador/a</button>
+    <button class="btn" style="width:auto;padding:12px 22px;margin:0;border-color:var(--rc);color:var(--rc)" onclick="loginGoogle()">Soy desarrolladora</button>
+  </div>
+</section>
+`;
 
 const comoBloque = () => `
 <h2 style="margin-top:40px">Cómo funciona</h2>
