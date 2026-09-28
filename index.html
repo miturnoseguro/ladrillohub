@@ -1542,7 +1542,7 @@ function ventaBox(l) {
   const vend = l.unidad_id && U.find(u => u.id === l.unidad_id);
   if (vend) return `<div class="bx" style="background:var(--soft)"><b>✔ Venta registrada</b><p class="sb">Unidad vendida: piso ${vend.piso} ${vend.letra} · ${vend.ambientes||"–"} amb · ${vend.superficie_m2||"–"} m²</p></div>`;
   const disp = U.filter(u => u.proyecto_id === l.proyecto_id && u.estado !== "vendida");
-  if (!disp.length) return `<p class="sb" style="margin-top:8px">Cargá las unidades del proyecto (Inicio → Stock y unidades) para registrar la venta.</p>`;
+  if (!disp.length) return `<p class="sb" style="margin-top:8px">Cargá las unidades del proyecto (Inicio → tu proyecto → Gestionar stock y unidades) para registrar la venta.</p>`;
   return `<div class="bx"><b>¿Se concretó la venta?</b><select class="st" id="vSel_${l.id}">${disp.map(u=>`<option value="${u.id}">Piso ${u.piso} ${u.letra} · ${u.ambientes||"–"} amb · ${u.superficie_m2||"–"} m²</option>`).join("")}</select>
   <button class="btn pri" onclick="marcarVendidaLead('${l.id}')">Marcar unidad como vendida</button></div>`;
 }
@@ -1640,7 +1640,7 @@ async function panelDesarrolladora() {
   <p class="sb" style="margin-top:10px">Tus reseñas de Google y de Ladrillo Hub están en la tab <a href="#" onclick="go('resenasD');return false">Reseñas</a>. Los hitos de obra se cargan por proyecto en la tab <a href="#" onclick="go('obra');return false">Obra</a>.</p>
 
   <h2 style="margin-top:26px">Mis proyectos</h2>
-  <div class="grid">${st.misProyectosDev.map(p=>`<div class="bx" style="margin:0"><div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div><button class="btn" style="margin-top:8px" onclick="abrirEdicionProyecto('${p.id}')">Fotos, documentos, unidades y stock</button></div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}</div>
+  <div class="grid">${st.misProyectosDev.map(p=>`<div class="bx" style="margin:0"><div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div>${stockResumenHTML(p.id)}<button class="btn pri" style="margin-top:8px" onclick="abrirEdicionProyecto('${p.id}', true)">Gestionar stock y unidades</button><button class="btn" style="margin-top:6px" onclick="abrirEdicionProyecto('${p.id}')">Fotos y documentos</button></div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}</div>
 
   ${st.editProyectoId ? edicionProyectoForm() : ""}
   ${nuevoProyectoForm()}
@@ -1650,7 +1650,13 @@ async function panelDesarrolladora() {
 // =====================================================================
 // EDICIÓN DE PROYECTO YA PUBLICADO (cargar fotos / docs / brochure / render)
 // =====================================================================
-async function abrirEdicionProyecto(id) {
+function stockResumenHTML(pid) {
+  const U = st.unidadesByProy[pid] || [];
+  if (!U.length) return `<p class="wn" style="font-size:.76rem;margin-top:8px">Todavía no cargaste unidades. Cargalas para que los compradores puedan filtrar por ambientes, m², piso y orientación.</p>`;
+  const c = (e) => U.filter(u => u.estado === e).length;
+  return `<div class="stk"><div><b class="ok">${c("disponible")}</b><span>Disponibles</span></div><div><b class="wn">${c("reservada")}</b><span>Reservadas</span></div><div><b>${c("vendida")}</b><span>Vendidas</span></div></div>`;
+}
+async function abrirEdicionProyecto(id, irAStock) {
   st.subiendo = true; render();
   const { data: p, error } = await sb.from("proyectos").select("*").eq("id", id).single();
   if (error || !p) { toast("No se pudo cargar el proyecto"); st.subiendo = false; render(); return; }
@@ -1661,6 +1667,7 @@ async function abrirEdicionProyecto(id) {
   st.editUnidades = (await sb.from("unidades").select("*").eq("proyecto_id", id)).data || [];
   st.subiendo = false;
   render();
+  if (irAStock) setTimeout(() => document.getElementById("stockSec")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
 }
 function cerrarEdicionProyecto() {
   st.editProyectoId = null; st.editProyecto = null; st.editFotos = [];
@@ -1732,7 +1739,7 @@ async function subirRenderEdicion(file) {
 function edicionProyectoForm() {
   const p = st.editProyecto;
   return `<div class="bx" style="margin-top:22px;border:2px solid var(--rc)">
-  <div class="r1"><h4>Cargar fotos y documentos: ${p.nombre}</h4><button class="btn" style="width:auto;padding:4px 10px" onclick="cerrarEdicionProyecto()">Cerrar</button></div>
+  <div class="r1"><h4>${p.nombre}: stock, fotos y documentos</h4><button class="btn" style="width:auto;padding:4px 10px" onclick="cerrarEdicionProyecto()">Cerrar</button></div>
 
   ${unidadesDevHTML(p)}
   <h4>Fotos reales de la obra</h4>
@@ -1761,7 +1768,7 @@ function unidadesDevHTML(p) {
   const U = [...st.editUnidades].sort((a,b) => (b.piso - a.piso) || String(a.letra).localeCompare(b.letra));
   const c = (e) => U.filter(u => u.estado === e).length;
   const opt = (arr, sel) => arr.map(x => `<option value="${x[0]||x}"${(x[0]||x)===sel?" selected":""}>${x[1]||x}</option>`).join("");
-  return `<h4>Unidades y stock</h4>
+  return `<h4 id="stockSec">Unidades y stock</h4>
   <p class="sb">Podés modificar el stock cuando quieras (por ejemplo si vendés por otro canal). Lo ve el comprador en la ficha.</p>
   <div class="stk"><div><b class="ok">${c("disponible")}</b><span>Disponibles</span></div><div><b class="wn">${c("reservada")}</b><span>Reservadas</span></div><div><b>${c("vendida")}</b><span>Vendidas</span></div></div>
   <div class="floorbox"><select class="st" id="uOri" style="margin-top:0"><option value="">Orientación del proyecto</option>${opt(ORI,p.orientacion)}</select><input class="st" id="uXPiso" type="number" min="1" max="26" placeholder="Unidades por piso" value="${p.unidades_por_piso||""}" style="margin-top:0"></div>
