@@ -1869,16 +1869,21 @@ const filaUnidad = (piso, letra, amb, sup, supDesc, ori, ubi) => ({
   letra, 
   ambientes: amb || null, 
   superficie_m2: sup || null, 
-  superficie_descubierta_m2: supDesc || null, // Nuevo campo
+  superficie_descubierta_m2: supDesc || null,
   orientacion: ori || null, 
-  ubicacion: ubi || null, 
+  ubicacion: ubi || null,   // null en vez de ""
   estado: "disponible" 
 });
 async function agregarUnidad() {
   const g = (i) => document.getElementById(i).value, piso = +g("uPiso");
   if (!piso && piso !== 0) { toast("Falta el piso"); return; }
+  
+  // Convertimos strings vacíos a null para no romper los CHECK constraints
+  const uOri = g("uOriU") || null;
+  const uUbi = g("uUbi") || null;
+  
   const { error } = await sb.from("unidades").insert(filaUnidad(
-    piso, g("uLetra"), +g("uAmb"), +g("uSup"), +g("uSupDesc"), g("uOriU"), g("uUbi")
+    piso, g("uLetra"), +g("uAmb"), +g("uSup"), +g("uSupDesc"), uOri, uUbi
   ));
   if (error) { toast("Error: " + error.message); return; }
   await recargarUnidades();
@@ -1889,7 +1894,8 @@ async function generarUnidades() {
   const rows = [];
   for (let p = d; p <= h; p++) 
     for (let i = 0; i < c; i++) 
-      rows.push(filaUnidad(p, LETRAS[i], g("gAmb"), g("gSup"), g("gSupDesc"), st.editProyecto.orientacion, ""));
+      // Acá ubicacion va null (no "") para no romper el CHECK
+      rows.push(filaUnidad(p, LETRAS[i], g("gAmb"), g("gSup"), g("gSupDesc"), st.editProyecto.orientacion || null, null));
   
   const { error } = await sb.from("unidades").insert(rows);
   if (error) { toast("Error: " + error.message); return; }
