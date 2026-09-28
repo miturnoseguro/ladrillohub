@@ -27,7 +27,8 @@ nav button.on,.tb button.on{background:var(--rc);color:#fff;border-color:var(--r
 @media (max-width:700px){.hd{flex-wrap:wrap}nav{order:3;flex-basis:100%}}
 @media (max-width:480px){.hd{gap:8px;padding:9px 12px}.brand{font-size:.98rem}.role .sb{max-width:120px;margin-right:4px}nav button,.role button{padding:6px 11px;font-size:.76rem}}
 #resbar{display:none}
-#resbar.show{display:flex;justify-content:center;align-items:center;gap:6px;padding:10px 14px;background:var(--ink);color:#fff;font-weight:700;font-size:.8rem;text-align:center;cursor:pointer;position:sticky;top:calc(5px + env(safe-area-inset-top,0px));z-index:40;margin:5px auto 0;width:calc(100% - 24px);max-width:720px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#resbar.show{display:block;height:62px;pointer-events:none}
+#resbar.show .rbi{pointer-events:auto;display:flex;justify-content:center;align-items:center;gap:6px;padding:10px 14px;background:var(--ink);color:#fff;font-weight:700;font-size:.8rem;text-align:center;cursor:pointer;position:fixed;top:calc(5px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:40;width:calc(100% - 24px);max-width:720px;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .buscando header{position:static}
 .legend{background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:.76rem;color:var(--gr)}
 .legend .c{cursor:default;margin:2px 4px 2px 0}.legend p{margin-top:6px}
@@ -36,7 +37,7 @@ nav button.on,.tb button.on{background:var(--rc);color:#fff;border-color:var(--r
 .stk{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.stk div{flex:1;min-width:90px;border:1px solid var(--ln);border-radius:12px;padding:8px;text-align:center}.stk b{display:block;font-size:1.3rem}.stk span{font-size:.7rem;color:var(--gr)}
 .urow{border:1px solid var(--ln);border-radius:12px;padding:10px;margin-top:8px}.urow.sold{opacity:.55}
 .tblw{overflow-x:auto}
-#resbar.show.hit{background:var(--rc)}
+#resbar.show.hit .rbi{background:var(--rc)}
 main{max-width:1200px;margin:auto;padding:18px 16px 70px}
 .lay{display:grid;gap:22px}
 .fl{display:block;border:1px solid var(--ln);border-radius:16px;padding:14px}
@@ -91,6 +92,8 @@ input[type="range"]{width:100%;accent-color:var(--rc)}
 .modal-bx{background:var(--bg);border-radius:18px;max-width:520px;width:100%;padding:28px 24px;text-align:center;max-height:90vh;overflow:auto}
 .modal-fit{display:flex;flex-direction:column;padding:16px;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow:hidden}
 .modal-fit h2{font-size:1.15rem}.modal-fit .scr{flex:1;min-height:0;overflow-y:auto;border:1px solid var(--ln);border-radius:10px;padding:8px 10px;text-align:left;font-size:.72rem;line-height:1.45;color:var(--gr);margin-top:10px}
+.modal-fit .scr{min-height:96px}
+@media (max-height:740px){.modal-fit{padding:12px}.modal-fit h2{font-size:1rem}.modal-fit>p.sb{display:none}.rolgrid .bx p{display:none}.rolgrid .bx{padding:8px}.modal-fit .scr{margin-top:8px}}
 .modal-fit .foot{flex:none;padding-top:10px}.modal-fit .foot .btn{margin-top:6px;padding:10px}
 .rolgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.rolgrid .bx{margin:0;padding:10px}.rolgrid h3{font-size:.85rem}.rolgrid p{font-size:.7rem;margin:4px 0}.rolgrid .btn{padding:8px 4px;font-size:.78rem;margin-top:4px}
 footer{border-top:1px solid var(--ln);margin-top:44px;padding:26px 16px calc(90px + env(safe-area-inset-bottom,0px));text-align:center}
@@ -358,7 +361,7 @@ const st = {
   resenas: {},            // { proyecto_id: [reseñas] }
   b: [], t: [], m: 4000, e: 300, // filtros de búsqueda
   docsFiltro: [],          // filtros de documentos/condiciones (planos, proforma_escritura, fondo_reserva, fondo_equipamiento)
-  f: { amb: [], ori: [], ubi: [], supMin: '', supMax: '', pisoMin: '', soloDisp: false }, // filtros de unidad
+  f: { amb: [], ori: [], ubi: [], xpiso: [], letras: [], totMin: '', totMax: '', supMin: '', supMax: '', pisoMin: '', soloDisp: false }, // filtros de unidad
   unidadesByProy: {}, editUnidades: [], unidadesDev: [], telefono: null, googleSolicitud: null,
   q: {},                  // prioridades marcadas en "Buscar" (0/1/2)
   mercadoOpen: false,
@@ -603,7 +606,7 @@ async function loginGoogle() {
 function resetSesionUI() {
   Object.assign(st, { v: "inicio", tab: 0, session: null, perfil: null, desarrolladora: null, ficha: null, telefono: null, leads: [], misSolicitudesReclamo: [],
     eligiendoDesarrolladora: false, editProyectoId: null, editProyecto: null, hitoModalOpen: false, q: {}, b: [], t: [], docsFiltro: [], m: 4000, e: 300,
-    f: { amb: [], ori: [], ubi: [], supMin: "", supMax: "", pisoMin: "", soloDisp: false } });
+    f: { amb: [], ori: [], ubi: [], xpiso: [], letras: [], totMin: "", totMax: "", supMin: "", supMax: "", pisoMin: "", soloDisp: false } });
 }
 async function logout() {
   await sb.auth.signOut();
@@ -761,6 +764,7 @@ function filtrarProyectos() {
     (p.precio_usd_m2||0) <= st.m &&
     (p.expensas_miles||9999) <= st.e &&
     (!st.docsFiltro.length || st.docsFiltro.every(k => proyectoTieneDoc(p, k))) &&
+    proyectoCumpleEstructura(p) &&
     (!filtrosUnidadActivos() || unidadesDe(p).some(u => u.estado === "disponible" && unidadCumple(u, p)))
   );
 }
@@ -770,15 +774,32 @@ function unidadCumple(u, p) {
   if (f.amb.length && !f.amb.includes(Math.min(u.ambientes || 0, 4))) return false;
   if (f.ori.length && !f.ori.includes(u.orientacion || p.orientacion)) return false;
   if (f.ubi.length && !f.ubi.includes(u.ubicacion)) return false;
+  if (f.letras.length && !f.letras.includes(u.letra)) return false;
   if (f.supMin !== "" && (u.superficie_m2 || 0) < +f.supMin) return false;
   if (f.supMax !== "" && (u.superficie_m2 || 0) > +f.supMax) return false;
   if (f.pisoMin !== "" && (u.piso || 0) < +f.pisoMin) return false;
   return true;
 }
-const filtrosUnidadActivos = () => { const f = st.f; return f.amb.length || f.ori.length || f.ubi.length || f.supMin !== "" || f.supMax !== "" || f.pisoMin !== "" || f.soloDisp; };
+// Filtros a nivel proyecto: unidades por piso y cantidad total de unidades
+const filtrosProyectoActivos = () => { const f = st.f; return f.xpiso.length > 0 || f.totMin !== "" || f.totMax !== ""; };
+function proyectoCumpleEstructura(p) {
+  const f = st.f;
+  if (f.xpiso.length && !f.xpiso.includes(Math.min(p.unidades_por_piso || 0, 5))) return false;
+  const tot = unidadesDe(p).length;
+  if (f.totMin !== "" && tot < +f.totMin) return false;
+  if (f.totMax !== "" && (tot === 0 || tot > +f.totMax)) return false;
+  return true;
+}
+const letrasDisponibles = () => {
+  const set = new Set();
+  Object.values(st.unidadesByProy || {}).forEach(a => a.forEach(u => u.letra && set.add(u.letra)));
+  const arr = [...set].sort();
+  return arr.length ? arr : LETRAS.slice(0, 6).split("");
+};
+const filtrosUnidadActivos = () => { const f = st.f; return f.amb.length || f.ori.length || f.ubi.length || f.letras.length || f.supMin !== "" || f.supMax !== "" || f.pisoMin !== "" || f.soloDisp; };
 function filtrosActivos() {
   return st.b.length > 0 || st.t.length > 0 || st.docsFiltro.length > 0 ||
-    Object.keys(st.q).length > 0 || st.m !== 4000 || st.e !== 300 || !!filtrosUnidadActivos();
+    Object.keys(st.q).length > 0 || st.m !== 4000 || st.e !== 300 || !!filtrosUnidadActivos() || filtrosProyectoActivos();
 }
 function pintarResBar() {
   const rb = document.getElementById("resbar");
@@ -786,15 +807,26 @@ function pintarResBar() {
   if (st.v !== "buscar") { rb.className = ""; rb.innerHTML = ""; rb.onclick = null; return; }
   if (!filtrosActivos()) {
     rb.className = "show";
-    rb.innerHTML = "Empezá a filtrar y te diremos cuántos resultados encontramos";
+    rb.innerHTML = '<div class="rbi">Empezá a filtrar y te diremos cuántos resultados encontramos</div>';
     rb.onclick = null;
   } else {
     const total = filtrarProyectos().length;
     rb.className = "show hit";
-    rb.innerHTML = `${total} ${total===1?"resultado":"resultados"} encontrado${total===1?"":"s"} · ver abajo ↓`;
+    rb.innerHTML = `<div class="rbi">${total} ${total===1?"resultado":"resultados"} encontrado${total===1?"":"s"} · ver abajo ↓</div>`;
     rb.onclick = () => document.getElementById("resLista")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+  posResBar();
 }
+// Al inicio de la página el aviso queda debajo del header; al scrollear se
+// queda a 5px del borde superior (funciona en Safari iOS sin depender de sticky).
+function posResBar() {
+  const host = document.getElementById("resbar"), bar = host && host.querySelector(".rbi");
+  if (!bar) return;
+  const top = host.getBoundingClientRect().top;
+  bar.style.top = `max(calc(5px + env(safe-area-inset-top, 0px)), ${Math.round(top + 5)}px)`;
+}
+window.addEventListener("scroll", posResBar, { passive: true });
+window.addEventListener("resize", posResBar);
 
 async function render() {
   nav();
@@ -1075,7 +1107,7 @@ const comoBloque = () => `
 
 function filtros() {
   const grupos = Object.entries(st.featuresByGroup), f = st.f;
-  const chip = (arr, v, lab) => `<span class="c${arr.includes(v)?" m":""}" onclick="toggleArr(st.f.${arr===f.amb?"amb":arr===f.ori?"ori":"ubi"},${typeof v==="number"?v:`'${v}'`})">${lab}</span>`;
+  const chip = (arr, v, lab) => `<span class="c${arr.includes(v)?" m":""}" onclick="toggleArr(st.f.${arr===f.amb?"amb":arr===f.ori?"ori":arr===f.xpiso?"xpiso":arr===f.letras?"letras":"ubi"},${typeof v==="number"?v:`'${v}'`})">${lab}</span>`;
   return `<div class="legend"><b style="color:var(--ink)">Cómo usar los filtros</b>
     <div style="margin-top:6px"><span class="c w">Gimnasio</span> <b>Filtro seleccionado (deseable):</b> suma puntos a tu % de match, pero no descarta proyectos.</div>
     <div style="margin-top:4px"><span class="c m">Piscina ★</span> <b>Filtro imprescindible:</b> pesa el doble en el match. Tocá una vez = deseable, dos veces = imprescindible, tres = quitar.</div>
@@ -1092,6 +1124,9 @@ function filtros() {
   <h4>Piso desde</h4><input class="st" type="number" min="1" placeholder="Ej: 5" value="${f.pisoMin}" style="margin-top:0" oninput="st.f.pisoMin=this.value;refrescarResultados()">
   <h4>Orientación</h4>${ORI.map(([k,l])=>chip(f.ori,k,l)).join("")}
   <h4>Ubicación en el piso</h4>${UBI.map(u=>chip(f.ubi,u,u[0].toUpperCase()+u.slice(1))).join("")}
+  <h4>Letra de unidad</h4>${letrasDisponibles().map(l=>chip(f.letras,l,l)).join("")}
+  <h4>Unidades por piso</h4>${[1,2,3,4,5].map(n=>chip(f.xpiso,n,n===5?"5 o más":String(n))).join("")}
+  <h4>Cantidad de unidades del proyecto</h4><div class="floorbox"><input class="st" type="number" min="0" placeholder="Mín." value="${f.totMin}" style="margin-top:0" oninput="st.f.totMin=this.value;refrescarResultados()"><input class="st" type="number" min="0" placeholder="Máx." value="${f.totMax}" style="margin-top:0" oninput="st.f.totMax=this.value;refrescarResultados()"></div>
   ${grupos.map(([g,items])=>`<h4>${g}</h4>${items.map(x=>`<span class="c${st.q[x.key]?" "+(st.q[x.key]===2?"m":"w"):""}" onclick="cicloPrioridad('${x.key}')">${x.label}${st.q[x.key]===2?" ★":""}</span>`).join("")}`).join("")}`;
 }
 function proyectoTieneDoc(p, key) {
@@ -1954,15 +1989,6 @@ async function asociarGoogle() {
   const r = await sb.functions.invoke("solicitar-asociacion-google", { body: { solicitud_id: data.id } });
   if (r.error) console.error(r.error);
   toast("Pedido enviado. Le mandamos un email a la empresa."); render();
-}
-async function guardarGoogleDev() {
-  const google_rating = +document.getElementById("ggRating").value || null;
-  const google_review_count = +document.getElementById("ggCount").value || null;
-  const google_reviews_url = document.getElementById("ggUrl").value.trim() || null;
-  const { error } = await sb.from("desarrolladoras").update({ google_rating, google_review_count, google_reviews_url }).eq("id", st.desarrolladora.id);
-  if (error) { toast("Error: " + error.message); return; }
-  Object.assign(st.desarrolladora, { google_rating, google_review_count, google_reviews_url });
-  toast("Reseñas de Google guardadas"); render();
 }
 
 function modalHitoHTML() {
