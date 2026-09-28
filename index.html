@@ -1280,7 +1280,13 @@ function pantallaPostulacion() {
   </div>
   <label class="sb">Anticipo disponible (USD)</label><input id="anticipoUsd" type="number" min="0" class="st" placeholder="Ej: 70000" value="${st.ficha?.anticipo_usd ?? ''}">
 
-  <button class="btn pri" onclick="compartirFicha('${p.id}')">Postularme por $10.000</button>
+ <div class="okbox" style="background: var(--soft); border-color: var(--ln); margin-top: 20px;">
+  <p class="sb" style="font-size: 0.75rem; line-height: 1.4; color: var(--ink);">
+    <b>Compromiso de transparencia:</b> Toda esta información puede ser exigida impresa y firmada como compromiso de acuerdo de que los gastos pueden variar máximo 5 a 7%, que no van a aparecer nuevos gastos futuros y la documentación tendrá que ser respaldada con firmas si así lo requiera.
+  </p>
+</div>
+
+<button class="btn pri" onclick="compartirFicha('${p.id}')">Postularme por $10.000</button>
   <p class="sb" style="text-align:center;margin-top:8px"><a href="#" onclick="toggleCondiciones();return false">Ver condiciones de la postulación, reintegro y tratamiento de datos</a></p>`;
 }
 
@@ -1640,7 +1646,20 @@ async function panelDesarrolladora() {
   <p class="sb" style="margin-top:10px">Tus reseñas de Google y de Ladrillo Hub están en la tab <a href="#" onclick="go('resenasD');return false">Reseñas</a>. Los hitos de obra se cargan por proyecto en la tab <a href="#" onclick="go('obra');return false">Obra</a>.</p>
 
   <h2 style="margin-top:26px">Mis proyectos</h2>
-  <div class="grid">${st.misProyectosDev.map(p=>`<div class="bx" style="margin:0"><div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div><div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div><div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div>${stockResumenHTML(p.id)}<button class="btn pri" style="margin-top:8px" onclick="abrirEdicionProyecto('${p.id}', true)">Gestionar stock y unidades</button><button class="btn" style="margin-top:6px" onclick="abrirEdicionProyecto('${p.id}')">Fotos y documentos</button></div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}</div>
+  <div class="grid">${st.misProyectosDev.map(p=>`// En panelDesarrolladora(), dentro del map de st.misProyectosDev:
+// Reemplazamos el bloque de la card del proyecto por esto:
+
+<div class="bx" style="margin:0">
+  <div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div>
+  <div class="kv"><span>USD/m²</span><b>${n(p.precio_usd_m2)}</b></div>
+  <div class="kv"><span>Publicado</span><b>${p.publicado?"Sí":"No"}</b></div>
+  
+  ${progresoHTML(p)} <!-- Componente de progreso -->
+  
+  ${stockResumenHTML(p.id)}
+  <button class="btn pri" style="margin-top:8px" onclick="abrirEdicionProyecto('${p.id}', true)">Gestionar stock y unidades</button>
+  <button class="btn" style="margin-top:6px" onclick="abrirEdicionProyecto('${p.id}')">Fotos y documentos</button>
+</div>`).join("") || '<p class="sb">Todavía no publicaste proyectos.</p>'}</div>
 
   ${st.editProyectoId ? edicionProyectoForm() : ""}
   ${nuevoProyectoForm()}
@@ -1739,7 +1758,12 @@ async function subirRenderEdicion(file) {
 function edicionProyectoForm() {
   const p = st.editProyecto;
   return `<div class="bx" style="margin-top:22px;border:2px solid var(--rc)">
-  <div class="r1"><h4>${p.nombre}: stock, fotos y documentos</h4><button class="btn" style="width:auto;padding:4px 10px" onclick="cerrarEdicionProyecto()">Cerrar</button></div>
+  <div class="r1">
+    <h4 style="font-size: 1.3rem; font-weight: 800; margin: 0;">${p.nombre}: stock, fotos y documentos</h4>
+    <button class="btn" style="width:auto;padding:4px 10px" onclick="cerrarEdicionProyecto()">Cerrar</button>
+  </div>
+  
+  ${progresoHTML(p)} <!-- Componente de progreso acá también -->
 
   ${unidadesDevHTML(p)}
   <h4>Fotos reales de la obra</h4>
@@ -1755,8 +1779,8 @@ function edicionProyectoForm() {
   ${p.brochure_url?`<p class="sb" style="margin-top:6px">✓ Brochure cargado — <a href="${p.brochure_url}" target="_blank" rel="noopener">ver</a></p>`:""}
 
   <h4 style="margin-top:14px">Documentación de la desarrolladora</h4>
-  ${DOCS.filter(d=>d.archivo).map(d=>`<div class="doc-row${(p.documentos_activos||[]).includes(d.key)?" on":""}">
-    <div><b>${d.label}</b>${p.documentos?.[d.key]?' <span class="ok" style="font-size:.76rem">✓ cargado</span>':' <span class="wn" style="font-size:.76rem">falta subir</span>'}
+${DOCS.filter(d=>d.archivo).map(d=>`<div class="doc-row${(p.documentos_activos||[]).includes(d.key)?" on":""}">
+    <div><b>${d.label}</b>${p.documentos?.[d.key]?' <span class="ok" style="font-size:.76rem">✓ cargado</span>':' <span class="sb" style="font-size:.76rem">(opcional)</span>'}
       <input class="st" type="file" style="margin-top:6px" ${st.subiendo?"disabled":""} onchange="subirDocumentoEdicion('${d.key}',this.files[0])">
       ${p.documentos?.[d.key]?`<p class="sb" style="margin-top:4px"><a href="${p.documentos[d.key]}" target="_blank" rel="noopener">Ver archivo actual</a></p>`:""}
     </div>
@@ -1768,21 +1792,64 @@ function unidadesDevHTML(p) {
   const U = [...st.editUnidades].sort((a,b) => (b.piso - a.piso) || String(a.letra).localeCompare(b.letra));
   const c = (e) => U.filter(u => u.estado === e).length;
   const opt = (arr, sel) => arr.map(x => `<option value="${x[0]||x}"${(x[0]||x)===sel?" selected":""}>${x[1]||x}</option>`).join("");
+  
   return `<h4 id="stockSec">Unidades y stock</h4>
   <p class="sb">Podés modificar el stock cuando quieras (por ejemplo si vendés por otro canal). Lo ve el comprador en la ficha.</p>
-  <div class="stk"><div><b class="ok">${c("disponible")}</b><span>Disponibles</span></div><div><b class="wn">${c("reservada")}</b><span>Reservadas</span></div><div><b>${c("vendida")}</b><span>Vendidas</span></div></div>
-  <div class="floorbox"><select class="st" id="uOri" style="margin-top:0"><option value="">Orientación del proyecto</option>${opt(ORI,p.orientacion)}</select><input class="st" id="uXPiso" type="number" min="1" max="26" placeholder="Unidades por piso" value="${p.unidades_por_piso||""}" style="margin-top:0"></div>
+  
+  <div class="stk">
+    <div><b class="ok">${c("disponible")}</b><span>Disponibles</span></div>
+    <div><b class="wn">${c("reservada")}</b><span>Reservadas</span></div>
+    <div><b>${c("vendida")}</b><span>Vendidas</span></div>
+  </div>
+  
+  <div class="floorbox">
+    <select class="st" id="uOri" style="margin-top:0"><option value="">Orientación del proyecto</option>${opt(ORI,p.orientacion)}</select>
+    <input class="st" id="uXPiso" type="number" min="1" max="26" placeholder="Unidades por piso" value="${p.unidades_por_piso||""}" style="margin-top:0">
+  </div>
   <button class="btn" onclick="guardarDatosUnidades()">Guardar datos del proyecto</button>
-  <details class="lh-details"><summary>Generar unidades en lote</summary>
-    <div class="floorbox"><input class="st" id="gDesde" type="number" min="1" placeholder="Piso desde" style="margin-top:0"><input class="st" id="gHasta" type="number" min="1" placeholder="Piso hasta" style="margin-top:0"></div>
-    <div class="floorbox"><input class="st" id="gCant" type="number" min="1" max="26" placeholder="Unid. por piso (A, B, C…)" style="margin-top:0"><input class="st" id="gAmb" type="number" min="1" placeholder="Ambientes" style="margin-top:0"><input class="st" id="gSup" type="number" step="0.01" placeholder="m²" style="margin-top:0"></div>
-    <button class="btn" onclick="generarUnidades()">Generar</button></details>
-  <details class="lh-details" open><summary>Agregar una unidad</summary>
-    <div class="floorbox"><input class="st" id="uPiso" type="number" placeholder="Piso" style="margin-top:0"><select class="st" id="uLetra" style="margin-top:0">${[...LETRAS].map(l=>`<option>${l}</option>`).join("")}</select><input class="st" id="uAmb" type="number" placeholder="Amb." style="margin-top:0"><input class="st" id="uSup" type="number" step="0.01" placeholder="m²" style="margin-top:0"></div>
-    <div class="floorbox"><select class="st" id="uOriU" style="margin-top:0"><option value="">Orientación</option>${opt(ORI,"")}</select><select class="st" id="uUbi" style="margin-top:0"><option value="">Ubicación</option>${opt(UBI,"")}</select></div>
-    <button class="btn" onclick="agregarUnidad()">Agregar unidad</button></details>
-  ${U.map(u=>`<div class="urow${u.estado==="vendida"?" sold":""}"><div class="r1"><b>Piso ${u.piso} ${u.letra}</b><span class="sb">${u.ambientes||"–"} amb · ${u.superficie_m2||"–"} m² · ${u.orientacion||"–"} · ${u.ubicacion||"–"}</span></div>
-    <div class="seg">${[["disponible","d","Disponible"],["reservada","r","Reservada"],["vendida","v","Vendida"]].map(([e,k,l])=>`<button class="${u.estado===e?"on "+k:""}" onclick="cambiarEstadoUnidad('${u.id}','${e}')">${l}</button>`).join("")}<button onclick="borrarUnidad('${u.id}')" style="flex:none;padding:5px 9px">🗑</button></div></div>`).join("") || '<p class="sb" style="margin-top:8px">Todavía no cargaste unidades.</p>'}`;
+  
+  <details class="lh-details">
+    <summary>Generar unidades en lote</summary>
+    <div class="floorbox">
+      <input class="st" id="gDesde" type="number" min="1" placeholder="Piso desde" style="margin-top:0">
+      <input class="st" id="gHasta" type="number" min="1" placeholder="Piso hasta" style="margin-top:0">
+    </div>
+    <div class="floorbox">
+      <input class="st" id="gCant" type="number" min="1" max="26" placeholder="Unid. por piso (A, B, C…)" style="margin-top:0">
+      <input class="st" id="gAmb" type="number" min="1" placeholder="Ambientes" style="margin-top:0">
+      <input class="st" id="gSup" type="number" step="0.01" placeholder="m² cubiertos" style="margin-top:0">
+      <input class="st" id="gSupDesc" type="number" step="0.01" placeholder="m² descubiertos" style="margin-top:0">
+    </div>
+    <button class="btn" onclick="generarUnidades()">Generar</button>
+  </details>
+  
+  <details class="lh-details" open>
+    <summary>Agregar una unidad</summary>
+    <div class="floorbox">
+      <input class="st" id="uPiso" type="number" placeholder="Piso" style="margin-top:0">
+      <select class="st" id="uLetra" style="margin-top:0">${[...LETRAS].map(l=>`<option>${l}</option>`).join("")}</select>
+      <input class="st" id="uAmb" type="number" placeholder="Amb." style="margin-top:0">
+      <input class="st" id="uSup" type="number" step="0.01" placeholder="m² cubiertos" style="margin-top:0">
+      <input class="st" id="uSupDesc" type="number" step="0.01" placeholder="m² descubiertos" style="margin-top:0">
+    </div>
+    <div class="floorbox">
+      <select class="st" id="uOriU" style="margin-top:0"><option value="">Orientación</option>${opt(ORI,"")}</select>
+      <select class="st" id="uUbi" style="margin-top:0"><option value="">Ubicación</option>${opt(UBI,"")}</select>
+    </div>
+    <button class="btn" onclick="agregarUnidad()">Agregar unidad</button>
+  </details>
+  
+  ${U.map(u=>`
+    <div class="urow${u.estado==="vendida"?" sold":""}" style="background: #eeeeee; border: 1px solid #ddd; padding: 12px; border-radius: 12px; margin-top: 8px;">
+      <div class="r1">
+        <b>Piso ${u.piso} ${u.letra}</b>
+        <span class="sb">${u.ambientes||"–"} amb · ${u.superficie_m2||"–"} m² cub. · ${u.superficie_descubierta_m2||"–"} m² desc. · ${u.orientacion||"–"} · ${u.ubicacion||"–"}</span>
+      </div>
+      <div class="seg" style="margin-top: 8px;">
+        ${[["disponible","d","Disponible"],["reservada","r","Reservada"],["vendida","v","Vendida"]].map(([e,k,l])=>`<button class="${u.estado===e?"on "+k:""}" onclick="cambiarEstadoUnidad('${u.id}','${e}')">${l}</button>`).join("")}
+        <button onclick="borrarUnidad('${u.id}')" style="flex:none; padding: 8px 12px; font-size: 1.2rem; line-height: 1;">🗑</button>
+      </div>
+    </div>`).join("") || '<p class="sb" style="margin-top:8px">Todavía no cargaste unidades.</p>'}`;
 }
 async function recargarUnidades() {
   const id = st.editProyectoId;
@@ -1797,11 +1864,23 @@ async function guardarDatosUnidades() {
   const p = st.proyectos.find(x => x.id === st.editProyectoId); if (p) Object.assign(p, { orientacion, unidades_por_piso });
   toast("Datos guardados"); render();
 }
-const filaUnidad = (piso, letra, amb, sup, ori, ubi) => ({ proyecto_id: st.editProyectoId, piso, letra, ambientes: amb || null, superficie_m2: sup || null, orientacion: ori || null, ubicacion: ubi || null, estado: "disponible" });
+const filaUnidad = (piso, letra, amb, sup, supDesc, ori, ubi) => ({ 
+  proyecto_id: st.editProyectoId, 
+  piso, 
+  letra, 
+  ambientes: amb || null, 
+  superficie_m2: sup || null, 
+  superficie_descubierta_m2: supDesc || null, // Nuevo campo
+  orientacion: ori || null, 
+  ubicacion: ubi || null, 
+  estado: "disponible" 
+});
 async function agregarUnidad() {
   const g = (i) => document.getElementById(i).value, piso = +g("uPiso");
   if (!piso && piso !== 0) { toast("Falta el piso"); return; }
-  const { error } = await sb.from("unidades").insert(filaUnidad(piso, g("uLetra"), +g("uAmb"), +g("uSup"), g("uOriU"), g("uUbi")));
+  const { error } = await sb.from("unidades").insert(filaUnidad(
+    piso, g("uLetra"), +g("uAmb"), +g("uSup"), +g("uSupDesc"), g("uOriU"), g("uUbi")
+  ));
   if (error) { toast("Error: " + error.message); return; }
   await recargarUnidades();
 }
@@ -1809,10 +1888,14 @@ async function generarUnidades() {
   const g = (i) => +document.getElementById(i).value, d = g("gDesde"), h = g("gHasta") || d, c = g("gCant");
   if (!d || !c || c > 26 || h < d) { toast("Completá pisos y cantidad por piso (máx. 26)"); return; }
   const rows = [];
-  for (let p = d; p <= h; p++) for (let i = 0; i < c; i++) rows.push(filaUnidad(p, LETRAS[i], g("gAmb"), g("gSup"), st.editProyecto.orientacion, ""));
+  for (let p = d; p <= h; p++) 
+    for (let i = 0; i < c; i++) 
+      rows.push(filaUnidad(p, LETRAS[i], g("gAmb"), g("gSup"), g("gSupDesc"), st.editProyecto.orientacion, ""));
+  
   const { error } = await sb.from("unidades").insert(rows);
   if (error) { toast("Error: " + error.message); return; }
-  toast(rows.length + " unidades generadas"); await recargarUnidades();
+  toast(rows.length + " unidades generadas"); 
+  await recargarUnidades();
 }
 async function cambiarEstadoUnidad(id, estado) {
   const patch = { estado, updated_at: new Date().toISOString() };
@@ -2267,6 +2350,48 @@ async function marcarHito(id, cumplido) {
   const h = st.obraHitos.find(x=>x.id===id); if (h) h.cumplido = cumplido;
   render();
 }
+
+  // Nueva función para calcular el % de completitud
+function calcularProgresoProyecto(p) {
+  const campos = [
+    'precio_usd_m2', 'expensas_miles', 'anio_entrega', 'descripcion', 
+    'fotos', 'brochure_url', 'render_url', 'documentos_activos', 'pisos_totales'
+  ];
+  let completados = 0;
+  
+  campos.forEach(campo => {
+    const val = p[campo];
+    if (Array.isArray(val) && val.length > 0) completados++;
+    else if (typeof val === 'string' && val.trim() !== '') completados++;
+    else if (typeof val === 'number' && val > 0) completados++;
+  });
+
+  // Contamos unidades como un dato más si existen
+  const tieneUnidades = (st.unidadesByProy[p.id] || []).length > 0;
+  if (tieneUnidades) completados++;
+  
+  const total = campos.length + 1;
+  const pct = Math.round((completados / total) * 100);
+  return pct;
+}
+
+// HTML del componente de progreso
+function progresoHTML(p) {
+  const pct = calcularProgresoProyecto(p);
+  return `
+    <div style="margin: 12px 0; padding: 10px; background: var(--soft); border-radius: 12px; border: 1px solid var(--ln);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <span style="font-size: 0.8rem; font-weight: 700;">Información del proyecto</span>
+        <span style="font-size: 0.8rem; font-weight: 700; color: ${pct > 70 ? 'var(--ok)' : 'var(--wn)'};">${pct}%</span>
+      </div>
+      <div class="bar" style="height: 6px;"><i style="width: ${pct}%; background: ${pct > 70 ? 'var(--ok)' : 'var(--wn)'};"></i></div>
+      <p class="sb" style="margin-top: 8px; font-size: 0.7rem; line-height: 1.3; color: var(--gr);">
+        Cuanto más información subas, más chances tenés de hacer match con un futuro comprador. La transparencia en la información es uno de nuestros pilares y objetivos.
+      </p>
+    </div>`;
+}
+
+  
 
 // =====================================================================
 window.addEventListener("load", boot);
