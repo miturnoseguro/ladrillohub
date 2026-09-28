@@ -1646,8 +1646,7 @@ async function panelDesarrolladora() {
   <p class="sb" style="margin-top:10px">Tus reseñas de Google y de Ladrillo Hub están en la tab <a href="#" onclick="go('resenasD');return false">Reseñas</a>. Los hitos de obra se cargan por proyecto en la tab <a href="#" onclick="go('obra');return false">Obra</a>.</p>
 
   <h2 style="margin-top:26px">Mis proyectos</h2>
-  <div class="grid">${st.misProyectosDev.map(p=>`// En panelDesarrolladora(), dentro del map de st.misProyectosDev:
-// Reemplazamos el bloque de la card del proyecto por esto:
+  <div class="grid">${st.misProyectosDev.map(p=>`
 
 <div class="bx" style="margin:0">
   <div class="r1"><b>${p.nombre}</b><span class="sb">${p.barrio}</span></div>
