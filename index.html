@@ -42,6 +42,7 @@ main{max-width:1200px;margin:auto;padding:18px 16px 70px}
 .g2{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
 .card{border:1px solid var(--ln);border-radius:16px;overflow:hidden;cursor:pointer}
 .card.dim{opacity:.55}
+.card.static{cursor:default}
 .ph{position:relative;aspect-ratio:16/10;overflow:hidden;background:#ddd;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#999;font-size:.7rem;text-align:center;padding:8px}
 .card .ph{border-radius:0}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
@@ -693,7 +694,7 @@ function go(v) {
   render(); window.scrollTo(0, 0);
 }
 function tab(i) { st.tab = i; render(); }
-function op(idx) { st.p = idx; st.pisoSel = null; go("ficha"); }
+function op(idx) { if (!st.session) return; st.p = idx; st.pisoSel = null; go("ficha"); }
 
 function nav() {
   // Sin sesión: se oculta todo el header (marca + tabs + botón de ingreso)
@@ -937,7 +938,7 @@ const inicioPublico = () => `
 
 ${st.proyectos.length ? `<section class="lh-sec">
   <h2>Proyectos destacados</h2>
-  <div class="grid">${st.proyectos.slice(0,6).map(p=>`<div class="card" onclick="op(${st.proyectos.indexOf(p)})"><div class="ph" data-l="${p.barrio}"><img src="${projImg(p)}" alt="${p.nombre}" loading="lazy"></div><div class="bd"><h3>${p.nombre}</h3><p class="sb">${p.barrio} · USD ${n(p.precio_usd_m2)}/m²</p></div></div>`).join("")}</div>
+  <div class="grid">${st.proyectos.slice(0,6).map(p=>`<div class="card static"><div class="ph" data-l="${p.barrio}"><img src="${projImg(p)}" alt="${p.nombre}" loading="lazy"></div><div class="bd"><h3>${p.nombre}</h3><p class="sb">${p.barrio} · USD ${n(p.precio_usd_m2)}/m²</p></div></div>`).join("")}</div>
 </section>` : ""}
 
 <section class="lh-sec" id="filtros">
