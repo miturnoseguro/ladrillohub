@@ -202,12 +202,12 @@ footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:
 .lh-trust-card{border:1px solid var(--ln);border-radius:14px;padding:16px;background:var(--soft)}
 .lh-trust-card h4{font-size:.9rem;margin:8px 0 6px}
 .lh-trust-card p{font-size:.8rem;color:var(--gr)}
-.lh-claim{background:var(--ink);color:#f3efe9;border-radius:18px;padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center;margin-top:16px}
+.lh-claim{background:#fff;border: 2px solid #262626;color:#f3efe9;border-radius:18px;padding:26px;display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center;margin-top:16px}
 @media (max-width:800px){.lh-claim{grid-template-columns:1fr}}
-.lh-claim h2{color:#fff;font-size:1.3rem}
-.lh-claim p{color:#c9c2b6;margin-top:10px;font-size:.85rem}
-.lh-claim-card{background:rgba(255,255,255,.08);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,.15)}
-.lh-claim-card h5{font-size:.85rem;margin-bottom:3px;font-weight:800}
+.lh-claim h2{color:#000;font-size:1.3rem}
+.lh-claim p{color:#000;margin-top:10px;font-size:.85rem}
+.lh-claim-card{background:rgba(255,255,255,.08);border-radius:12px;padding:14px;border:1px solid #000;}
+.lh-claim-card h5{font-size:.85rem;margin-bottom:3px;font-weight:800; color: #000;}
 .lh-claim-card span{font-size:.74rem;color:#b3aa9e}
 .lh-claim-status{font-size:.7rem;font-weight:700;margin-top:6px;display:inline-block}
 .lh-claim-status.pending{color:#e0a836}
@@ -1042,7 +1042,7 @@ ${st.proyectos.length ? `<section class="lh-sec">
 <section class="lh-sec" id="desarrolladoras">
   <div class="lh-claim">
     <div>
-      <div class="lh-eyebrow" style="color:#e08a78">Para desarrolladoras</div>
+      <div class="lh-eyebrow" style="color:#000">Para desarrolladoras</div>
       <h2>¿Tu proyecto ya está en Ladrillo Hub y todavía no lo reclamaste?</h2>
       <p>Cargamos fichas con datos públicos de los desarrollos actuales de CABA y GBA para que los compradores empiecen a filtrar desde el día uno. Si una ficha es tuya, la reclamás, la revisamos y en cuanto la aprobamos vos seguís cargando el resto: planos, fotos reales, fideicomiso, gastos y todo el detalle que hace subir tu compatibilidad.</p>
       <button class="btn pri" style="width:auto;padding:12px 22px;margin-top:18px" onclick="loginGoogle()">Reclamar mi proyecto</button>
