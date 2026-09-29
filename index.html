@@ -1122,7 +1122,7 @@ function filtros() {
     <div style="margin-top:6px"><span class="c w">Gimnasio</span> <b>Filtro seleccionado (deseable):</b> suma puntos a tu % de match, pero no descarta proyectos.</div>
     <div style="margin-top:4px"><span class="c m">Piscina ★</span> <b>Filtro imprescindible:</b> pesa el doble en el match. Tocá una vez = deseable, dos veces = imprescindible, tres = quitar.</div>
     <p>Barrio, tipo, documentación y unidad funcionan como filtro directo (color pleno): solo se muestran los que cumplen.</p></div>
-  <h4>Barrio</h4>${["Palermo","Belgrano","Núñez","Colegiales","Saavedra","Coghlan","Villa Urquiza","Villa Crespo","Caballito","Olivos","Nordelta"].map(b=>`<span class="c${st.b.includes(b)?" m":""}" onclick="toggleArr(st.b,'${b}')">${b}</span>`).join("")}
+  <h4>Barrio</h4>${["Palermo","Belgrano","Núñez","Colegiales","Saavedra","Coghlan","Villa Urquiza","Villa Crespo","Villa Devoto","Almagro","Caballito","Olivos","Nordelta"].map(b=>`<span class="c${st.b.includes(b)?" m":""}" onclick="toggleArr(st.b,'${b}')">${b}</span>`).join("")}
   <h4>Tipo</h4>${["Depto","PH","Casa"].map(t=>`<span class="c${st.t.includes(t)?" m":""}" onclick="toggleArr(st.t,'${t}')">${t}</span>`).join("")}
   <h4>Tope USD/m²: ${st.m}</h4><input type="range" min="2000" max="6000" step="50" value="${st.m}" oninput="st.m=+this.value;this.previousElementSibling.textContent='Tope USD/m²: '+st.m;refrescarResultados()">
   <h4>Tope expensas ($ miles): ${st.e}</h4><input type="range" min="100" max="400" step="10" value="${st.e}" oninput="st.e=+this.value;this.previousElementSibling.textContent='Tope expensas ($ miles): '+st.e;refrescarResultados()">
@@ -1932,7 +1932,7 @@ function nuevoProyectoForm() {
   const grupos = Object.entries(st.featuresByGroup);
   return `<div class="bx" style="margin-top:22px"><h4>Publicar nuevo proyecto</h4>
   <input class="st" id="pNombre" placeholder="Nombre del proyecto">
-  <select class="st" id="pBarrio"><option>Palermo</option><option>Belgrano</option><option>Núñez</option><option>Colegiales</option><option>Saavedra</option><option>Coghlan</option><option>Villa Urquiza</option><option>Villa Crespo</option><option>Caballito</option><option>Olivos</option><option>Nordelta</option><option>Otro</option></select>
+  <select class="st" id="pBarrio"><option>Palermo</option><option>Belgrano</option><option>Núñez</option><option>Colegiales</option><option>Saavedra</option><option>Coghlan</option><option>Villa Urquiza</option><option>Villa Crespo</option><option>Villa Devoto</option><option>Almagro</option><option>Caballito</option><option>Olivos</option><option>Nordelta</option><option>Otro</option></select>
   <select class="st" id="pTipo"><option>Depto</option><option>PH</option><option>Casa</option></select>
   <input class="st" id="pPrecio" type="number" placeholder="USD por m² (planta baja / piso 1)">
   <div class="floorbox">
