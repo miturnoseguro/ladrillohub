@@ -223,6 +223,26 @@ footer .flink{color:var(--gr);font-size:.82rem;text-decoration:underline;cursor:
 .lh-final{text-align:center;padding:34px 0 6px}
 .lh-final h2{font-size:1.4rem;max-width:22ch;margin:0 auto}
 .lh-final .lh-cta-row{justify-content:center}
+  /* ===== Asistente por pasos / tabs ===== */
+.wz-modal{background:var(--bg);border:2px solid var(--rc);border-radius:18px;width:100%;max-width:780px;height:min(700px,calc(100vh - 32px));height:min(700px,calc(100dvh - 32px));display:flex;flex-direction:column;overflow:hidden}
+.wz-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px 8px}
+.wz-head h3{font-size:1.05rem}
+.wz-tabs{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--ln);overflow-x:auto;flex:none}
+.wz-tab{flex:none;display:flex;align-items:center;gap:7px;border:0;background:none;padding:10px 12px;font-weight:700;font-size:.82rem;color:var(--gr);border-bottom:3px solid transparent;cursor:pointer}
+.wz-tab i{width:20px;height:20px;border-radius:50%;background:var(--ln);color:var(--ink);font-style:normal;font-size:.7rem;display:grid;place-items:center}
+.wz-tab.on{color:var(--ink);border-bottom-color:var(--rc)}
+.wz-tab.on i{background:var(--rc);color:#fff}
+.wz-tab.done i{background:var(--ok);color:#fff}
+.wz-body{flex:1;min-height:0;overflow-y:auto;padding:14px 18px}
+.wz-foot{flex:none;display:flex;justify-content:space-between;gap:8px;padding:10px 18px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ln)}
+.wz-foot .btn{width:auto;margin:0;padding:10px 20px}
+.wz-split,.fgrid,.docs2{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.wz-span{grid-column:1/-1}
+.fld{display:grid;gap:4px;font-size:.74rem;font-weight:700;color:var(--gr)}
+.fld .st{margin-top:0}
+.ulist{max-height:46vh;overflow-y:auto}
+.wz-cta{margin-top:22px;text-align:center;border:1px dashed var(--ln);border-radius:16px;padding:20px}
+@media (max-width:640px){.wz-split,.fgrid,.docs2{grid-template-columns:1fr}.ulist{max-height:none}.wz-tab span{display:none}.wz-tab.on span{display:inline}}
 </style>
 </head>
 <body>
@@ -345,6 +365,7 @@ const TERMINOS_HTML = `
 
 // -------- estado global en memoria --------
 const st = {
+  tabEdit: 0, nuevoAbierto: false, nuevoPaso: 0,
   v: "inicio",          // vista actual
   session: null,
   perfil: null,          // fila de public.perfiles
@@ -1690,6 +1711,7 @@ async function abrirEdicionProyecto(id, irAStock) {
   if (error || !p) { toast("No se pudo cargar el proyecto"); st.subiendo = false; render(); return; }
   const { data: fotos } = await sb.from("proyecto_fotos").select("*").eq("proyecto_id", id).order("orden");
   st.editProyectoId = id;
+  st.tabEdit = irAStock ? 0 : 1;
   st.editProyecto = p;
   st.editFotos = fotos || [];
   st.editUnidades = (await sb.from("unidades").select("*").eq("proyecto_id", id)).data || [];
@@ -1764,101 +1786,92 @@ async function subirRenderEdicion(file) {
   st.subiendo = false; render();
 }
 
+function setTabEdit(i) { st.tabEdit = i; render(); }
+
 function edicionProyectoForm() {
-  const p = st.editProyecto;
-  return `<div class="bx" style="margin-top:22px;border:2px solid var(--rc)">
-  <div class="r1">
-    <h4 style="font-size: 1.3rem; font-weight: 800; margin: 0;">${p.nombre}: stock, fotos y documentos</h4>
-    <button class="btn" style="width:auto;padding:4px 10px" onclick="cerrarEdicionProyecto()">Cerrar</button>
-  </div>
-  
-  ${progresoHTML(p)} <!-- Componente de progreso acá también -->
-
-  ${unidadesDevHTML(p)}
-  <h4>Fotos reales de la obra</h4>
-  <input class="st" type="file" accept="image/*" multiple ${st.subiendo?"disabled":""} onchange="subirFotosEdicion(this.files,'real')">
-  <div class="thumbs">${st.editFotos.filter(f=>f.tipo==="real").map(f=>`<div style="position:relative;display:inline-block"><img src="${f.url}"><button class="btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;padding:0;line-height:1;border-radius:50%" onclick="eliminarFotoEdicion('${f.id}')">×</button></div>`).join("") || '<p class="sb">Sin fotos reales todavía.</p>'}</div>
-
-  <h4 style="margin-top:14px">Renders</h4>
-  <input class="st" type="file" accept="image/*" multiple ${st.subiendo?"disabled":""} onchange="subirFotosEdicion(this.files,'render')">
-  <div class="thumbs">${st.editFotos.filter(f=>f.tipo==="render").map(f=>`<div style="position:relative;display:inline-block"><img src="${f.url}"><button class="btn" style="position:absolute;top:2px;right:2px;width:20px;height:20px;padding:0;line-height:1;border-radius:50%" onclick="eliminarFotoEdicion('${f.id}')">×</button></div>`).join("") || '<p class="sb">Sin renders todavía.</p>'}</div>
-
-  <h4 style="margin-top:14px">Brochure (PDF)</h4>
-  <input class="st" type="file" accept="application/pdf" ${st.subiendo?"disabled":""} onchange="subirBrochureEdicion(this.files[0])">
-  ${p.brochure_url?`<p class="sb" style="margin-top:6px">✓ Brochure cargado — <a href="${p.brochure_url}" target="_blank" rel="noopener">ver</a></p>`:""}
-
-  <h4 style="margin-top:14px">Documentación de la desarrolladora</h4>
-${DOCS.filter(d=>d.archivo).map(d=>`<div class="doc-row${(p.documentos_activos||[]).includes(d.key)?" on":""}">
-    <div><b>${d.label}</b>${p.documentos?.[d.key]?' <span class="ok" style="font-size:.76rem">✓ cargado</span>':' <span class="sb" style="font-size:.76rem">(opcional)</span>'}
-      <input class="st" type="file" style="margin-top:6px" ${st.subiendo?"disabled":""} onchange="subirDocumentoEdicion('${d.key}',this.files[0])">
-      ${p.documentos?.[d.key]?`<p class="sb" style="margin-top:4px"><a href="${p.documentos[d.key]}" target="_blank" rel="noopener">Ver archivo actual</a></p>`:""}
+  const p = st.editProyecto, i = st.tabEdit || 0;
+  const T = ["Unidades y stock", "Fotos y brochure", "Documentos"];
+  const done = [st.editUnidades.length > 0, st.editFotos.length > 0 || !!p.brochure_url, (p.documentos_activos || []).length > 0];
+  const body = [unidadesDevHTML, fotosEdicionHTML, docsEdicionHTML][i](p);
+  return `<div class="modal-ov" onclick="if(event.target===this)cerrarEdicionProyecto()"><div class="wz-modal" role="dialog" aria-modal="true">
+    <div class="wz-head"><h3>${p.nombre}</h3><button class="btn" style="width:auto;margin:0;padding:6px 14px" onclick="cerrarEdicionProyecto()">Cerrar</button></div>
+    <div style="padding:0 18px">${progresoHTML(p, true)}</div>
+    <div class="wz-tabs" role="tablist">${T.map((t, k) => `<button class="wz-tab${k === i ? " on" : ""}${done[k] && k !== i ? " done" : ""}" role="tab" aria-selected="${k === i}" onclick="setTabEdit(${k})"><i>${done[k] && k !== i ? "✓" : k + 1}</i><span>${t}</span></button>`).join("")}</div>
+    <div class="wz-body">${body}</div>
+    <div class="wz-foot">
+      <button class="btn" style="visibility:${i ? "visible" : "hidden"}" onclick="setTabEdit(${i - 1})">Atrás</button>
+      <button class="btn pri" onclick="${i < 2 ? `setTabEdit(${i + 1})` : "cerrarEdicionProyecto()"}">${i < 2 ? "Siguiente" : "Listo"}</button>
     </div>
-  </div>`).join("")}
-  </div>`;
+  </div></div>`;
 }
 
 function unidadesDevHTML(p) {
-  const U = [...st.editUnidades].sort((a,b) => (b.piso - a.piso) || String(a.letra).localeCompare(b.letra));
+  const U = [...st.editUnidades].sort((a, b) => (b.piso - a.piso) || String(a.letra).localeCompare(b.letra));
   const c = (e) => U.filter(u => u.estado === e).length;
-  const opt = (arr, sel) => arr.map(x => `<option value="${x[0]||x}"${(x[0]||x)===sel?" selected":""}>${x[1]||x}</option>`).join("");
-  
-  return `<h4 id="stockSec">Unidades y stock</h4>
-  <p class="sb">Podés modificar el stock cuando quieras (por ejemplo si vendés por otro canal). Lo ve el comprador en la ficha.</p>
-  
-  <div class="stk">
+  const opt = (arr, sel) => arr.map(x => `<option value="${x[0] || x}"${(x[0] || x) === sel ? " selected" : ""}>${x[1] || x}</option>`).join("");
+  return `<div id="stockSec" class="stk" style="margin-top:0">
     <div><b class="ok">${c("disponible")}</b><span>Disponibles</span></div>
     <div><b class="wn">${c("reservada")}</b><span>Reservadas</span></div>
-    <div><b>${c("vendida")}</b><span>Vendidas</span></div>
+    <div><b>${c("vendida")}</b><span>Vendidas</span></div></div>
+  <div class="floorbox" style="margin-top:8px">
+    <select class="st" id="uOri" style="margin-top:0"><option value="">Orientación del proyecto</option>${opt(ORI, p.orientacion)}</select>
+    <input class="st" id="uXPiso" type="number" min="1" max="26" placeholder="Unidades por piso" value="${p.unidades_por_piso || ""}" style="margin-top:0">
+    <button class="btn" style="width:auto;margin:0;flex:none" onclick="guardarDatosUnidades()">Guardar</button>
   </div>
-  
-  <div class="floorbox">
-    <select class="st" id="uOri" style="margin-top:0"><option value="">Orientación del proyecto</option>${opt(ORI,p.orientacion)}</select>
-    <input class="st" id="uXPiso" type="number" min="1" max="26" placeholder="Unidades por piso" value="${p.unidades_por_piso||""}" style="margin-top:0">
-  </div>
-  <button class="btn" onclick="guardarDatosUnidades()">Guardar datos del proyecto</button>
-  
-  <details class="lh-details">
-    <summary>Generar unidades en lote</summary>
-    <div class="floorbox">
-      <input class="st" id="gDesde" type="number" min="1" placeholder="Piso desde" style="margin-top:0">
-      <input class="st" id="gHasta" type="number" min="1" placeholder="Piso hasta" style="margin-top:0">
+  <div class="wz-split" style="margin-top:12px">
+    <div>
+      <details class="lh-details" open><summary>Agregar una unidad</summary>
+        <div class="fgrid" style="margin-top:10px">
+          <input class="st" id="uPiso" type="number" placeholder="Piso" style="margin-top:0">
+          <select class="st" id="uLetra" style="margin-top:0">${[...LETRAS].map(l => `<option>${l}</option>`).join("")}</select>
+          <input class="st" id="uAmb" type="number" placeholder="Ambientes" style="margin-top:0">
+          <input class="st" id="uSup" type="number" step="0.01" placeholder="m² cubiertos" style="margin-top:0">
+          <input class="st" id="uSupDesc" type="number" step="0.01" placeholder="m² descubiertos" style="margin-top:0">
+          <select class="st" id="uOriU" style="margin-top:0"><option value="">Orientación</option>${opt(ORI, "")}</select>
+          <select class="st wz-span" id="uUbi" style="margin-top:0"><option value="">Ubicación</option>${opt(UBI, "")}</select>
+        </div>
+        <button class="btn pri" onclick="agregarUnidad()">Agregar unidad</button>
+      </details>
+      <details class="lh-details"><summary>Generar unidades en lote</summary>
+        <div class="fgrid" style="margin-top:10px">
+          <input class="st" id="gDesde" type="number" min="1" placeholder="Piso desde" style="margin-top:0">
+          <input class="st" id="gHasta" type="number" min="1" placeholder="Piso hasta" style="margin-top:0">
+          <input class="st" id="gCant" type="number" min="1" max="26" placeholder="Unid. por piso" style="margin-top:0">
+          <input class="st" id="gAmb" type="number" min="1" placeholder="Ambientes" style="margin-top:0">
+          <input class="st" id="gSup" type="number" step="0.01" placeholder="m² cubiertos" style="margin-top:0">
+          <input class="st" id="gSupDesc" type="number" step="0.01" placeholder="m² descubiertos" style="margin-top:0">
+        </div>
+        <button class="btn" onclick="generarUnidades()">Generar</button>
+      </details>
     </div>
-    <div class="floorbox">
-      <input class="st" id="gCant" type="number" min="1" max="26" placeholder="Unid. por piso (A, B, C…)" style="margin-top:0">
-      <input class="st" id="gAmb" type="number" min="1" placeholder="Ambientes" style="margin-top:0">
-      <input class="st" id="gSup" type="number" step="0.01" placeholder="m² cubiertos" style="margin-top:0">
-      <input class="st" id="gSupDesc" type="number" step="0.01" placeholder="m² descubiertos" style="margin-top:0">
-    </div>
-    <button class="btn" onclick="generarUnidades()">Generar</button>
-  </details>
-  
-  <details class="lh-details" open>
-    <summary>Agregar una unidad</summary>
-    <div class="floorbox">
-      <input class="st" id="uPiso" type="number" placeholder="Piso" style="margin-top:0">
-      <select class="st" id="uLetra" style="margin-top:0">${[...LETRAS].map(l=>`<option>${l}</option>`).join("")}</select>
-      <input class="st" id="uAmb" type="number" placeholder="Amb." style="margin-top:0">
-      <input class="st" id="uSup" type="number" step="0.01" placeholder="m² cubiertos" style="margin-top:0">
-      <input class="st" id="uSupDesc" type="number" step="0.01" placeholder="m² descubiertos" style="margin-top:0">
-    </div>
-    <div class="floorbox">
-      <select class="st" id="uOriU" style="margin-top:0"><option value="">Orientación</option>${opt(ORI,"")}</select>
-      <select class="st" id="uUbi" style="margin-top:0"><option value="">Ubicación</option>${opt(UBI,"")}</select>
-    </div>
-    <button class="btn" onclick="agregarUnidad()">Agregar unidad</button>
-  </details>
-  
-  ${U.map(u=>`
-    <div class="urow${u.estado==="vendida"?" sold":""}" style="background: #eeeeee; border: 1px solid #ddd; padding: 12px; border-radius: 12px; margin-top: 8px;">
-      <div class="r1">
-        <b>Piso ${u.piso} ${u.letra}</b>
-        <span class="sb">${u.ambientes||"–"} amb · ${u.superficie_m2||"–"} m² cub. · ${u.superficie_descubierta_m2||"–"} m² desc. · ${u.orientacion||"–"} · ${u.ubicacion||"–"}</span>
-      </div>
-      <div class="seg" style="margin-top: 8px;">
-        ${[["disponible","d","Disponible"],["reservada","r","Reservada"],["vendida","v","Vendida"]].map(([e,k,l])=>`<button class="${u.estado===e?"on "+k:""}" onclick="cambiarEstadoUnidad('${u.id}','${e}')">${l}</button>`).join("")}
-        <button onclick="borrarUnidad('${u.id}')" style="flex:none; padding: 8px 12px; font-size: 1.2rem; line-height: 1;">🗑</button>
-      </div>
-    </div>`).join("") || '<p class="sb" style="margin-top:8px">Todavía no cargaste unidades.</p>'}`;
+    <div class="ulist">${U.map(u => `<div class="urow${u.estado === "vendida" ? " sold" : ""}" style="background:var(--soft);margin:0 0 8px">
+      <div class="r1"><b>Piso ${u.piso} ${u.letra}</b><span class="sb">${u.ambientes || "–"} amb · ${u.superficie_m2 || "–"} m² cub. · ${u.superficie_descubierta_m2 || "–"} m² desc. · ${u.orientacion || "–"} · ${u.ubicacion || "–"}</span></div>
+      <div class="seg">${[["disponible", "d", "Disponible"], ["reservada", "r", "Reservada"], ["vendida", "v", "Vendida"]].map(([e, k, l]) => `<button class="${u.estado === e ? "on " + k : ""}" onclick="cambiarEstadoUnidad('${u.id}','${e}')">${l}</button>`).join("")}
+        <button class="del" aria-label="Borrar unidad" style="flex:none;padding:5px 10px" onclick="borrarUnidad('${u.id}')">🗑</button></div>
+    </div>`).join("") || '<p class="sb">Todavía no cargaste unidades. Agregá una o generalas en lote.</p>'}</div>
+  </div>`;
+}
+
+function fotoThumbs(tipo, vacio) {
+  const F = st.editFotos.filter(f => f.tipo === tipo);
+  return `<div class="thumbs">${F.map(f => `<div style="position:relative;display:inline-block"><img src="${f.url}" alt=""><button class="btn" aria-label="Quitar foto" style="position:absolute;top:2px;right:2px;width:20px;height:20px;padding:0;margin:0;line-height:1;border-radius:50%" onclick="eliminarFotoEdicion('${f.id}')">×</button></div>`).join("") || `<p class="sb">${vacio}</p>`}</div>`;
+}
+function fotosEdicionHTML(p) {
+  const dis = st.subiendo ? "disabled" : "";
+  return `<div class="wz-split">
+    <div><h4 style="margin-top:0">Fotos reales de la obra</h4><input class="st" type="file" accept="image/*" multiple ${dis} onchange="subirFotosEdicion(this.files,'real')">${fotoThumbs("real", "Sin fotos reales todavía.")}</div>
+    <div><h4 style="margin-top:0">Renders</h4><input class="st" type="file" accept="image/*" multiple ${dis} onchange="subirFotosEdicion(this.files,'render')">${fotoThumbs("render", "Sin renders todavía.")}</div>
+    <div class="wz-span"><h4>Brochure (PDF)</h4><input class="st" type="file" accept="application/pdf" ${dis} onchange="subirBrochureEdicion(this.files[0])">
+      ${p.brochure_url ? `<p class="sb" style="margin-top:6px">✓ Brochure cargado — <a href="${p.brochure_url}" target="_blank" rel="noopener">ver</a></p>` : ""}</div>
+  </div>`;
+}
+function docsEdicionHTML(p) {
+  return `<p class="sb" style="margin-bottom:10px">Todo es opcional. Cuanta más documentación subas, más confianza le das al comprador.</p>
+  <div class="docs2">${DOCS.filter(d => d.archivo).map(d => `<div class="doc-row${(p.documentos_activos || []).includes(d.key) ? " on" : ""}">
+    <div style="min-width:0;width:100%"><b>${d.label}</b>${p.documentos?.[d.key] ? ' <span class="ok" style="font-size:.76rem">✓ cargado</span>' : ""}
+      <input class="st" type="file" style="margin-top:6px" ${st.subiendo ? "disabled" : ""} onchange="subirDocumentoEdicion('${d.key}',this.files[0])">
+      ${p.documentos?.[d.key] ? `<p class="sb" style="margin-top:4px"><a href="${p.documentos[d.key]}" target="_blank" rel="noopener">Ver archivo actual</a></p>` : ""}</div>
+  </div>`).join("")}</div>`;
 }
 async function recargarUnidades() {
   const id = st.editProyectoId;
@@ -1927,46 +1940,72 @@ async function borrarUnidad(id) {
   await recargarUnidades();
 }
 
-function nuevoProyectoForm() {
+const BARRIOS_NP = ["Palermo","Belgrano","Núñez","Colegiales","Saavedra","Coghlan","Villa Urquiza","Villa Crespo","Villa Devoto","Almagro","Caballito","Olivos","Nordelta","Otro"];
+const NP_PASOS = ["Datos básicos", "Características", "Fotos y archivos", "Documentación"];
+
+function npDatos() {
   const np = st.nuevoProyecto;
-  const grupos = Object.entries(st.featuresByGroup);
-  return `<div class="bx" style="margin-top:22px"><h4>Publicar nuevo proyecto</h4>
-  <input class="st" id="pNombre" placeholder="Nombre del proyecto">
-  <select class="st" id="pBarrio"><option>Palermo</option><option>Belgrano</option><option>Núñez</option><option>Colegiales</option><option>Saavedra</option><option>Coghlan</option><option>Villa Urquiza</option><option>Villa Crespo</option><option>Villa Devoto</option><option>Almagro</option><option>Caballito</option><option>Olivos</option><option>Nordelta</option><option>Otro</option></select>
-  <select class="st" id="pTipo"><option>Depto</option><option>PH</option><option>Casa</option></select>
-  <input class="st" id="pPrecio" type="number" placeholder="USD por m² (planta baja / piso 1)">
-  <div class="floorbox">
-    <input class="st" id="pPisos" type="number" min="1" placeholder="Pisos totales del edificio" style="margin-top:0">
-    <input class="st" id="pIncremento" type="number" step="0.1" placeholder="% de aumento por piso" style="margin-top:0" value="${np.incrementoPiso||0}">
-  </div>
-  <p class="sb" style="margin-top:4px">Si el edificio tiene varios pisos, el comprador va a poder elegir el piso y ver cómo sube el USD/m² a medida que sube el edificio.</p>
-  <input class="st" id="pExpensas" type="number" placeholder="Expensas estimadas ($ miles)">
-  <input class="st" id="pEntrega" type="number" placeholder="Año de entrega">
-  <textarea class="st" id="pDescripcion" rows="3" placeholder="Descripción del proyecto"></textarea>
-
-  <h4>Características (tocá para activar las que tiene tu proyecto)</h4>
-  ${grupos.length ? grupos.map(([g,items])=>`<div style="margin-top:8px"><b class="sb" style="display:block;margin-bottom:4px">${g}</b>${items.map(x=>`<span class="c${np.features.includes(x.key)?" m":""}" onclick="toggleFeatureNuevo('${x.key}')">${x.label}</span>`).join("")}</div>`).join("") : '<p class="sb">Cargando catálogo de características…</p>'}
-
-  <h4>Fotos del proyecto</h4>
-  <input class="st" type="file" accept="image/*" multiple ${st.subiendo?"disabled":""} onchange="subirFotosProyecto(this.files)">
-  <div class="thumbs">${np.fotos.map(u=>`<img src="${u}">`).join("")}</div>
-
-  <h4>Brochure (PDF)</h4>
-  <input class="st" type="file" accept="application/pdf" ${st.subiendo?"disabled":""} onchange="subirBrochure(this.files[0])">
-  ${np.brochureUrl?`<p class="sb" style="margin-top:6px">✓ Brochure cargado — <a href="${np.brochureUrl}" target="_blank" rel="noopener">ver</a></p>`:""}
-
-  <h4>Render</h4>
-  <input class="st" type="file" accept="image/*" ${st.subiendo?"disabled":""} onchange="subirRender(this.files[0])">
-  ${np.renderUrl?`<img src="${np.renderUrl}" style="width:100%;border-radius:12px;margin-top:8px">`:""}
-
-  <h4>Documentación de la desarrolladora</h4>
-  <p class="sb">Activá lo que corresponda a tu proyecto. Lo que actives con documento queda como requisito para poder publicar, y lo marcado como filtro además lo va a poder filtrar el comprador.</p>
-  ${DOCS.map(d=>docRowHTML(d)).join("")}
-
-  <button class="btn pri" style="margin-top:14px" ${st.subiendo||!puedePublicar(np)?"disabled":""} onclick="crearProyecto()">${st.subiendo?"Subiendo…":"Publicar proyecto"}</button>
-  ${!puedePublicar(np) ? '<p class="wn" style="margin-top:6px">Para publicar, subí el documento de cada ítem que activaste arriba.</p>' : ""}
-  </div>`;
+  return np.datos ||= { nombre: "", barrio: "Palermo", tipo: "Depto", precio: "", pisos: "", incremento: 0, expensas: "", entrega: "", descripcion: "" };
 }
+function setND(k, v) { npDatos()[k] = v; }
+function abrirNuevoProyecto() { st.nuevoAbierto = true; st.nuevoPaso = 0; render(); }
+function cerrarNuevoProyecto() { st.nuevoAbierto = false; render(); }
+function irPasoNuevo(i) {
+  if (i > st.nuevoPaso && !npDatos().nombre.trim()) { toast("Primero poné el nombre del proyecto"); st.nuevoPaso = 0; render(); return; }
+  st.nuevoPaso = Math.max(0, Math.min(3, i)); render();
+}
+
+function nuevoProyectoForm() {
+  if (!st.nuevoAbierto) {
+    const borrador = st.nuevoProyecto.datos?.nombre?.trim();
+    return `<div class="wz-cta">
+      <button class="btn pri" style="width:auto;display:inline-block;padding:12px 24px;margin:0" onclick="abrirNuevoProyecto()">Publicar nuevo proyecto</button>
+      <p class="sb" style="margin-top:8px">${borrador ? `Tenés un borrador en curso: ${borrador}.` : "Te guiamos paso a paso: datos, características, fotos y documentación."}</p>
+    </div>`;
+  }
+  const np = st.nuevoProyecto, d = npDatos(), i = st.nuevoPaso || 0, dis = st.subiendo ? "disabled" : "";
+  const done = [!!d.nombre.trim(), np.features.length > 0, np.fotos.length > 0 || !!np.brochureUrl || !!np.renderUrl, np.documentosActivos.length > 0];
+  const inp = (k, label, type, extra = "") => `<label class="fld">${label}<input class="st" type="${type}" ${extra} value="${d[k] ?? ""}" oninput="setND('${k}',this.value)"></label>`;
+  const paneles = [
+    `<div class="fgrid">
+      <div class="wz-span">${inp("nombre", "Nombre del proyecto", "text")}</div>
+      <label class="fld">Barrio<select class="st" onchange="setND('barrio',this.value)">${BARRIOS_NP.map(b => `<option${b === d.barrio ? " selected" : ""}>${b}</option>`).join("")}</select></label>
+      <label class="fld">Tipo<select class="st" onchange="setND('tipo',this.value)">${["Depto", "PH", "Casa"].map(t => `<option${t === d.tipo ? " selected" : ""}>${t}</option>`).join("")}</select></label>
+      ${inp("precio", "USD por m² (planta baja / piso 1)", "number")}
+      ${inp("expensas", "Expensas estimadas ($ miles)", "number")}
+      ${inp("pisos", "Pisos totales del edificio", "number", 'min="1"')}
+      ${inp("incremento", "% de aumento por piso", "number", 'step="0.1"')}
+      ${inp("entrega", "Año de entrega", "number")}
+      <div class="wz-span"><label class="fld">Descripción<textarea class="st" rows="3" oninput="setND('descripcion',this.value)">${d.descripcion || ""}</textarea></label></div>
+    </div>
+    <p class="sb" style="margin-top:8px">Si el edificio tiene varios pisos, el comprador va a poder elegir el piso y ver cómo sube el USD/m².</p>`,
+
+    `<p class="sb" style="margin-bottom:8px">Tocá las que tiene tu proyecto.</p>
+    <div class="fgrid">${Object.entries(st.featuresByGroup).map(([g, items]) => `<div><b class="sb" style="display:block;margin-bottom:4px">${g}</b>${items.map(x => `<span class="c${np.features.includes(x.key) ? " m" : ""}" onclick="toggleFeatureNuevo('${x.key}')">${x.label}</span>`).join("")}</div>`).join("") || '<p class="sb">Cargando catálogo…</p>'}</div>`,
+
+    `<div class="wz-split">
+      <div><h4 style="margin-top:0">Fotos del proyecto</h4><input class="st" type="file" accept="image/*" multiple ${dis} onchange="subirFotosProyecto(this.files)"><div class="thumbs">${np.fotos.map(u => `<img src="${u}" alt="">`).join("")}</div></div>
+      <div><h4 style="margin-top:0">Render</h4><input class="st" type="file" accept="image/*" ${dis} onchange="subirRender(this.files[0])">${np.renderUrl ? `<img src="${np.renderUrl}" alt="" style="width:100%;border-radius:12px;margin-top:8px">` : ""}</div>
+      <div class="wz-span"><h4>Brochure (PDF)</h4><input class="st" type="file" accept="application/pdf" ${dis} onchange="subirBrochure(this.files[0])">${np.brochureUrl ? `<p class="sb" style="margin-top:6px">✓ Brochure cargado — <a href="${np.brochureUrl}" target="_blank" rel="noopener">ver</a></p>` : ""}</div>
+    </div>`,
+
+    `<p class="sb" style="margin-bottom:10px">Activá lo que corresponda. Lo que actives con archivo es requisito para publicar.</p>
+    <div class="docs2">${DOCS.map(x => docRowHTML(x)).join("")}</div>`,
+  ];
+  const ultimo = i === 3, ok = puedePublicar(np) && !!d.nombre.trim();
+  return `<div class="modal-ov" onclick="if(event.target===this)cerrarNuevoProyecto()"><div class="wz-modal" role="dialog" aria-modal="true">
+    <div class="wz-head"><h3>Publicar nuevo proyecto</h3><button class="btn" style="width:auto;margin:0;padding:6px 14px" onclick="cerrarNuevoProyecto()">Cerrar</button></div>
+    <div class="wz-tabs" role="tablist">${NP_PASOS.map((t, k) => `<button class="wz-tab${k === i ? " on" : ""}${done[k] && k !== i ? " done" : ""}" role="tab" aria-selected="${k === i}" onclick="irPasoNuevo(${k})"><i>${done[k] && k !== i ? "✓" : k + 1}</i><span>${t}</span></button>`).join("")}</div>
+    <div class="wz-body">${paneles[i]}</div>
+    <div class="wz-foot">
+      <button class="btn" style="visibility:${i ? "visible" : "hidden"}" onclick="irPasoNuevo(${i - 1})">Atrás</button>
+      ${ultimo
+        ? `<button class="btn pri" ${st.subiendo || !ok ? "disabled" : ""} onclick="crearProyecto()">${st.subiendo ? "Subiendo…" : "Publicar proyecto"}</button>`
+        : `<button class="btn pri" onclick="irPasoNuevo(${i + 1})">Siguiente</button>`}
+    </div>
+  </div></div>`;
+}
+  
 function toggleFeatureNuevo(k) { const np=st.nuevoProyecto; const i=np.features.indexOf(k); i<0?np.features.push(k):np.features.splice(i,1); render(); }
 
 function docRowHTML(d) {
@@ -2029,22 +2068,15 @@ async function subirRender(file) {
 }
 
 async function crearProyecto() {
-  const nombre = document.getElementById("pNombre").value.trim();
+  const d = npDatos(), np = st.nuevoProyecto;
+  const nombre = d.nombre.trim();
   if (!nombre) { toast("Falta el nombre del proyecto"); return; }
-  const barrio = document.getElementById("pBarrio").value;
-  const tipo = document.getElementById("pTipo").value;
-  const precio = +document.getElementById("pPrecio").value || null;
-  const pisos_totales = +document.getElementById("pPisos").value || null;
-  const incremento_pct_piso = +document.getElementById("pIncremento").value || 0;
-  const expensas = +document.getElementById("pExpensas").value || null;
-  const entrega = +document.getElementById("pEntrega").value || null;
-  const descripcion = document.getElementById("pDescripcion").value.trim() || null;
-  const np = st.nuevoProyecto;
   if (!puedePublicar(np)) { toast("Te falta cargar la documentación que activaste para poder publicar"); return; }
   const { error } = await sb.from("proyectos").insert({
-    nombre, barrio, tipo, precio_usd_m2: precio, pisos_totales, incremento_pct_piso,
-    expensas_miles: expensas, anio_entrega: entrega,
-    descripcion, features: np.features, fotos: np.fotos,
+    nombre, barrio: d.barrio, tipo: d.tipo,
+    precio_usd_m2: +d.precio || null, pisos_totales: +d.pisos || null, incremento_pct_piso: +d.incremento || 0,
+    expensas_miles: +d.expensas || null, anio_entrega: +d.entrega || null,
+    descripcion: d.descripcion.trim() || null, features: np.features, fotos: np.fotos,
     brochure_url: np.brochureUrl || null, render_url: np.renderUrl || null,
     documentos: np.documentos, documentos_activos: np.documentosActivos,
     fondo_reserva_incluido: np.fondoReserva, fondo_equipamiento_incluido: np.fondoEquipamiento,
@@ -2053,6 +2085,7 @@ async function crearProyecto() {
   if (error) { toast("Error: " + error.message); return; }
   toast("Proyecto publicado");
   st.nuevoProyecto = { features: [], fotos: [], brochureUrl: null, renderUrl: null, pisosTotal: null, incrementoPiso: 0, documentosActivos: [], documentos: {}, fondoReserva: false, fondoEquipamiento: false };
+  st.nuevoAbierto = false; st.nuevoPaso = 0;
   await cargarProyectos();
   render();
 }
@@ -2391,19 +2424,13 @@ function calcularProgresoProyecto(p) {
 }
 
 // HTML del componente de progreso
-function progresoHTML(p) {
-  const pct = calcularProgresoProyecto(p);
-  return `
-    <div style="margin: 12px 0; padding: 10px; background: var(--soft); border-radius: 12px; border: 1px solid var(--ln);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-        <span style="font-size: 0.8rem; font-weight: 700;">Información del proyecto</span>
-        <span style="font-size: 0.8rem; font-weight: 700; color: ${pct > 70 ? 'var(--ok)' : 'var(--wn)'};">${pct}%</span>
-      </div>
-      <div class="bar" style="height: 6px;"><i style="width: ${pct}%; background: ${pct > 70 ? 'var(--ok)' : 'var(--wn)'};"></i></div>
-      <p class="sb" style="margin-top: 8px; font-size: 0.7rem; line-height: 1.3; color: var(--gr);">
-        Cuanto más información subas, más chances tenés de hacer match con un futuro comprador. La transparencia en la información es uno de nuestros pilares y objetivos.
-      </p>
-    </div>`;
+function progresoHTML(p, compact) {
+  const pct = calcularProgresoProyecto(p), col = pct > 70 ? "var(--ok)" : "var(--wn)";
+  return `<div style="margin:${compact ? "4px 0 8px" : "12px 0"};padding:10px;background:var(--soft);border-radius:12px;border:1px solid var(--ln)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:.8rem;font-weight:700">Información del proyecto</span><span style="font-size:.8rem;font-weight:700;color:${col}">${pct}%</span></div>
+    <div class="bar" style="height:6px"><i style="width:${pct}%;background:${col}"></i></div>
+    ${compact ? "" : `<p class="sb" style="margin-top:8px;font-size:.7rem;line-height:1.3">Cuanto más información subas, más chances tenés de hacer match con un futuro comprador. La transparencia en la información es uno de nuestros pilares y objetivos.</p>`}
+  </div>`;
 }
 
   
